@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ScreenFlow - Screen Recording for Teams</title>
+    <meta name="description" content="Record your screen, share videos instantly, and collaborate faster with your team." />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="ScreenFlow" />
+    <meta name="theme-color" content="#0f172a" />
+    <meta name="format-detection" content="telephone=no" />
+    <link rel="canonical" href="https://screenflow.app/" />
+
+    <meta property="og:title" content="ScreenFlow - Screen Recording for Teams" />
+    <meta property="og:description" content="Record your screen, share videos instantly, and collaborate faster with your team." />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="ScreenFlow" />
+    <meta property="og:url" content="https://screenflow.app/" />
+    <meta property="og:image" content="https://screenflow.app/og-image.svg" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="ScreenFlow - Screen Recording for Teams" />
+    <meta name="twitter:description" content="Record your screen, share videos instantly, and collaborate faster with your team." />
+    <meta name="twitter:image" content="https://screenflow.app/og-image.svg" />
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "ScreenFlow",
+        "applicationCategory": "BusinessApplication",
+        "operatingSystem": "Web",
+        "description": "Record your screen, share videos instantly, and collaborate faster with your team.",
+        "url": "https://screenflow.app/"
+      }
+    </script>
+  </head>
+
+  <body>
+    <div id="root"></div>
+    <script>
+      (function () {
+        try {
+          var savedTheme = localStorage.getItem("theme");
+          var prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+          var shouldUseDark = savedTheme ? savedTheme === "dark" : prefersDark;
+          document.documentElement.classList.toggle("dark", shouldUseDark);
+        } catch (_) {}
+      })();
+    </script>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

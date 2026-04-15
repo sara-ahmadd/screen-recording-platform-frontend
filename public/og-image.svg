@@ -1,0 +1,17 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="630" fill="#0F172A"/>
+  <rect x="72" y="72" width="1056" height="486" rx="24" fill="#111827"/>
+  <rect x="120" y="132" width="560" height="36" rx="8" fill="#38BDF8"/>
+  <rect x="120" y="188" width="460" height="24" rx="8" fill="#94A3B8"/>
+  <rect x="120" y="228" width="520" height="24" rx="8" fill="#475569"/>
+  <rect x="120" y="318" width="220" height="64" rx="12" fill="#22C55E"/>
+  <text x="132" y="360" fill="#0F172A" font-family="Arial, sans-serif" font-size="28" font-weight="700">
+    Start Recording
+  </text>
+  <text x="120" y="470" fill="#E2E8F0" font-family="Arial, sans-serif" font-size="72" font-weight="700">
+    ScreenFlow
+  </text>
+  <text x="120" y="515" fill="#94A3B8" font-family="Arial, sans-serif" font-size="30">
+    Screen recording and video collaboration for teams
+  </text>
+</svg>
