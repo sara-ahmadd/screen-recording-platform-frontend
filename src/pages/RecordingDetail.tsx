@@ -199,6 +199,19 @@ export default function RecordingDetailPage() {
   const handleRemoveWatermark = async () => {
     try {
       const wmRes = await recordingsApi.removeWatermark(Number(id));
+      setRecording((prev: any) =>
+        prev
+          ? {
+              ...prev,
+              status: "processing",
+              videoUrl: "",
+              video_url: "",
+              thumbUrl: "",
+              thumbnailUrl: "",
+              thumbnail_url: "",
+            }
+          : prev
+      );
       toastApiSuccess(wmRes, {
         title: "Watermark removal",
         fallbackDescription: "Watermark removal started.",
@@ -287,7 +300,14 @@ export default function RecordingDetailPage() {
                 </div>
               </div>
               <Badge className={recording.status === "ready" ? "bg-success/20 text-success border-0 hover:bg-success/20" : "bg-warning/20 text-warning border-0 hover:bg-warning/20"}>
-                {recording.status}
+                {recording.status === "processing" ? (
+                  <>
+                    <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                    processing
+                  </>
+                ) : (
+                  recording.status
+                )}
               </Badge>
             </div>
 

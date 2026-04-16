@@ -1,5 +1,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import type { RouteRecord } from "vite-react-ssg";
+import { HelmetProvider } from "react-helmet-async";
+import { Outlet } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -39,52 +41,76 @@ import RecordScreenCopy from "./pages/RecordScreenCopy";
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
+const RootLayout = () => (
+  <HelmetProvider>
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
         <SeoManager />
         <ThemeToggle />
         <ConfirmDialogProvider>
           <AuthProvider>
             <NotificationsBell />
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/register" element={<RegisterPage />} />
-              <Route path="/verify" element={<VerifyPage />} />
-              <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-              <Route path="/preview/:token" element={<PublicVideoPage />} />
-              <Route path="/share/:shareToken" element={<SharePage />} />
-              <Route path="/select-workspace" element={<ProtectedRoute><SelectWorkspacePage /></ProtectedRoute>} />
-              <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-              <Route path="/record" element={<ProtectedRoute><RecordScreen /></ProtectedRoute>} />
-              <Route path="/record-copy" element={<ProtectedRoute><RecordScreenCopy /></ProtectedRoute>} />
-              <Route path="/upload" element={<ProtectedRoute><UploadPage /></ProtectedRoute>} />
-              <Route path="/recording/:id" element={<ProtectedRoute><RecordingDetailPage /></ProtectedRoute>} />
-              <Route path="/workspaces" element={<ProtectedRoute><WorkspacesPage /></ProtectedRoute>} />
-              <Route path="/billing" element={<ProtectedRoute><BillingPage /></ProtectedRoute>} />
-              <Route path="/plans" element={<ProtectedRoute><PlansPage /></ProtectedRoute>} />
-              <Route path="/subscription" element={<ProtectedRoute><SubscriptionPage /></ProtectedRoute>} />
-              <Route path="/notifications" element={<ProtectedRoute><NotificationsPage /></ProtectedRoute>} />
-              <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
-              <Route path="/super-admin/recordings" element={<ProtectedRoute requireSuperAdmin><SuperAdminRecordingsPage /></ProtectedRoute>} />
-              <Route path="/super-admin/workspaces" element={<ProtectedRoute requireSuperAdmin><SuperAdminWorkspacesPage /></ProtectedRoute>} />
-              <Route path="/super-admin/workspaces/:id/recordings" element={<ProtectedRoute requireSuperAdmin><SuperAdminWorkspaceRecordingsPage /></ProtectedRoute>} />
-              <Route path="/super-admin/users" element={<ProtectedRoute requireSuperAdmin><SuperAdminUsersPage /></ProtectedRoute>} />
-              <Route path="/super-admin/plans" element={<ProtectedRoute requireSuperAdmin><SuperAdminPlansPage /></ProtectedRoute>} />
-              <Route path="/super-admin/promocodes" element={<ProtectedRoute requireSuperAdmin><SuperAdminPromocodesPage /></ProtectedRoute>} />
-              <Route path="/accept-invite" element={<AcceptInvitePage />} />
-              <Route path="/workspace/accept-invite" element={<AcceptInvitePage />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
+            <Outlet />
           </AuthProvider>
         </ConfirmDialogProvider>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
+      </TooltipProvider>
+    </QueryClientProvider>
+  </HelmetProvider>
 );
 
-export default App;
+export const routes: RouteRecord[] = [
+  {
+    path: "/",
+    element: <RootLayout />,
+    children: [
+      { index: true, element: <Index /> },
+      { path: "login", element: <LoginPage /> },
+      { path: "register", element: <RegisterPage /> },
+      { path: "verify", element: <VerifyPage /> },
+      { path: "forgot-password", element: <ForgotPasswordPage /> },
+      { path: "preview/:token", element: <PublicVideoPage /> },
+      { path: "share/:shareToken", element: <SharePage /> },
+      { path: "accept-invite", element: <AcceptInvitePage /> },
+      { path: "workspace/accept-invite", element: <AcceptInvitePage /> },
+      { path: "select-workspace", element: <ProtectedRoute><SelectWorkspacePage /></ProtectedRoute> },
+      { path: "dashboard", element: <ProtectedRoute><Dashboard /></ProtectedRoute> },
+      { path: "record", element: <ProtectedRoute><RecordScreen /></ProtectedRoute> },
+      { path: "record-copy", element: <ProtectedRoute><RecordScreenCopy /></ProtectedRoute> },
+      { path: "upload", element: <ProtectedRoute><UploadPage /></ProtectedRoute> },
+      { path: "recording/:id", element: <ProtectedRoute><RecordingDetailPage /></ProtectedRoute> },
+      { path: "workspaces", element: <ProtectedRoute><WorkspacesPage /></ProtectedRoute> },
+      { path: "billing", element: <ProtectedRoute><BillingPage /></ProtectedRoute> },
+      { path: "plans", element: <ProtectedRoute><PlansPage /></ProtectedRoute> },
+      { path: "subscription", element: <ProtectedRoute><SubscriptionPage /></ProtectedRoute> },
+      { path: "notifications", element: <ProtectedRoute><NotificationsPage /></ProtectedRoute> },
+      { path: "profile", element: <ProtectedRoute><ProfilePage /></ProtectedRoute> },
+      {
+        path: "super-admin/recordings",
+        element: <ProtectedRoute requireSuperAdmin><SuperAdminRecordingsPage /></ProtectedRoute>,
+      },
+      {
+        path: "super-admin/workspaces",
+        element: <ProtectedRoute requireSuperAdmin><SuperAdminWorkspacesPage /></ProtectedRoute>,
+      },
+      {
+        path: "super-admin/workspaces/:id/recordings",
+        element: <ProtectedRoute requireSuperAdmin><SuperAdminWorkspaceRecordingsPage /></ProtectedRoute>,
+      },
+      {
+        path: "super-admin/users",
+        element: <ProtectedRoute requireSuperAdmin><SuperAdminUsersPage /></ProtectedRoute>,
+      },
+      {
+        path: "super-admin/plans",
+        element: <ProtectedRoute requireSuperAdmin><SuperAdminPlansPage /></ProtectedRoute>,
+      },
+      {
+        path: "super-admin/promocodes",
+        element: <ProtectedRoute requireSuperAdmin><SuperAdminPromocodesPage /></ProtectedRoute>,
+      },
+      { path: "*", element: <NotFound /> },
+    ],
+  },
+];

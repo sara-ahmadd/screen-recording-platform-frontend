@@ -1,0 +1,22 @@
+{
+  "_client-BltdV4QZ.js": {
+    "file": "assets/client-BltdV4QZ.js",
+    "name": "client",
+    "isDynamicEntry": true,
+    "imports": [
+      "index.html"
+    ]
+  },
+  "index.html": {
+    "file": "assets/app-B6TJjJTm.js",
+    "name": "app",
+    "src": "index.html",
+    "isEntry": true,
+    "dynamicImports": [
+      "_client-BltdV4QZ.js"
+    ],
+    "css": [
+      "assets/app-CIG9b7Yw.css"
+    ]
+  }
+}

@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { Helmet } from "react-helmet-async";
 import { useLocation } from "react-router-dom";
 
 const APP_NAME = "ScreenFlow";
@@ -48,6 +48,11 @@ const ROUTE_SEO: Record<string, SeoData> = {
     title: "Shared Recording",
     description: "Watch and review a shared recording on ScreenFlow.",
   },
+  "/dashboard": {
+    title: "Dashboard",
+    description: "Manage your workspace recordings, status, and collaboration flow.",
+    robots: "noindex, nofollow",
+  },
 };
 
 const PRIVATE_PATH_PREFIXES = [
@@ -66,20 +71,6 @@ const PRIVATE_PATH_PREFIXES = [
   "/workspace/accept-invite",
 ];
 
-const setMetaContent = (selector: string, content: string) => {
-  const element = document.querySelector(selector);
-  if (element instanceof HTMLMetaElement) {
-    element.setAttribute("content", content);
-  }
-};
-
-const setCanonical = (url: string) => {
-  const canonical = document.querySelector('link[rel="canonical"]');
-  if (canonical instanceof HTMLLinkElement) {
-    canonical.setAttribute("href", url);
-  }
-};
-
 const matchRouteSeo = (pathname: string): SeoData | undefined => {
   if (ROUTE_SEO[pathname]) return ROUTE_SEO[pathname];
   if (pathname.startsWith("/preview/")) return ROUTE_SEO["/preview/:token"];
@@ -92,30 +83,29 @@ const isPrivatePath = (pathname: string) =>
 
 const SeoManager = () => {
   const location = useLocation();
+  const seo = matchRouteSeo(location.pathname);
+  const fallbackTitle = location.pathname === "/" ? DEFAULT_TITLE : `${APP_NAME} App`;
+  const title = seo ? `${seo.title} | ${APP_NAME}` : fallbackTitle;
+  const description = seo?.description || DEFAULT_DESCRIPTION;
+  const robots =
+    seo?.robots || (isPrivatePath(location.pathname) ? "noindex, nofollow" : "index, follow");
+  const canonicalUrl = `${SITE_URL}${location.pathname}`;
 
-  useEffect(() => {
-    const seo = matchRouteSeo(location.pathname);
-    const fallbackTitle = location.pathname === "/" ? DEFAULT_TITLE : `${APP_NAME} App`;
-    const title = seo ? `${seo.title} | ${APP_NAME}` : fallbackTitle;
-    const description = seo?.description || DEFAULT_DESCRIPTION;
-    const robots =
-      seo?.robots || (isPrivatePath(location.pathname) ? "noindex, nofollow" : "index, follow");
-    const canonicalUrl = `${SITE_URL}${location.pathname}`;
-
-    document.title = title;
-    setMetaContent('meta[name="description"]', description);
-    setMetaContent('meta[name="robots"]', robots);
-    setMetaContent('meta[property="og:title"]', title);
-    setMetaContent('meta[property="og:description"]', description);
-    setMetaContent('meta[property="og:url"]', canonicalUrl);
-    setMetaContent('meta[property="og:image"]', `${SITE_URL}${DEFAULT_OG_IMAGE}`);
-    setMetaContent('meta[name="twitter:title"]', title);
-    setMetaContent('meta[name="twitter:description"]', description);
-    setMetaContent('meta[name="twitter:image"]', `${SITE_URL}${DEFAULT_OG_IMAGE}`);
-    setCanonical(canonicalUrl);
-  }, [location.pathname]);
-
-  return null;
+  return (
+    <Helmet prioritizeSeoTags>
+      <title>{title}</title>
+      <meta name="description" content={description} />
+      <meta name="robots" content={robots} />
+      <link rel="canonical" href={canonicalUrl} />
+      <meta property="og:title" content={title} />
+      <meta property="og:description" content={description} />
+      <meta property="og:url" content={canonicalUrl} />
+      <meta property="og:image" content={`${SITE_URL}${DEFAULT_OG_IMAGE}`} />
+      <meta name="twitter:title" content={title} />
+      <meta name="twitter:description" content={description} />
+      <meta name="twitter:image" content={`${SITE_URL}${DEFAULT_OG_IMAGE}`} />
+    </Helmet>
+  );
 };
 
 export default SeoManager;

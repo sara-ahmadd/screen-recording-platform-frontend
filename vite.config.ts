@@ -35,4 +35,9 @@ export default defineConfig(({ mode }) => ({
       "@tanstack/query-core",
     ],
   },
+  ssgOptions: {
+    includedRoutes(paths: string[]) {
+      return paths.filter((routePath: string) => routePath === "/");
+    },
+  },
 }));

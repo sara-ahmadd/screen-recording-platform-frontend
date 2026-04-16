@@ -1,14 +1,21 @@
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+const isBrowser = typeof window !== "undefined";
 
-let accessToken: string | null = localStorage.getItem("access_token");
-let refreshTokenValue: string | null = localStorage.getItem("refresh_token");
+const readStorage = (key: string) => (isBrowser ? window.localStorage.getItem(key) : null);
+const writeStorage = (key: string, value: string | null) => {
+  if (!isBrowser) return;
+  if (value) window.localStorage.setItem(key, value);
+  else window.localStorage.removeItem(key);
+};
+
+let accessToken: string | null = readStorage("access_token");
+let refreshTokenValue: string | null = readStorage("refresh_token");
 let refreshPromise: Promise<string | null> | null = null;
 const WORKSPACE_STORAGE_KEY = "selected_workspace_id";
 
 export function setAccessToken(token: string | null) {
   accessToken = token;
-  if (token) localStorage.setItem("access_token", token);
-  else localStorage.removeItem("access_token");
+  writeStorage("access_token", token);
 }
 
 export function getAccessToken() {
@@ -17,8 +24,7 @@ export function getAccessToken() {
 
 export function setRefreshToken(token: string | null) {
   refreshTokenValue = token;
-  if (token) localStorage.setItem("refresh_token", token);
-  else localStorage.removeItem("refresh_token");
+  writeStorage("refresh_token", token);
 }
 
 export function getRefreshToken() {
@@ -26,12 +32,11 @@ export function getRefreshToken() {
 }
 
 export function getSelectedWorkspaceId() {
-  return localStorage.getItem(WORKSPACE_STORAGE_KEY);
+  return readStorage(WORKSPACE_STORAGE_KEY);
 }
 
 export function setSelectedWorkspaceId(workspaceId: string | null) {
-  if (workspaceId) localStorage.setItem(WORKSPACE_STORAGE_KEY, workspaceId);
-  else localStorage.removeItem(WORKSPACE_STORAGE_KEY);
+  writeStorage(WORKSPACE_STORAGE_KEY, workspaceId);
 }
 
 async function refreshToken(): Promise<string | null> {
@@ -148,7 +153,7 @@ export async function apiFetch<T = any>(
     } else {
       setAccessToken(null);
       setRefreshToken(null);
-      window.location.href = "/login";
+      if (isBrowser) window.location.href = "/login";
       throw new Error("Session expired");
     }
   }
@@ -276,6 +281,52 @@ export const recordingsApi = {
     apiFetch(`/recordings/${id}/uploads/${uploadId}/complete`, {
       method: "POST",
       body: JSON.stringify(data),
+    }),
+  initCameraTrackUpload: (
+    id: number,
+    payload: {
+      fileName: string;
+      contentType: string;
+      durationSec: number;
+      workspaceId: string;
+      cameraPosition: "top-left" | "top-right" | "bottom-left" | "bottom-right";
+      cameraShape: "circle" | "rounded-rect";
+      cameraScale: number;
+    },
+  ) =>
+    apiFetch(`/recordings/${id}/camera-track`, {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }),
+  getCameraTrackPresignedUrls: (
+    id: number,
+    uploadId: string,
+    payload: { workspaceId: string; partNumbers: number[] },
+  ) =>
+    apiFetch(`/recordings/${id}/camera-track/uploads/${uploadId}/parts`, {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }),
+  getCameraTrackUploadedParts: (id: number, uploadId: string) =>
+    apiFetch(`/recordings/${id}/camera-track/uploads/${uploadId}/parts`, {
+      method: "GET",
+    }),
+  completeCameraTrackUpload: (
+    id: number,
+    uploadId: string,
+    payload: {
+      workspaceId: string;
+      data: { partNumber: number; eTag: string }[];
+    },
+  ) =>
+    apiFetch(`/recordings/${id}/camera-track/uploads/${uploadId}/complete`, {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }),
+  abortCameraTrackUpload: (id: number, uploadId: string) =>
+    apiFetch(`/recordings/${id}/camera-track/uploads/${uploadId}`, {
+      method: "DELETE",
+      body: JSON.stringify({}),
     }),
   myRecordings: (
     params: {
