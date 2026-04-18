@@ -29,6 +29,7 @@ import {
   X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { trackClientEvent } from "@/lib/analyticsClient";
 
 type RecordingState = "idle" | "recording" | "paused" | "stopping" | "processing";
 
@@ -309,8 +310,9 @@ export default function RecordScreenCopy() {
         </div>
       `;
       doc.getElementById("pip-toggle")?.addEventListener("click", () => {
-        if (recordingStateRef.current === "recording") pauseRecording();
-        if (recordingStateRef.current === "paused") resumeRecording();
+        const s = recordingStateRef.current;
+        if (s === "recording") pauseRecording();
+        else if (s === "paused") resumeRecording();
       });
       doc.getElementById("pip-restart")?.addEventListener("click", () => {
         void restartRecording();
@@ -417,6 +419,11 @@ export default function RecordScreenCopy() {
     if (Number.isNaN(recordingId)) {
       throw new Error("Unable to create recording draft: missing id in response.");
     }
+    trackClientEvent({
+      eventType: "recording_created",
+      eventName: "recording_draft_created",
+      metadata: { recordingId, route: "/record" },
+    });
     return { recordingId, safeTitle };
   };
 
@@ -722,6 +729,11 @@ export default function RecordScreenCopy() {
       toastApiSuccess(completeRes, {
         title: "Upload complete",
         fallbackDescription: "Your recording is being processed.",
+      });
+      trackClientEvent({
+        eventType: "recording_completed",
+        eventName: "recording_upload_finalized",
+        metadata: { recordingId, route: "/record" },
       });
       stopAllStreams();
       setTimeout(() => navigate(`/recording/${recordingId}`), 1200);
@@ -1148,28 +1160,77 @@ export default function RecordScreenCopy() {
   };
 
   const pauseRecording = () => {
-    if (state === "recording" && recorderRef.current) {
-      recorderRef.current.pause();
-      if (cameraRecorderRef.current?.state === "recording") {
-        cameraRecorderRef.current.pause();
+    // Use recordingStateRef so callers from stale closures (e.g. PiP window listeners attached once) see current state.
+    if (recordingStateRef.current !== "recording" || !recorderRef.current) return;
+    const rec = recorderRef.current;
+    const cam = cameraRecorderRef.current;
+    try {
+      if (rec.state === "recording") {
+        rec.pause();
       }
-      setState("paused");
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
-        timerRef.current = null;
+      if (cam?.state === "recording") {
+        cam.pause();
       }
+    } catch (err: any) {
+      toast({
+        title: "Could not pause",
+        description: err?.message || "Try stopping the recording instead.",
+        variant: "destructive",
+      });
+      return;
+    }
+    if (rec.state !== "paused") {
+      toast({
+        title: "Pause not supported",
+        description:
+          "This browser or recording format does not support pause. Use Stop to finish, or try Chrome with WebM.",
+      });
+      return;
+    }
+    setState("paused");
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
     }
   };
 
   const resumeRecording = () => {
-    if (state === "paused" && recorderRef.current) {
-      recorderRef.current.resume();
-      if (cameraRecorderRef.current?.state === "paused") {
-        cameraRecorderRef.current.resume();
+    if (recordingStateRef.current !== "paused" || !recorderRef.current) return;
+    const rec = recorderRef.current;
+    const cam = cameraRecorderRef.current;
+    try {
+      if (rec.state === "paused") {
+        rec.resume();
       }
-      setState("recording");
-      timerRef.current = setInterval(() => setElapsed((prev) => prev + 1), 1000);
+      if (cam?.state === "paused") {
+        cam.resume();
+      }
+    } catch (err: any) {
+      if (rec.state === "recording") {
+        setState("recording");
+        if (!timerRef.current) {
+          timerRef.current = setInterval(() => setElapsed((prev) => prev + 1), 1000);
+        }
+        return;
+      }
+      toast({
+        title: "Could not resume",
+        description: err?.message || "Try stopping and starting a new recording.",
+        variant: "destructive",
+      });
+      return;
     }
+    if (rec.state !== "recording") {
+      toast({
+        title: "Could not resume",
+        description: "The recorder did not return to an active state. Try stopping the recording.",
+        variant: "destructive",
+      });
+      return;
+    }
+    setState("recording");
+    if (timerRef.current) clearInterval(timerRef.current);
+    timerRef.current = setInterval(() => setElapsed((prev) => prev + 1), 1000);
   };
 
   const toggleMicLive = async () => {
@@ -1419,7 +1480,18 @@ export default function RecordScreenCopy() {
 
             <div className="flex flex-wrap gap-2">
               {state === "idle" && (
-                <Button className="gradient-primary" onClick={() => setShareDialogOpen(true)} disabled={preparing}>
+                <Button
+                  className="gradient-primary"
+                  onClick={() => {
+                    trackClientEvent({
+                      eventType: "click",
+                      eventName: "record_open_share_dialog",
+                      metadata: { route: "/record" },
+                    });
+                    setShareDialogOpen(true);
+                  }}
+                  disabled={preparing}
+                >
                   {preparing ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Monitor className="h-4 w-4 mr-2" />}
                   Start Recording
                 </Button>
@@ -1587,6 +1659,11 @@ export default function RecordScreenCopy() {
             <Button
               className="gradient-primary"
               onClick={() => {
+                trackClientEvent({
+                  eventType: "click",
+                  eventName: "record_share_dialog_continue",
+                  metadata: { route: "/record", shareTarget },
+                });
                 setShareDialogOpen(false);
                 setPermissionsDialogOpen(true);
               }}
@@ -1691,6 +1768,11 @@ export default function RecordScreenCopy() {
             <Button
               className="gradient-primary"
               onClick={async () => {
+                trackClientEvent({
+                  eventType: "click",
+                  eventName: "record_start_countdown",
+                  metadata: { route: "/record", micEnabled, cameraEnabled },
+                });
                 try {
                   const draft = await createDraft();
                   setPendingDraftId(draft.recordingId);

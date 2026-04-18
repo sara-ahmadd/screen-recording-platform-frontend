@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { recordingsApi } from "@/lib/api";
 import { getSocket } from "@/lib/socket";
@@ -14,10 +14,13 @@ import { useToast } from "@/hooks/use-toast";
 import { toastApiSuccess } from "@/lib/appToast";
 import { useConfirmDialog } from "@/contexts/ConfirmDialogContext";
 import { Play, Download, Link2, Trash2, Droplets, Edit2, Loader2, ArrowLeft } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { getCurrentWorkspaceSubscription, isPaidSubscription } from "@/lib/workspaceSubscription";
 
 export default function RecordingDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { user, selectedWorkspaceId } = useAuth();
   const { toast } = useToast();
   const confirm = useConfirmDialog();
   const [recording, setRecording] = useState<any>(null);
@@ -30,6 +33,16 @@ export default function RecordingDetailPage() {
   const durationInMin = typeof recording?.duration === "number" ? (recording.duration / 60).toFixed(2) : null;
   const isPrivate = (recording?.visibility || "public") === "private";
   const recordingId = Number(id);
+
+  const selectedWorkspace = useMemo(() => {
+    if (!selectedWorkspaceId || !user?.workspaces?.length) return null;
+    return user.workspaces.find((w: any) => String(w.id) === selectedWorkspaceId) ?? null;
+  }, [selectedWorkspaceId, user?.workspaces]);
+
+  const isFreePlanWorkspace = useMemo(() => {
+    const sub = getCurrentWorkspaceSubscription(selectedWorkspace);
+    return !isPaidSubscription(sub);
+  }, [selectedWorkspace]);
 
   const normalizeRecording = useCallback((rec: any) => {
     if (!rec) return rec;
@@ -312,9 +325,24 @@ export default function RecordingDetailPage() {
             </div>
 
             <div className="flex flex-wrap gap-3">
-              <Button variant="outline" onClick={handleDownload} className="gap-2">
-                <Download className="h-4 w-4" /> Download
-              </Button>
+              {isFreePlanWorkspace ? (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span className="inline-flex" tabIndex={0}>
+                      <Button variant="outline" className="gap-2" disabled>
+                        <Download className="h-4 w-4" /> Download
+                      </Button>
+                    </span>
+                  </TooltipTrigger>
+                  <TooltipContent side="top" className="max-w-xs">
+                    Upgrade your plan to download this video.
+                  </TooltipContent>
+                </Tooltip>
+              ) : (
+                <Button variant="outline" onClick={handleDownload} className="gap-2">
+                  <Download className="h-4 w-4" /> Download
+                </Button>
+              )}
               <Tooltip>
                 <TooltipTrigger asChild>
                   <span tabIndex={0}>
@@ -329,9 +357,24 @@ export default function RecordingDetailPage() {
                   </TooltipContent>
                 )}
               </Tooltip>
-              <Button variant="outline" onClick={handleRemoveWatermark} className="gap-2">
-                <Droplets className="h-4 w-4" /> Remove Watermark
-              </Button>
+              {isFreePlanWorkspace ? (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span className="inline-flex" tabIndex={0}>
+                      <Button variant="outline" className="gap-2" disabled>
+                        <Droplets className="h-4 w-4" /> Remove Watermark
+                      </Button>
+                    </span>
+                  </TooltipTrigger>
+                  <TooltipContent side="top" className="max-w-xs">
+                    Upgrade your plan to remove the watermark from this video.
+                  </TooltipContent>
+                </Tooltip>
+              ) : (
+                <Button variant="outline" onClick={handleRemoveWatermark} className="gap-2">
+                  <Droplets className="h-4 w-4" /> Remove Watermark
+                </Button>
+              )}
               <Button variant="outline" className="text-destructive hover:text-destructive gap-2" onClick={handleDelete}>
                 <Trash2 className="h-4 w-4" /> Delete
               </Button>

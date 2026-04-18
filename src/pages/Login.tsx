@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useToast } from "@/hooks/use-toast";
 import { toastApiSuccess, toastSuccess } from "@/lib/appToast";
 import { setAccessToken, setRefreshToken } from "@/lib/api";
+import { getPendingInviteToken } from "@/lib/inviteFlow";
 import { Loader2, Monitor } from "lucide-react";
 
 export default function LoginPage() {
@@ -20,7 +21,6 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
-  const INVITE_TOKEN_STORAGE_KEY = "pending_invite_token";
   const PENDING_GOOGLE_LOGIN_KEY = "pending_google_login";
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
 
@@ -52,8 +52,10 @@ export default function LoginPage() {
 
   useEffect(() => {
     async function completeGoogleLogin() {
-      const inviteToken = localStorage.getItem(INVITE_TOKEN_STORAGE_KEY);
-      const postLoginPath = inviteToken ? `/workspace/accept-invite?token=${inviteToken}` : "/dashboard";
+      const inviteToken = getPendingInviteToken();
+      const postLoginPath = inviteToken
+        ? `/workspace/accept-invite?token=${encodeURIComponent(inviteToken)}`
+        : "/dashboard";
       const sp = new URLSearchParams(location.search);
       const googleFlag = sp.get("google");
       const accessTokenFromQuery = sp.get("accessToken");
@@ -132,11 +134,11 @@ export default function LoginPage() {
     try {
       const loginRes = await login(email, password);
       toastApiSuccess(loginRes, { title: "Signed in", fallbackDescription: "Welcome back." });
-      const inviteToken = localStorage.getItem(INVITE_TOKEN_STORAGE_KEY);
+      const inviteToken = getPendingInviteToken();
       if (inviteToken) {
-        navigate(`/workspace/accept-invite?token=${inviteToken}`);
+        navigate(`/workspace/accept-invite?token=${encodeURIComponent(inviteToken)}`);
       } else {
-        navigate("/select-workspace");
+        navigate("/dashboard");
       }
     } catch (err: any) {
       toast({ title: "Login failed", description: err.message, variant: "destructive" });

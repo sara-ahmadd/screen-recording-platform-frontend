@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { Monitor, LayoutDashboard, Upload, Users, CreditCard, Bell, LogOut, Video, PanelLeftClose, PanelLeftOpen, Shield } from "lucide-react";
+import { Monitor, LayoutDashboard, Upload, Users, CreditCard, Bell, LogOut, Video, PanelLeftClose, PanelLeftOpen, Shield, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useAvatarSrc } from "@/hooks/useAvatarSrc";
@@ -13,6 +13,7 @@ const baseNavItems = [
   { href: "/upload", icon: Upload, label: "Upload" },
   { href: "/workspaces", icon: Users, label: "Workspaces" },
   { href: "/billing", icon: CreditCard, label: "Billing" },
+  { href: "/feedback", icon: MessageSquare, label: "Feedback" },
 ];
 
 const superAdminNavItems = [
@@ -21,6 +22,8 @@ const superAdminNavItems = [
   { href: "/super-admin/users", icon: Shield, label: "All Users" },
   { href: "/super-admin/plans", icon: Shield, label: "All Plans" },
   { href: "/super-admin/promocodes", icon: Shield, label: "All Promocodes" },
+  { href: "/super-admin/analytics", icon: Shield, label: "Analytics Overview" },
+  { href: "/super-admin/feedback", icon: Shield, label: "All Feedback" },
 ];
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {

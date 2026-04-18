@@ -1,10 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { workspaceApi } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
-import { toastApiSuccess } from "@/lib/appToast";
 import { useAuth } from "@/contexts/AuthContext";
-import { Loader2 } from "lucide-react";
+import { CheckCircle2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   AlertDialog,
@@ -15,8 +14,10 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-
-const INVITE_TOKEN_STORAGE_KEY = "pending_invite_token";
+import {
+  bindInviteTokenForSession,
+  clearInviteFlowStorage,
+} from "@/lib/inviteFlow";
 
 export default function AcceptInvitePage() {
   const [searchParams] = useSearchParams();
@@ -25,6 +26,8 @@ export default function AcceptInvitePage() {
   const { user, refreshUser } = useAuth();
   const [loading, setLoading] = useState(true);
   const [showSignupDialog, setShowSignupDialog] = useState(false);
+  const [showSuccessDialog, setShowSuccessDialog] = useState(false);
+  const inviteAcceptedRef = useRef(false);
 
   useEffect(() => {
     async function accept() {
@@ -35,7 +38,12 @@ export default function AcceptInvitePage() {
         return;
       }
 
-      localStorage.setItem(INVITE_TOKEN_STORAGE_KEY, token);
+      if (inviteAcceptedRef.current) {
+        setLoading(false);
+        return;
+      }
+
+      bindInviteTokenForSession(token);
 
       if (!user) {
         setShowSignupDialog(true);
@@ -44,24 +52,30 @@ export default function AcceptInvitePage() {
       }
 
       try {
-        const acceptRes = await workspaceApi.acceptInvite(token);
-        localStorage.removeItem(INVITE_TOKEN_STORAGE_KEY);
+        await workspaceApi.acceptInvite(token);
+        inviteAcceptedRef.current = true;
+        clearInviteFlowStorage();
         await refreshUser();
-        toastApiSuccess(acceptRes, {
-          title: "Invitation accepted",
-          fallbackDescription: "You've joined the workspace.",
-        });
-        navigate("/workspaces");
+        setShowSuccessDialog(true);
       } catch (err: any) {
-        toast({ title: "Invitation not accepted", description: err.message, variant: "destructive" });
+        toast({
+          title: "Invitation not accepted",
+          description: err.message,
+          variant: "destructive",
+        });
         setShowSignupDialog(true);
       } finally {
         setLoading(false);
       }
     }
 
-    accept();
-  }, [user, searchParams, navigate, toast, refreshUser]);
+    void accept();
+  }, [user, searchParams, toast, refreshUser]);
+
+  const goHome = () => {
+    setShowSuccessDialog(false);
+    navigate("/", { replace: true });
+  };
 
   return (
     <>
@@ -73,20 +87,22 @@ export default function AcceptInvitePage() {
               <p className="text-sm text-muted-foreground mt-3">Processing invitation...</p>
             </>
           ) : (
-            <>
-              <p className="text-lg font-semibold">Invitation Pending</p>
-              <p className="text-sm text-muted-foreground mt-2">
-                Complete signup/login to accept this workspace invitation.
-              </p>
-              <div className="flex items-center justify-center gap-2 mt-4">
-                <Link to="/register">
-                  <Button className="gradient-primary">Sign up</Button>
-                </Link>
-                <Link to="/login">
-                  <Button variant="outline">Login</Button>
-                </Link>
-              </div>
-            </>
+            !showSuccessDialog && (
+              <>
+                <p className="text-lg font-semibold">Invitation Pending</p>
+                <p className="text-sm text-muted-foreground mt-2">
+                  Complete signup/login to accept this workspace invitation.
+                </p>
+                <div className="flex items-center justify-center gap-2 mt-4">
+                  <Link to="/register">
+                    <Button className="gradient-primary">Sign up</Button>
+                  </Link>
+                  <Link to="/login">
+                    <Button variant="outline">Login</Button>
+                  </Link>
+                </div>
+              </>
+            )
           )}
         </div>
       </div>
@@ -102,6 +118,30 @@ export default function AcceptInvitePage() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogAction onClick={() => navigate("/register")}>Go to Sign up</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={showSuccessDialog} onOpenChange={() => {}}>
+        <AlertDialogContent
+          className="sm:max-w-md"
+          onEscapeKeyDown={(e) => e.preventDefault()}
+          onPointerDownOutside={(e) => e.preventDefault()}
+        >
+          <AlertDialogHeader className="sm:text-center">
+            <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-emerald-500/15">
+              <CheckCircle2 className="h-7 w-7 text-emerald-600 dark:text-emerald-400" aria-hidden />
+            </div>
+            <AlertDialogTitle className="text-center">Invitation accepted</AlertDialogTitle>
+            <AlertDialogDescription className="text-center">
+              You have joined the workspace successfully. Continue to the homepage &mdash; sign in any time to open
+              your dashboard and workspaces.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="sm:justify-center">
+            <AlertDialogAction className="gradient-primary w-full sm:w-auto" onClick={goHome}>
+              Go to homepage
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

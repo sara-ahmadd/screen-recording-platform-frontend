@@ -12,7 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { toastApiSuccess, toastSuccess } from "@/lib/appToast";
 import { useConfirmDialog } from "@/contexts/ConfirmDialogContext";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Users, Mail, UserMinus, Loader2, CheckCircle2, LogOut } from "lucide-react";
+import { Plus, Users, Mail, UserMinus, Loader2, CheckCircle2, LogOut, AlertTriangle } from "lucide-react";
 import { buildAvatarSrc } from "@/hooks/useAvatarSrc";
 
 const formatBytes = (bytes?: number | null) => {
@@ -34,6 +34,19 @@ const buildWorkspaceLogoSrc = (rawUrl?: string | null) => {
 const getWorkspaceLogoRaw = (workspace?: any) => {
   if (!workspace) return "";
   return workspace.logoUrl || workspace.logo_url || workspace.logo || "";
+};
+
+const getWorkspaceOwnerId = (workspace?: any): number | null => {
+  if (!workspace) return null;
+  const raw =
+    workspace.ownerId ??
+    workspace.owner_id ??
+    workspace.owner?.id ??
+    workspace.owner?.userId ??
+    workspace.owner?.user_id;
+  if (raw === undefined || raw === null || raw === "") return null;
+  const n = Number(raw);
+  return Number.isFinite(n) ? n : null;
 };
 
 export default function WorkspacesPage() {
@@ -118,6 +131,8 @@ export default function WorkspacesPage() {
       setNewWsName("");
       const id = res.workspace?.id || res.id;
       setWsId(id);
+      await refreshUser();
+      if (id != null) setSelectedWorkspaceId(String(id));
       loadMembers(id);
     } catch (err: any) {
       toast({ title: "Error", description: err.message, variant: "destructive" });
@@ -377,11 +392,33 @@ export default function WorkspacesPage() {
             <CardTitle className="text-base">Your Workspaces</CardTitle>
           </CardHeader>
           <CardContent>
+            {(user?.workspaces?.length || 0) === 0 ? (
+              <div
+                role="alert"
+                className="mb-4 flex gap-3 rounded-lg border border-amber-500/45 bg-amber-500/[0.12] px-3 py-3 shadow-sm dark:border-amber-500/35 dark:bg-amber-950/50"
+              >
+                <AlertTriangle
+                  className="mt-0.5 h-5 w-5 shrink-0 text-amber-600 dark:text-amber-400"
+                  aria-hidden
+                />
+                <p className="text-sm leading-relaxed text-amber-950 dark:text-amber-50/95">
+                  You need at least one workspace before you can open the dashboard or use recording features. Create one
+                  below to continue.
+                </p>
+              </div>
+            ) : null}
             <div className="space-y-3">
               {(user?.workspaces || []).map((ws: any) => {
                 const isCurrent = String(ws.id) === selectedWorkspaceId;
                 const workspaceMembers = workspaceMembersMap[ws.id] || [];
                 const workspaceData = { ...ws, ...(workspaceDetailsMap[ws.id] || {}) };
+                const ownerId = getWorkspaceOwnerId(workspaceData);
+                const currentUserId =
+                  user?.id != null ? Number(user.id) : Number.NaN;
+                const isOwnWorkspace =
+                  Number.isFinite(currentUserId) &&
+                  ownerId != null &&
+                  ownerId === currentUserId;
                 const logoSrc = buildWorkspaceLogoSrc(getWorkspaceLogoRaw(workspaceData));
                 const hideLogo = hiddenWorkspaceLogos[`${ws.id}:${logoSrc}`];
                 const showMembers = openedWorkspaceMembersId === ws.id;
@@ -411,14 +448,21 @@ export default function WorkspacesPage() {
                           )}
                         </button>
                         <div className="min-w-0">
-                          <button
-                            type="button"
-                            className="font-medium truncate text-left hover:underline"
-                            onClick={() => openWorkspaceEditor(workspaceData)}
-                            title="Edit workspace name"
-                          >
-                            {workspaceData.name || ws.name}
-                          </button>
+                          <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 min-w-0">
+                            <button
+                              type="button"
+                              className="font-medium truncate text-left hover:underline min-w-0"
+                              onClick={() => openWorkspaceEditor(workspaceData)}
+                              title="Edit workspace name"
+                            >
+                              {workspaceData.name || ws.name}
+                            </button>
+                            {isOwnWorkspace ? (
+                              <span className="text-xs text-muted-foreground shrink-0">
+                                Your workspace
+                              </span>
+                            ) : null}
+                          </div>
                           <p className="text-xs text-muted-foreground truncate">{workspaceData.slug || ws.slug || "-"}</p>
                           <p className="text-xs mt-1">
                             <span className="inline-flex rounded-full bg-secondary px-2 py-0.5 text-muted-foreground">
@@ -586,7 +630,7 @@ export default function WorkspacesPage() {
                             <Button
                               variant="ghost"
                               size="sm"
-                              className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive shrink-0"
+                              className="h-8 w-8 p-0 text-muted-foreground hover:bg-primary hover:text-white shrink-0"
                               onClick={handleLeaveWorkspace}
                               title="Leave workspace"
                             >

@@ -4,7 +4,6 @@ import { authApi, workspaceApi } from "@/lib/api";
 import { toastApiSuccess } from "@/lib/appToast";
 import { useAuth } from "@/contexts/AuthContext";
 import { WorkspaceActiveSubscriptionDetails } from "@/components/WorkspaceActiveSubscriptionDetails";
-import { getCurrentWorkspaceSubscription } from "@/lib/workspaceSubscription";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -232,50 +231,6 @@ export default function ProfilePage() {
             description="Current plan for the workspace you have selected in the app."
           />
         </div>
-
-        <Card className="glass mt-6">
-          <CardHeader>
-            <CardTitle>Workspace Subscriptions</CardTitle>
-            <CardDescription>Subscription details for all workspaces you belong to.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {(user?.workspaces?.length || 0) === 0 ? (
-              <p className="text-sm text-muted-foreground">No workspace memberships found.</p>
-            ) : (
-              <div className="space-y-4">
-                {(user?.workspaces || []).map((workspace: any) => {
-                  const subscription = getCurrentWorkspaceSubscription(workspace);
-                  return (
-                    <div key={workspace.id} className="rounded-lg border border-border p-4">
-                      <p className="font-semibold">{workspace.name}</p>
-                      <p className="text-xs text-muted-foreground mt-1">{workspace.slug}</p>
-
-                      {subscription ? (
-                        <div className="mt-3 grid gap-2 text-sm">
-                          <p><span className="text-muted-foreground">Plan:</span> {subscription.plan?.name || "-"}</p>
-                          <p><span className="text-muted-foreground">Type:</span> {subscription.type || "-"}</p>
-                          <p><span className="text-muted-foreground">Status:</span> {subscription.status || "-"}</p>
-                          <p>
-                            <span className="text-muted-foreground">Current period:</span>{" "}
-                            {subscription.currentPeriodStart
-                              ? new Date(subscription.currentPeriodStart).toLocaleDateString()
-                              : "-"}{" "}
-                            -{" "}
-                            {subscription.currentPeriodEnd
-                              ? new Date(subscription.currentPeriodEnd).toLocaleDateString()
-                              : "-"}
-                          </p>
-                        </div>
-                      ) : (
-                        <p className="text-sm text-muted-foreground mt-3">No subscription details available.</p>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </CardContent>
-        </Card>
       </div>
 
       <Dialog open={otpDialogOpen} onOpenChange={setOtpDialogOpen}>

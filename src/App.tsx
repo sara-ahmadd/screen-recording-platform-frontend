@@ -27,6 +27,7 @@ import BillingPage from "./pages/Billing";
 import PlansPage from "./pages/Plans";
 import SubscriptionPage from "./pages/Subscription";
 import NotificationsPage from "./pages/Notifications";
+import FeedbackPage from "./pages/Feedback";
 import AcceptInvitePage from "./pages/AcceptInvite";
 import SelectWorkspacePage from "./pages/SelectWorkspace";
 import ProfilePage from "./pages/Profile";
@@ -36,6 +37,8 @@ import SuperAdminUsersPage from "./pages/admin/SuperAdminUsers";
 import SuperAdminPlansPage from "./pages/admin/SuperAdminPlans";
 import SuperAdminPromocodesPage from "./pages/admin/SuperAdminPromocodes";
 import SuperAdminWorkspaceRecordingsPage from "./pages/admin/SuperAdminWorkspaceRecordings";
+import SuperAdminAnalyticsPage from "./pages/admin/SuperAdminAnalytics";
+import SuperAdminFeedbackPage from "./pages/admin/SuperAdminFeedback";
 import NotFound from "./pages/NotFound";
 import RecordScreenCopy from "./pages/RecordScreenCopy";
 
@@ -85,6 +88,7 @@ export const routes: RouteRecord[] = [
       { path: "plans", element: <ProtectedRoute><PlansPage /></ProtectedRoute> },
       { path: "subscription", element: <ProtectedRoute><SubscriptionPage /></ProtectedRoute> },
       { path: "notifications", element: <ProtectedRoute><NotificationsPage /></ProtectedRoute> },
+      { path: "feedback", element: <ProtectedRoute><FeedbackPage /></ProtectedRoute> },
       { path: "profile", element: <ProtectedRoute><ProfilePage /></ProtectedRoute> },
       {
         path: "super-admin/recordings",
@@ -109,6 +113,14 @@ export const routes: RouteRecord[] = [
       {
         path: "super-admin/promocodes",
         element: <ProtectedRoute requireSuperAdmin><SuperAdminPromocodesPage /></ProtectedRoute>,
+      },
+      {
+        path: "super-admin/analytics",
+        element: <ProtectedRoute requireSuperAdmin><SuperAdminAnalyticsPage /></ProtectedRoute>,
+      },
+      {
+        path: "super-admin/feedback",
+        element: <ProtectedRoute requireSuperAdmin><SuperAdminFeedbackPage /></ProtectedRoute>,
       },
       { path: "*", element: <NotFound /> },
     ],

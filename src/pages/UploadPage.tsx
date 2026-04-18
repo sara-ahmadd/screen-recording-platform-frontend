@@ -10,6 +10,7 @@ import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
 import { toastApiSuccess } from "@/lib/appToast";
 import { Upload, FileVideo, X, Loader2, Check } from "lucide-react";
+import { trackClientEvent } from "@/lib/analyticsClient";
 
 const PART_SIZE = 5 * 1024 * 1024; // 5MB
 
@@ -27,6 +28,11 @@ export default function UploadPage() {
   const handleFile = (f: File) => {
     setFile(f);
     setTitle(f.name.replace(/\.[^/.]+$/, ""));
+    trackClientEvent({
+      eventType: "click",
+      eventName: "upload_video_selected",
+      metadata: { route: "/upload", fileName: f.name, sizeBytes: f.size },
+    });
   };
 
   const handleDrop = useCallback((e: React.DragEvent) => {
@@ -39,6 +45,11 @@ export default function UploadPage() {
 
   const handleUpload = async () => {
     if (!file || !title) return;
+    trackClientEvent({
+      eventType: "click",
+      eventName: "upload_submit",
+      metadata: { route: "/upload", title: title.trim(), fileName: file.name },
+    });
     setUploading(true);
     setStep("uploading");
     setProgress(0);
@@ -50,6 +61,12 @@ export default function UploadPage() {
       // 1. Create draft
       const draft = await recordingsApi.create(title);
       const recordingId = draft.id || draft.recording?.id;
+
+      trackClientEvent({
+        eventType: "recording_created",
+        eventName: "recording_draft_created",
+        metadata: { recordingId, route: "/upload" },
+      });
 
       // 2. Init upload
       const upload = await recordingsApi.initUpload(recordingId, {
@@ -111,6 +128,12 @@ export default function UploadPage() {
       toastApiSuccess(completeRes, {
         title: "Upload complete",
         fallbackDescription: "Your video is now being processed.",
+      });
+
+      trackClientEvent({
+        eventType: "recording_completed",
+        eventName: "recording_upload_finalized",
+        metadata: { recordingId, route: "/upload" },
       });
 
       // Navigate to recording

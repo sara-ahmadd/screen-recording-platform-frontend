@@ -27,7 +27,17 @@ export default function ProtectedRoute({ children, requireSuperAdmin = false }: 
   if (requireSuperAdmin) return <>{children}</>;
 
   const hasWorkspaces = (user.workspaces?.length || 0) > 0;
-  if (hasWorkspaces && !selectedWorkspaceId && location.pathname !== "/select-workspace") {
+
+  // Super admins can skip workspace onboarding for normal app routes.
+  if (!isSuperAdmin(user) && !hasWorkspaces && location.pathname !== "/workspaces") {
+    return <Navigate to="/workspaces" replace />;
+  }
+
+  if (
+    hasWorkspaces &&
+    !selectedWorkspaceId &&
+    location.pathname !== "/select-workspace"
+  ) {
     return <Navigate to="/select-workspace" replace />;
   }
 

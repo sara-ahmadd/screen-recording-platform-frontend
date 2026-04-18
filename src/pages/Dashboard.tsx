@@ -16,6 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
+import { trackClientEvent } from "@/lib/analyticsClient";
 
 interface Recording {
   id: number;
@@ -234,7 +235,16 @@ export default function DashboardPage() {
               <ArrowUpDown className="h-4 w-4" />
               Order: {order === "DESC" ? "Newest" : "Oldest"}
             </Button>
-            <Link to="/record">
+            <Link
+              to="/record"
+              onClick={() =>
+                trackClientEvent({
+                  eventType: "click",
+                  eventName: "dashboard_nav_record",
+                  metadata: { placement: "header_toolbar" },
+                })
+              }
+            >
               <Button className="gradient-primary gap-2">
                 <Upload className="h-4 w-4" /> New Recording
               </Button>
@@ -341,7 +351,18 @@ export default function DashboardPage() {
               </div>
               <h3 className="text-lg font-semibold mb-2">No recordings yet</h3>
               <p className="text-muted-foreground mb-4">Upload your first screen recording to get started.</p>
-              <Link to="/upload"><Button className="gradient-primary">Upload Recording</Button></Link>
+              <Link
+                to="/upload"
+                onClick={() =>
+                  trackClientEvent({
+                    eventType: "click",
+                    eventName: "dashboard_nav_upload",
+                    metadata: { placement: "empty_state" },
+                  })
+                }
+              >
+                <Button className="gradient-primary">Upload Recording</Button>
+              </Link>
             </CardContent>
           </Card>
         ) : (

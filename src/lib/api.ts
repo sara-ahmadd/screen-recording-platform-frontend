@@ -1,7 +1,8 @@
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
 const isBrowser = typeof window !== "undefined";
 
-const readStorage = (key: string) => (isBrowser ? window.localStorage.getItem(key) : null);
+const readStorage = (key: string) =>
+  isBrowser ? window.localStorage.getItem(key) : null;
 const writeStorage = (key: string, value: string | null) => {
   if (!isBrowser) return;
   if (value) window.localStorage.setItem(key, value);
@@ -104,7 +105,9 @@ export async function apiFetch<T = any>(
     !/\/workspace\/\d+\/invite$/.test(path) &&
     !/\/workspace\/members\/\d+\/edit\/\d+$/.test(path) &&
     path !== "/accept-invite" &&
-    !path.startsWith("/workspace/accept-invite")
+    !path.startsWith("/workspace/accept-invite") &&
+    path !== "/analytics/events" &&
+    path !== "/feedback"
   ) {
     try {
       const parsed = JSON.parse(String(requestBody));
@@ -462,7 +465,9 @@ export const workspaceApi = {
 
 // Notifications
 export const notificationsApi = {
-  getAll: (params: { page?: number; limit?: number; order?: "DESC" | "ASC" } = {}) => {
+  getAll: (
+    params: { page?: number; limit?: number; order?: "DESC" | "ASC" } = {},
+  ) => {
     const sp = new URLSearchParams();
     if (params.page) sp.set("page", String(params.page));
     if (params.limit) sp.set("limit", String(params.limit));
@@ -484,6 +489,59 @@ export const notificationsApi = {
     }),
   delete: (id: number) =>
     apiFetch(`/notifications/${id}`, {
+      method: "DELETE",
+      body: JSON.stringify({}),
+    }),
+};
+
+// Analytics
+export const analyticsApi = {
+  trackEvent: (data: {
+    eventType: "click" | "recording_created" | "recording_completed";
+    eventName: string;
+    metadata?: Record<string, unknown>;
+  }) =>
+    apiFetch("/analytics/events", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+};
+
+// Feedback
+export const feedbackApi = {
+  create: (data: {
+    rating: number;
+    comment: string;
+    isWebsiteSuccessful: boolean;
+  }) =>
+    apiFetch("/feedback", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+  getMy: (
+    params: { page?: number; limit?: number; order?: "DESC" | "ASC" } = {},
+  ) => {
+    const sp = new URLSearchParams();
+    if (params.page) sp.set("page", String(params.page));
+    if (params.limit) sp.set("limit", String(params.limit));
+    if (params.order) sp.set("order", params.order);
+    const query = sp.toString();
+    return apiFetch(`/feedback/my${query ? `?${query}` : ""}`);
+  },
+  update: (
+    feedbackId: number,
+    data: {
+      rating?: number;
+      comment?: string;
+      isWebsiteSuccessful?: boolean;
+    },
+  ) =>
+    apiFetch(`/feedback/${feedbackId}`, {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    }),
+  delete: (feedbackId: number) =>
+    apiFetch(`/feedback/${feedbackId}`, {
       method: "DELETE",
       body: JSON.stringify({}),
     }),
@@ -616,5 +674,51 @@ export const superAdminApi = {
         method: "DELETE",
         body: JSON.stringify({}),
       }),
+  },
+  analytics: {
+    overview: () => apiFetch("/analytics/overview"),
+    events: (
+      params: {
+        page?: number;
+        limit?: number;
+        order?: "DESC" | "ASC";
+        filters?: { eventType?: string };
+      } = {},
+    ) => {
+      const sp = new URLSearchParams();
+      if (params.page) sp.set("page", String(params.page));
+      if (params.limit) sp.set("limit", String(params.limit));
+      if (params.order) sp.set("order", params.order);
+      if (params.filters?.eventType) {
+        sp.set("filters[eventType]", params.filters.eventType);
+      }
+      return apiFetch(`/analytics/events?${sp}`);
+    },
+  },
+  feedback: {
+    overview: () => apiFetch("/feedback/overview"),
+    list: (
+      params: {
+        page?: number;
+        limit?: number;
+        order?: "DESC" | "ASC";
+        filters?: { rating?: number; isWebsiteSuccessful?: boolean };
+      } = {},
+    ) => {
+      const sp = new URLSearchParams();
+      if (params.page) sp.set("page", String(params.page));
+      if (params.limit) sp.set("limit", String(params.limit));
+      if (params.order) sp.set("order", params.order);
+      if (params.filters?.rating != null) {
+        sp.set("filters[rating]", String(params.filters.rating));
+      }
+      if (params.filters?.isWebsiteSuccessful != null) {
+        sp.set(
+          "filters[isWebsiteSuccessful]",
+          String(params.filters.isWebsiteSuccessful),
+        );
+      }
+      return apiFetch(`/feedback/all?${sp}`);
+    },
   },
 };
