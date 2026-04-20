@@ -23,6 +23,15 @@ export default function LoginPage() {
   const [googleLoading, setGoogleLoading] = useState(false);
   const PENDING_GOOGLE_LOGIN_KEY = "pending_google_login";
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+  const isIgnorableGoogleCorsError = (err: unknown) => {
+    const msg = String((err as any)?.message || "").toLowerCase();
+    return (
+      msg.includes("failed to fetch") ||
+      msg.includes("networkerror") ||
+      msg.includes("cors") ||
+      msg.includes("accounts.google.com/o/oauth2/v2/auth")
+    );
+  };
 
   const GoogleIcon = () => (
     <svg className="h-4 w-4" viewBox="0 0 24 24" aria-hidden="true">
@@ -66,16 +75,19 @@ export default function LoginPage() {
           const refreshTokenFromQuery = sp.get("refreshToken");
           setAccessToken(accessTokenFromQuery);
           if (refreshTokenFromQuery) setRefreshToken(refreshTokenFromQuery);
-          await refreshUser(); // Calls GET /auth/me
+          const meOk = await refreshUser(); // Calls GET /auth/me
+          if (!meOk) throw new Error("Could not verify login session.");
           localStorage.removeItem(PENDING_GOOGLE_LOGIN_KEY);
           toastSuccess("Signed in", "Google login successful.");
           navigate(postLoginPath, { replace: true });
         } catch (err: any) {
-          toast({
-            title: "Google login failed",
-            description: err.message || "Please try again.",
-            variant: "destructive",
-          });
+          if (!isIgnorableGoogleCorsError(err)) {
+            toast({
+              title: "Google login failed",
+              description: err.message || "Please try again.",
+              variant: "destructive",
+            });
+          }
         } finally {
           setGoogleLoading(false);
         }
@@ -106,7 +118,8 @@ export default function LoginPage() {
 
         setAccessToken(token);
         if (refresh) setRefreshToken(refresh);
-        await refreshUser(); // Calls GET /auth/me
+        const meOk = await refreshUser(); // Calls GET /auth/me
+        if (!meOk) throw new Error("Could not verify login session.");
         localStorage.removeItem(PENDING_GOOGLE_LOGIN_KEY);
         toastApiSuccess(data, {
           title: "Signed in",
@@ -115,11 +128,13 @@ export default function LoginPage() {
         navigate(postLoginPath, { replace: true });
       } catch (err: any) {
         localStorage.removeItem(PENDING_GOOGLE_LOGIN_KEY);
-        toast({
-          title: "Google login failed",
-          description: err.message || "Please try again.",
-          variant: "destructive",
-        });
+        if (!isIgnorableGoogleCorsError(err)) {
+          toast({
+            title: "Google login failed",
+            description: err.message || "Please try again.",
+            variant: "destructive",
+          });
+        }
       } finally {
         setGoogleLoading(false);
       }

@@ -10,11 +10,12 @@ import { useToast } from "@/hooks/use-toast";
 import { toastApiSuccess } from "@/lib/appToast";
 import { messageFromApiSuccessResponse } from "@/lib/apiMessage";
 import { useConfirmDialog } from "@/contexts/ConfirmDialogContext";
-import { Upload, Play, Clock, AlertCircle, ChevronLeft, ChevronRight, Trash2, Loader2, ArrowUpDown, Calendar as CalendarIcon } from "lucide-react";
+import { Upload, Play, Clock, AlertCircle, ChevronLeft, ChevronRight, Trash2, Loader2, ArrowUpDown, Calendar as CalendarIcon, MoreVertical } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 import { trackClientEvent } from "@/lib/analyticsClient";
 
@@ -27,6 +28,8 @@ interface Recording {
   videoUrl?: string;
   thumbUrl?: string;
   duration?: number;
+  multipartUploadId?: string;
+  cameraMultipartUploadId?: string;
 }
 
 export default function DashboardPage() {
@@ -171,6 +174,27 @@ export default function DashboardPage() {
       socket.off("limit_warning", onLimitWarning);
     };
   }, [fetchRecordings, toast]);
+
+  const handleCancelStuckUpload = async (id: number) => {
+    const confirmed = await confirm({
+      title: "Cancel this upload?",
+      description:
+        "The in-progress file transfer will be stopped and the draft will be reset. You can start a new upload afterward.",
+      confirmText: "Cancel upload",
+      cancelText: "Keep",
+    });
+    if (!confirmed) return;
+    try {
+      const res = await recordingsApi.abortMultipartUpload(id);
+      toastApiSuccess(res, {
+        title: "Upload cancelled",
+        fallbackDescription: "You can record or upload again.",
+      });
+      fetchRecordings();
+    } catch (err: any) {
+      toast({ title: "Could not cancel upload", description: err.message, variant: "destructive" });
+    }
+  };
 
   const handleDelete = async (id: number) => {
     const confirmed = await confirm({
@@ -397,7 +421,32 @@ export default function DashboardPage() {
                           <Clock className="h-3 w-3" />
                           {new Date(rec.createdAt).toLocaleDateString()}
                         </span>
-                        <div className="flex items-center gap-1">
+                        <div className="flex items-center gap-1 flex-wrap justify-end">
+                          {(rec.status === "uploading" || rec.cameraMultipartUploadId) && (
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="outline" size="sm" className="h-7 w-7 p-0" aria-label="Upload actions">
+                                  <MoreVertical className="h-3.5 w-3.5" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuItem asChild>
+                                  <Link to={`/record?resumeScreenId=${rec.id}`}>Finish screen</Link>
+                                </DropdownMenuItem>
+                                <DropdownMenuItem asChild>
+                                  <Link to={`/upload?resumeRecordingId=${rec.id}`}>Resume file</Link>
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  className="text-destructive focus:text-white"
+                                  onSelect={() => {
+                                    void handleCancelStuckUpload(rec.id);
+                                  }}
+                                >
+                                  Cancel upload
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          )}
                           <div className="flex items-center gap-1.5 rounded-md border border-border px-2 py-1">
                             <span className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Visibility</span>
                             <Select
@@ -413,7 +462,7 @@ export default function DashboardPage() {
                               </SelectContent>
                             </Select>
                           </div>
-                          <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-muted-foreground hover:text-destructive" onClick={() => handleDelete(rec.id)}>
+                          <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-muted-foreground hover:text-white" onClick={() => handleDelete(rec.id)}>
                             <Trash2 className="h-3.5 w-3.5" />
                           </Button>
                         </div>

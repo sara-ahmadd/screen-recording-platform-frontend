@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { getSelectedWorkspaceId, recordingsApi } from "@/lib/api";
 import AppLayout from "@/components/AppLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
@@ -30,6 +31,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { trackClientEvent } from "@/lib/analyticsClient";
+import { resumeScreenRecordingFromServer } from "@/lib/resumeScreenUpload";
 
 type RecordingState = "idle" | "recording" | "paused" | "stopping" | "processing";
 
@@ -45,6 +47,7 @@ const TARGET_UPLOAD_CHUNK_SIZE = 5 * 1024 * 1024;
 
 export default function RecordScreenCopy() {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { toast } = useToast();
 
   const [state, setState] = useState<RecordingState>("idle");
@@ -121,6 +124,33 @@ export default function RecordScreenCopy() {
   const controlsPipWindowRef = useRef<Window | null>(null);
   const nativeCameraPipActiveRef = useRef(false);
   const cameraPreviewContainerRef = useRef<HTMLDivElement | null>(null);
+  const [uploadingDrafts, setUploadingDrafts] = useState<
+    { id: number; title?: string }[]
+  >([]);
+  const [screenResuming, setScreenResuming] = useState(false);
+  const [resumeProgress, setResumeProgress] = useState(0);
+
+  const refreshUploadingDrafts = useCallback(async () => {
+    try {
+      const listRes = await recordingsApi.myRecordings({
+        limit: 200,
+        page: 1,
+        filters: { unfinishedMultipart: true },
+      });
+      const rows =
+        (listRes as { recordings?: { id?: number; title?: string }[] }).recordings ??
+        (listRes as { data?: { id?: number; title?: string }[] }).data ??
+        [];
+      setUploadingDrafts(
+        rows.map((r) => ({
+          id: Number(r.id),
+          title: typeof r.title === "string" ? r.title : undefined,
+        })),
+      );
+    } catch {
+      setUploadingDrafts([]);
+    }
+  }, []);
 
   const formattedTime = useMemo(() => {
     const m = Math.floor(elapsed / 60);
@@ -528,7 +558,7 @@ export default function RecordScreenCopy() {
         while (session.queue.length > 0) {
           const chunk = session.queue.shift();
           if (!chunk) continue;
-          const partNumber = session.nextPart++;
+          const partNumber = session.nextPart;
           const url = await getPresignedUrlForPart(
             session.recordingId,
             session.uploadId,
@@ -543,6 +573,7 @@ export default function RecordScreenCopy() {
           if (!putRes.ok) throw new Error(`Failed to upload part ${partNumber}`);
           const eTag = (putRes.headers.get("ETag") || `part-${partNumber}`).replace(/"/g, "");
           session.uploadedParts.push({ partNumber, eTag });
+          session.nextPart = partNumber + 1;
         }
         if (session.doneCollecting && session.resolveDrain) {
           session.resolveDrain();
@@ -573,7 +604,7 @@ export default function RecordScreenCopy() {
       while (session.queue.length > 0) {
         const chunk = session.queue.shift();
         if (!chunk) continue;
-        const partNumber = session.nextPart++;
+        const partNumber = session.nextPart;
         const url = await getCameraPresignedUrlForPart(
           session.recordingId,
           session.uploadId,
@@ -588,6 +619,7 @@ export default function RecordScreenCopy() {
         if (!putRes.ok) throw new Error(`Failed to upload camera part ${partNumber}`);
         const eTag = (putRes.headers.get("ETag") || `camera-part-${partNumber}`).replace(/"/g, "");
         session.uploadedParts.push({ partNumber, eTag });
+        session.nextPart = partNumber + 1;
       }
       if (session.doneCollecting && session.resolveDrain) {
         session.resolveDrain();
@@ -698,6 +730,26 @@ export default function RecordScreenCopy() {
     }
   }, []);
 
+  const abortMainUploadIfNeeded = useCallback(
+    async (recordingId?: number | null, uploadId?: string | null) => {
+      if (!recordingId) return;
+      if (uploadId) {
+        try {
+          await recordingsApi.abortUpload(recordingId, uploadId);
+          return;
+        } catch {
+          // Fall through to server-stored upload id.
+        }
+      }
+      try {
+        await recordingsApi.abortMultipartUpload(recordingId);
+      } catch {
+        // Ignore abort errors.
+      }
+    },
+    [],
+  );
+
   const finalizeUpload = useCallback(
     async (recordingId: number, uploadId: string, uploadedParts: UploadedPart[]) => {
       const completeRes = await recordingsApi.completeUpload(recordingId, uploadId, {
@@ -746,6 +798,7 @@ export default function RecordScreenCopy() {
     setPreparing(true);
     let recordingId = draftInfo?.recordingId ?? null;
     let safeTitle = draftInfo?.safeTitle ?? "";
+    let initiatedMainUploadId: string | undefined;
     try {
       if (!navigator.mediaDevices?.getDisplayMedia || typeof MediaRecorder === "undefined") {
         throw new Error("This browser does not support screen recording.");
@@ -761,7 +814,6 @@ export default function RecordScreenCopy() {
         recordingId = draft.recordingId;
         safeTitle = draft.safeTitle;
       }
-
       const displaySurfaceMap: Record<ShareTarget, "monitor" | "window" | "browser"> = {
         screen: "monitor",
         window: "window",
@@ -897,6 +949,7 @@ export default function RecordScreenCopy() {
         contentType: recordingMimeType,
       });
       if (!init?.uploadId) throw new Error("Unable to initialize upload session.");
+      initiatedMainUploadId = init.uploadId;
       uploadSessionRef.current = {
         recordingId,
         uploadId: init.uploadId,
@@ -1003,12 +1056,13 @@ export default function RecordScreenCopy() {
         variant: "destructive",
       });
       stopAllStreams();
+      await abortMainUploadIfNeeded(recordingId, initiatedMainUploadId ?? null);
+      await abortCameraUploadIfNeeded();
       if (recordingId) {
         await safeDeleteDraft(recordingId);
       }
       uploadSessionRef.current = null;
       cameraRecorderRef.current = null;
-      await abortCameraUploadIfNeeded();
       cameraUploadSessionRef.current = null;
       setState("idle");
     } finally {
@@ -1064,11 +1118,13 @@ export default function RecordScreenCopy() {
       await finalizeUpload(session.recordingId, session.uploadId, session.uploadedParts);
     } catch (err: any) {
       toast({
-        title: "Failed to finalize upload",
-        description: err?.message || "Please try again.",
+        title: "Upload interrupted",
+        description:
+          err?.message ||
+          "Chunks already in the cloud can be finished below or from another device. Anything not uploaded is lost.",
         variant: "destructive",
       });
-      await abortCameraUploadIfNeeded();
+      void refreshUploadingDrafts();
       setState("idle");
       stopAllStreams();
     } finally {
@@ -1081,7 +1137,9 @@ export default function RecordScreenCopy() {
 
   const restartRecording = async () => {
     if (state !== "recording" && state !== "paused") return;
-    const currentRecordingId = uploadSessionRef.current?.recordingId;
+    const mainSession = uploadSessionRef.current;
+    const currentRecordingId = mainSession?.recordingId;
+    const mainUploadId = mainSession?.uploadId;
 
     if (timerRef.current) {
       clearInterval(timerRef.current);
@@ -1102,6 +1160,7 @@ export default function RecordScreenCopy() {
     recorderRef.current = null;
     cameraRecorderRef.current = null;
     uploadSessionRef.current = null;
+    await abortMainUploadIfNeeded(currentRecordingId, mainUploadId);
     await abortCameraUploadIfNeeded();
     cameraUploadSessionRef.current = null;
     stopAllStreams();
@@ -1381,6 +1440,82 @@ export default function RecordScreenCopy() {
     return () => document.removeEventListener("visibilitychange", onVisibilityChange);
   }, [cameraEnabled]);
 
+  const discardIncompleteUpload = useCallback(
+    async (recordingId: number) => {
+      try {
+        await recordingsApi.abortMultipartUpload(recordingId);
+      } catch {
+        /* ignore */
+      }
+      setUploadingDrafts((prev) => prev.filter((x) => x.id !== recordingId));
+      void refreshUploadingDrafts();
+      toast({
+        title: "Discarded",
+        description: "Multipart session aborted on the server.",
+      });
+    },
+    [toast, refreshUploadingDrafts],
+  );
+
+  const runResumeScreenJob = useCallback(
+    async (recordingId: number) => {
+      setScreenResuming(true);
+      setResumeProgress(0);
+      try {
+        await resumeScreenRecordingFromServer(recordingId, {
+          onProgress: (pct) => setResumeProgress(pct),
+        });
+        toast({ title: "Upload complete", description: "Your recording is being processed." });
+        setState("processing");
+        setTimeout(() => navigate(`/recording/${recordingId}`), 1200);
+        void refreshUploadingDrafts();
+      } catch (e: unknown) {
+        const msg = e instanceof Error ? e.message : "Try again.";
+        toast({ title: "Resume failed", description: msg, variant: "destructive" });
+      } finally {
+        setScreenResuming(false);
+      }
+    },
+    [navigate, toast, refreshUploadingDrafts],
+  );
+
+  useEffect(() => {
+    void refreshUploadingDrafts();
+  }, [state, screenResuming, refreshUploadingDrafts]);
+
+  useEffect(() => {
+    const id = searchParams.get("resumeScreenId");
+    if (!id) return;
+    const rid = Number(id);
+    if (!Number.isFinite(rid)) return;
+    void (async () => {
+      try {
+        const listRes = await recordingsApi.myRecordings({
+          limit: 200,
+          page: 1,
+          filters: { status: "uploading" },
+        });
+        const rows =
+          (listRes as { recordings?: { id?: number; title?: string }[] }).recordings ??
+          (listRes as { data?: { id?: number; title?: string }[] }).data ??
+          [];
+        const rec = rows.find((r) => Number(r.id) === rid);
+        toast({
+          title: "Recording still uploading",
+          description: rec?.title
+            ? `Finish «${rec.title}» below. You can also open this page on another signed-in device.`
+            : `Finish recording #${rid} below when possible.`,
+        });
+      } catch {
+        toast({
+          title: "Recording still uploading",
+          description: `Finish recording #${rid} below when possible.`,
+        });
+      }
+      setSearchParams({});
+    })();
+  }, [searchParams, setSearchParams, toast]);
+
   return (
     <AppLayout>
       <div className="p-6 md:p-8 max-w-7xl mx-auto space-y-6">
@@ -1390,6 +1525,54 @@ export default function RecordScreenCopy() {
             1080p screen recording with webcam/mic controls and robust upload.
           </p>
         </div>
+
+        {uploadingDrafts.length > 0 && (
+          <Card className="glass border-amber-500/35">
+            <CardContent className="p-4 space-y-3">
+              <p className="text-sm font-semibold">
+                Uploads in progress — finish screen and/or camera multipart from parts already in the cloud
+              </p>
+              <ul className="space-y-2">
+                {uploadingDrafts.map((job) => (
+                  <li
+                    key={job.id}
+                    className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border px-3 py-2 text-sm"
+                  >
+                    <span className="truncate">
+                      {job.title ?? `Recording #${job.id}`}
+                    </span>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        disabled={screenResuming}
+                        onClick={() => void runResumeScreenJob(job.id)}
+                      >
+                        {screenResuming ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+                        Finish upload
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="text-destructive"
+                        disabled={screenResuming}
+                        onClick={() => void discardIncompleteUpload(job.id)}
+                      >
+                        Discard
+                      </Button>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+              {screenResuming && (
+                <div className="space-y-1">
+                  <Progress value={resumeProgress} className="h-2" />
+                  <p className="text-xs text-muted-foreground">{resumeProgress}%</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
 
         {state === "idle" && (
           <Card className="glass border-primary/20">

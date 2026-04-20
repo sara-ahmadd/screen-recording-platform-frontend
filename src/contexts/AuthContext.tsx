@@ -25,7 +25,7 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<any>;
   register: (data: { user_name: string; email: string; password: string; confirmPassword: string }) => Promise<any>;
   logout: () => Promise<void>;
-  refreshUser: () => Promise<void>;
+  refreshUser: () => Promise<boolean>;
   setSelectedWorkspaceId: (workspaceId: string | null) => void;
 }
 
@@ -54,12 +54,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       connectSocket();
+      return true;
     } catch {
       setUser(null);
       setAccessToken(null);
       setRefreshToken(null);
       setSelectedWorkspaceId(null);
       disconnectSocket();
+      return false;
     }
   }, [selectedWorkspaceId, setSelectedWorkspaceId]);
 

@@ -285,6 +285,21 @@ export const recordingsApi = {
       method: "POST",
       body: JSON.stringify(data),
     }),
+  /** Abort main screen-recording multipart when uploadId is known (e.g. in-session failure). */
+  abortUpload: (id: number, uploadId: string) =>
+    apiFetch(`/recordings/${id}/uploads/${uploadId}`, {
+      method: "DELETE",
+      body: JSON.stringify({}),
+    }),
+  /** Abort using server-stored multipartUploadId (tab closed / recovery / dashboard). */
+  abortMultipartUpload: (id: number) =>
+    apiFetch(`/recordings/${id}/multipart-upload`, {
+      method: "DELETE",
+      body: JSON.stringify({}),
+    }),
+  /** Main + camera multipart sessions still open (recovery UI). */
+  getRecordingUploadState: (id: number) =>
+    apiFetch(`/recordings/${id}/upload-state`, { method: "GET" }),
   initCameraTrackUpload: (
     id: number,
     payload: {
@@ -342,6 +357,8 @@ export const recordingsApi = {
         visibility?: string;
         startDate?: string;
         endDate?: string;
+        /** Backend: recordings that need main or camera multipart completion */
+        unfinishedMultipart?: boolean;
       };
     } = {},
   ) => {
@@ -362,6 +379,9 @@ export const recordingsApi = {
       sp.set("filters[endDate]", params.filters.endDate);
       // Keep compatibility with backends expecting singular 'filter' key.
       sp.set("filters[endDate]", params.filters.endDate);
+    }
+    if (params.filters?.unfinishedMultipart) {
+      sp.set("filters[unfinishedMultipart]", "true");
     }
     return apiFetch(`/recordings/my-recordings?${sp}`);
   },
