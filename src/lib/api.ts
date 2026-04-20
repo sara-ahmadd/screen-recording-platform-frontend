@@ -270,8 +270,16 @@ export const recordingsApi = {
         chunkSize ? { partNumbers, chunkSize } : { partNumbers },
       ),
     }),
-  getUploadedParts: (id: number, uploadId: string) =>
-    apiFetch(`/recordings/${id}/uploads/${uploadId}/parts`, { method: "GET" }),
+  getUploadedParts: (id: number, uploadId: string, workspaceId?: string | number) => {
+    const sp = new URLSearchParams();
+    if (workspaceId != null && workspaceId !== "") {
+      sp.set("workspaceId", String(workspaceId));
+    }
+    const query = sp.toString();
+    return apiFetch(`/recordings/${id}/uploads/${uploadId}/parts${query ? `?${query}` : ""}`, {
+      method: "GET",
+    });
+  },
   completeUpload: (
     id: number,
     uploadId: string,
@@ -325,10 +333,23 @@ export const recordingsApi = {
       method: "POST",
       body: JSON.stringify(payload),
     }),
-  getCameraTrackUploadedParts: (id: number, uploadId: string) =>
-    apiFetch(`/recordings/${id}/camera-track/uploads/${uploadId}/parts`, {
-      method: "GET",
-    }),
+  getCameraTrackUploadedParts: (
+    id: number,
+    uploadId: string,
+    workspaceId?: string | number,
+  ) => {
+    const sp = new URLSearchParams();
+    if (workspaceId != null && workspaceId !== "") {
+      sp.set("workspaceId", String(workspaceId));
+    }
+    const query = sp.toString();
+    return apiFetch(
+      `/recordings/${id}/camera-track/uploads/${uploadId}/parts${query ? `?${query}` : ""}`,
+      {
+        method: "GET",
+      },
+    );
+  },
   completeCameraTrackUpload: (
     id: number,
     uploadId: string,

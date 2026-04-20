@@ -5,6 +5,10 @@ export function parseListPartsResponse(data: unknown): UploadedPartRecord[] {
   const root = data as Record<string, unknown> | null;
   const inner = root?.Parts as Record<string, unknown> | undefined;
   const list =
+    // New backend shape
+    (root?.parts as unknown) ??
+    (root?.data as { parts?: unknown } | undefined)?.parts ??
+    // Existing S3-like nested shapes
     (inner?.resp as { Parts?: unknown } | undefined)?.Parts ??
     inner?.Parts ??
     (Array.isArray(inner) ? inner : []);

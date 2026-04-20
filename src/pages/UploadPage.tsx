@@ -151,7 +151,9 @@ export default function UploadPage() {
     startingUploaded: { partNumber: number; eTag: string }[],
   ) => {
     const totalParts = Math.ceil(fileArg.size / PART_SIZE);
-    const serverListed = parseListPartsResponse(await recordingsApi.getUploadedParts(recordingId, uploadId));
+    const serverListed = parseListPartsResponse(
+      await recordingsApi.getUploadedParts(recordingId, uploadId, workspaceId),
+    );
     let mergedKnown = mergeByPartNumber(serverListed, startingUploaded);
     const uploadedNums = new Set(mergedKnown.map((p) => p.partNumber));
 

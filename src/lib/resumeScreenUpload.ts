@@ -46,7 +46,7 @@ export async function resumeScreenRecordingFromServer(
 
   if (mainId) {
     options?.onProgress?.(pct);
-    const partsRaw = await recordingsApi.getUploadedParts(recordingId, mainId);
+    const partsRaw = await recordingsApi.getUploadedParts(recordingId, mainId, ws);
     const parts = sortUploadedParts(parseListPartsResponse(partsRaw));
     if (parts.length === 0) {
       throw new Error(
@@ -68,6 +68,7 @@ export async function resumeScreenRecordingFromServer(
     const camPartsRaw = await recordingsApi.getCameraTrackUploadedParts(
       recordingId,
       camId,
+      ws,
     );
     const camParts = sortUploadedParts(parseListPartsResponse(camPartsRaw));
     if (camParts.length === 0) {
