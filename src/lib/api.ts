@@ -207,6 +207,12 @@ export const authApi = {
       body: JSON.stringify(data),
       skipAuth: true,
     }),
+  googleOneTap: (data: { idToken: string }) =>
+    apiFetch("/auth/google/one-tap", {
+      method: "POST",
+      body: JSON.stringify(data),
+      skipAuth: true,
+    }),
   logout: () => apiFetch("/auth/logout", { method: "GET" }),
 
   refreshToken: (data: { refreshToken: string }) =>
@@ -343,7 +349,11 @@ export const recordingsApi = {
       sp.set("workspaceId", String(workspaceId));
     }
     const query = sp.toString();
-    return apiFetch(
+    return apiFetch<{
+      status: string;
+      message: string;
+      parts: unknown[];
+    }>(
       `/recordings/${id}/camera-track/uploads/${uploadId}/parts${query ? `?${query}` : ""}`,
       {
         method: "GET",
@@ -421,6 +431,17 @@ export const recordingsApi = {
       method: "POST",
       body: JSON.stringify(workspaceId ? { workspaceId } : {}),
     }),
+  reprocess: (id: number, workspaceId?: string | number) => {
+    const resolvedWorkspaceId = workspaceId ?? getSelectedWorkspaceId();
+    return apiFetch(`/recordings/reprocess/${id}`, {
+      method: "POST",
+      body: JSON.stringify(
+        resolvedWorkspaceId != null && resolvedWorkspaceId !== ""
+          ? { workspaceId: String(resolvedWorkspaceId) }
+          : {},
+      ),
+    });
+  },
   downloadVideo: (id: number, workspaceId?: string) =>
     apiFetch(`/recordings/download-video/${id}`, {
       method: "POST",

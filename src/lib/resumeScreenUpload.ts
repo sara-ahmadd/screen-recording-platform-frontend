@@ -70,6 +70,13 @@ export async function resumeScreenRecordingFromServer(
       camId,
       ws,
     );
+    const camMessage = String(
+      (camPartsRaw as { message?: unknown } | null)?.message ?? "",
+    ).toLowerCase();
+    if (camMessage.includes("camera track upload is not initialized")) {
+      options?.onProgress?.(100);
+      return;
+    }
     const camParts = sortUploadedParts(parseListPartsResponse(camPartsRaw));
     if (camParts.length === 0) {
       throw new Error(

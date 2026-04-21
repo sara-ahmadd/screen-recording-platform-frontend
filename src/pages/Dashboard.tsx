@@ -10,7 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { toastApiSuccess } from "@/lib/appToast";
 import { messageFromApiSuccessResponse } from "@/lib/apiMessage";
 import { useConfirmDialog } from "@/contexts/ConfirmDialogContext";
-import { Upload, Play, Clock, AlertCircle, ChevronLeft, ChevronRight, Trash2, Loader2, ArrowUpDown, Calendar as CalendarIcon, MoreVertical } from "lucide-react";
+import { Upload, Play, Clock, AlertCircle, ChevronLeft, ChevronRight, Trash2, Loader2, ArrowUpDown, Calendar as CalendarIcon, MoreVertical, RotateCcw } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Calendar } from "@/components/ui/calendar";
@@ -46,6 +46,7 @@ export default function DashboardPage() {
   const [startDateFilter, setStartDateFilter] = useState<Date | undefined>();
   const [endDateFilter, setEndDateFilter] = useState<Date | undefined>();
   const [hoveredDate, setHoveredDate] = useState<Date | undefined>();
+  const [reprocessingIds, setReprocessingIds] = useState<number[]>([]);
   const limit = 12;
 
   const formatDateForApi = (date?: Date) => (date ? date.toLocaleDateString("en-US") : undefined);
@@ -228,6 +229,30 @@ export default function DashboardPage() {
       });
     } catch (err: any) {
       toast({ title: "Error", description: err.message, variant: "destructive" });
+    }
+  };
+
+  const handleReprocess = async (rec: Recording) => {
+    if (rec.status !== "failed" && rec.status !== "uploaded") return;
+    if (reprocessingIds.includes(rec.id)) return;
+    try {
+      setReprocessingIds((prev) => [...prev, rec.id]);
+      const res = await recordingsApi.reprocess(rec.id);
+      setRecordings((prev) =>
+        prev.map((item) => (item.id === rec.id ? { ...item, status: "processing" } : item)),
+      );
+      toastApiSuccess(res, {
+        title: "Processing retried",
+        fallbackDescription: "Recording re-queued for processing.",
+      });
+    } catch (err: any) {
+      toast({
+        title: "Retry failed",
+        description: err.message,
+        variant: "destructive",
+      });
+    } finally {
+      setReprocessingIds((prev) => prev.filter((id) => id !== rec.id));
     }
   };
 
@@ -462,6 +487,24 @@ export default function DashboardPage() {
                               </SelectContent>
                             </Select>
                           </div>
+                          {(rec.status === "failed" || rec.status === "uploaded") && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="h-7 px-2 gap-1.5"
+                              onClick={() => {
+                                void handleReprocess(rec);
+                              }}
+                              disabled={reprocessingIds.includes(rec.id)}
+                            >
+                              {reprocessingIds.includes(rec.id) ? (
+                                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                              ) : (
+                                <RotateCcw className="h-3.5 w-3.5" />
+                              )}
+                              Retry
+                            </Button>
+                          )}
                           <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-muted-foreground hover:text-white" onClick={() => handleDelete(rec.id)}>
                             <Trash2 className="h-3.5 w-3.5" />
                           </Button>

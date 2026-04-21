@@ -13,7 +13,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { useToast } from "@/hooks/use-toast";
 import { toastApiSuccess } from "@/lib/appToast";
 import { useConfirmDialog } from "@/contexts/ConfirmDialogContext";
-import { Play, Download, Link2, Trash2, Droplets, Edit2, Loader2, ArrowLeft } from "lucide-react";
+import { Play, Download, Link2, Trash2, Droplets, Edit2, Loader2, ArrowLeft, RotateCcw } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { getCurrentWorkspaceSubscription, isPaidSubscription } from "@/lib/workspaceSubscription";
 
@@ -29,6 +29,7 @@ export default function RecordingDetailPage() {
   const [newTitle, setNewTitle] = useState("");
   const [publicLink, setPublicLink] = useState("");
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
+  const [reprocessing, setReprocessing] = useState(false);
   const sizeInMb = typeof recording?.size === "number" ? (recording.size / (1024 * 1024)).toFixed(2) : null;
   const durationInMin = typeof recording?.duration === "number" ? (recording.duration / 60).toFixed(2) : null;
   const isPrivate = (recording?.visibility || "public") === "private";
@@ -234,6 +235,25 @@ export default function RecordingDetailPage() {
     }
   };
 
+  const handleReprocess = async () => {
+    if (!recording || (recording.status !== "failed" && recording.status !== "uploaded")) {
+      return;
+    }
+    try {
+      setReprocessing(true);
+      const res = await recordingsApi.reprocess(Number(id));
+      setRecording((prev: any) => (prev ? { ...prev, status: "processing" } : prev));
+      toastApiSuccess(res, {
+        title: "Processing retried",
+        fallbackDescription: "Recording re-queued for processing.",
+      });
+    } catch (err: any) {
+      toast({ title: "Retry failed", description: err.message, variant: "destructive" });
+    } finally {
+      setReprocessing(false);
+    }
+  };
+
   if (loading) {
     return <AppLayout><div className="flex justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div></AppLayout>;
   }
@@ -375,7 +395,17 @@ export default function RecordingDetailPage() {
                   <Droplets className="h-4 w-4" /> Remove Watermark
                 </Button>
               )}
-              <Button variant="outline" className="text-destructive hover:text-destructive gap-2" onClick={handleDelete}>
+              {(recording.status === "failed" || recording.status === "uploaded") && (
+                <Button variant="outline" onClick={handleReprocess} className="gap-2" disabled={reprocessing}>
+                  {reprocessing ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <RotateCcw className="h-4 w-4" />
+                  )}
+                  Retry Processing
+                </Button>
+              )}
+              <Button variant="outline" className="text-destructive hover:text-white gap-2" onClick={handleDelete}>
                 <Trash2 className="h-4 w-4" /> Delete
               </Button>
             </div>

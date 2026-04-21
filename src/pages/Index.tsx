@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Monitor, Play, Upload, Users, Shield, Zap, ArrowRight, Check, Loader2, CircleCheck } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAvatarSrc } from "@/hooks/useAvatarSrc";
-import { plansApi } from "@/lib/api";
+import { authApi, plansApi, setAccessToken, setRefreshToken } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 import { isFreePlan } from "@/lib/plans";
 import {
@@ -16,7 +16,7 @@ import { usePaidToFreeSubscribe } from "@/hooks/usePaidToFreeSubscribe";
 import { PaidToFreeDialogs } from "@/components/PaidToFreeDialogs";
 
 export default function Index() {
-  const { user, selectedWorkspaceId } = useAuth();
+  const { user, selectedWorkspaceId, refreshUser } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
@@ -101,6 +101,50 @@ export default function Index() {
       setSuccessDialogOpen(false);
     }
   }, [searchParams]);
+
+  useEffect(() => {
+    if (user) return;
+    const googleApi = (window as any)?.google?.accounts?.id;
+    const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID as string | undefined;
+    if (!googleApi || !clientId) return;
+
+    googleApi.initialize({
+      client_id: clientId,
+      auto_select: false,
+      cancel_on_tap_outside: true,
+      context: "signin",
+      callback: async (response: { credential?: string }) => {
+        const idToken = response?.credential;
+        if (!idToken) return;
+        try {
+          const res = await authApi.googleOneTap({ idToken });
+          const token =
+            res?.accessToken || res?.token || res?.data?.accessToken || res?.user?.accessToken;
+          const refresh =
+            res?.refreshToken || res?.data?.refreshToken || res?.user?.refreshToken;
+          if (!token) throw new Error("Google sign-in did not return access token.");
+          setAccessToken(token);
+          if (refresh) setRefreshToken(refresh);
+          const meOk = await refreshUser();
+          if (!meOk) throw new Error("Could not verify Google session.");
+          toast({
+            variant: "success",
+            title: "Signed in",
+            description: "Google login successful.",
+          });
+          navigate("/dashboard");
+        } catch (err: any) {
+          toast({
+            title: "Google login failed",
+            description: err?.message || "Please try again.",
+            variant: "destructive",
+          });
+        }
+      },
+    });
+
+    googleApi.prompt();
+  }, [navigate, refreshUser, toast, user]);
 
   return (
     <div className="min-h-screen bg-background">
