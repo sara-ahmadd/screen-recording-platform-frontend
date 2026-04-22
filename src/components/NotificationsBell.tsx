@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useState } from "react";
-import { notificationsApi } from "@/lib/api";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { notificationsApi, recordingsApi } from "@/lib/api";
 import { getSocket } from "@/lib/socket";
 import { emitNotificationsUpdated, subscribeNotificationsUpdated } from "@/lib/notificationsSync";
 import { useAuth } from "@/contexts/AuthContext";
@@ -29,6 +29,8 @@ interface NotificationItem {
 }
 
 const DROPDOWN_LIMIT = 10;
+const PLAN_LIMIT_KEYWORD = "exceeds the plan limit";
+const PROCESSING_FAILED_TITLE = "video processing failed";
 
 function normalizeNotifications(response: any): NotificationItem[] {
   if (Array.isArray(response?.notifications)) return response.notifications;
@@ -49,6 +51,43 @@ function parseUnreadCount(response: any): number {
     0;
   const parsed = Number(raw);
   return Number.isFinite(parsed) ? parsed : 0;
+}
+
+function extractText(value: unknown): string {
+  return typeof value === "string" ? value.trim() : "";
+}
+
+function getProcessingFailurePayload(rawPayload: unknown) {
+  if (!rawPayload || typeof rawPayload !== "object") return null;
+  const payload = rawPayload as Record<string, unknown>;
+  const nested =
+    payload.data && typeof payload.data === "object"
+      ? (payload.data as Record<string, unknown>)
+      : null;
+  const title = (
+    extractText(payload.title) ||
+    extractText(payload.notificationTitle) ||
+    extractText(nested?.title) ||
+    extractText(nested?.notificationTitle)
+  ).toLowerCase();
+  const message = (
+    extractText(payload.message) ||
+    extractText(payload.description) ||
+    extractText(payload.body) ||
+    extractText(nested?.message) ||
+    extractText(nested?.description) ||
+    extractText(nested?.body)
+  ).toLowerCase();
+  const recordingIdRaw =
+    payload.recordingId ??
+    payload.recording_id ??
+    nested?.recordingId ??
+    nested?.recording_id;
+  const recordingId = Number(recordingIdRaw);
+  if (!Number.isFinite(recordingId)) return null;
+  if (title !== PROCESSING_FAILED_TITLE) return null;
+  if (!message.includes(PLAN_LIMIT_KEYWORD)) return null;
+  return { recordingId };
 }
 
 const NOTIFICATION_REFRESH_EVENTS = new Set([
@@ -76,6 +115,7 @@ export default function NotificationsBell() {
   const [loading, setLoading] = useState(false);
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
+  const planLimitDeleteInFlight = useRef<Set<number>>(new Set());
   const isLoggedIn = Boolean(user);
 
   const loadUnreadCount = useCallback(async () => {
@@ -151,10 +191,31 @@ export default function NotificationsBell() {
       }, 250);
     };
 
-    const onAnyEvent = (eventName: string) => {
+    const onAnyEvent = (eventName: string, ...args: unknown[]) => {
       if (NOTIFICATION_REFRESH_EVENTS.has(eventName)) {
         scheduleRefresh();
       }
+      if (
+        eventName !== "processing_failed" &&
+        eventName !== "notification" &&
+        eventName !== "new_notification" &&
+        eventName !== "notification_created"
+      ) {
+        return;
+      }
+      const matched = getProcessingFailurePayload(args[0]);
+      if (!matched) return;
+      const { recordingId } = matched;
+      if (planLimitDeleteInFlight.current.has(recordingId)) return;
+      planLimitDeleteInFlight.current.add(recordingId);
+      void recordingsApi
+        .delete(recordingId, undefined, { permanent: true })
+        .catch(() => {
+          // Ignore cleanup failures to avoid noisy UI errors from background socket handling.
+        })
+        .finally(() => {
+          planLimitDeleteInFlight.current.delete(recordingId);
+        });
     };
 
     socket.onAny(onAnyEvent);

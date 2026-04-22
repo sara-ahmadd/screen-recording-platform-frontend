@@ -244,6 +244,7 @@ export default function Index() {
   {/* Ad here */}
   {/* <!-- landing _top --> */}
       <ins className="adsbygoogle block"
+      style={{display:"block"}}
         data-ad-client="ca-pub-7034676662232707"
         data-ad-slot="9591210325"
         data-ad-format="auto"
