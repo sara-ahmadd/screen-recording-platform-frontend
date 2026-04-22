@@ -20,6 +20,7 @@ import {
 } from "@/lib/multipartResume";
 
 const PART_SIZE = 2 * 1024 * 1024; // 2MB
+const VIDEO_DURATION_LIMIT_ERROR = "video duration exceeds current plan limit";
 
 export default function UploadPage() {
   const navigate = useNavigate();
@@ -228,6 +229,20 @@ export default function UploadPage() {
 
       setTimeout(() => navigate(`/recording/${recordingId}`), 2000);
     } catch (err: any) {
+      const errorMessage =
+        typeof err?.message === "string" ? err.message.toLowerCase() : "";
+      if (
+        recordingId &&
+        errorMessage.includes(VIDEO_DURATION_LIMIT_ERROR)
+      ) {
+        try {
+          await recordingsApi.delete(recordingId, undefined, {
+            permanent: true,
+          });
+        } catch {
+          // Keep the original failure visible even if cleanup fails.
+        }
+      }
       if (cancelRequestedRef.current) {
         toast({ title: "Upload cancelled", variant: "success" });
         setStep("select");
