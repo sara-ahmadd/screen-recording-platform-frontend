@@ -77,6 +77,16 @@ export default function DashboardPage() {
   }, [page, order, titleFilter, statusFilter, visibilityFilter, startDateFilter, endDateFilter, toast]);
 
   useEffect(() => {
+    try {
+      (window as any).adsbygoogle = (window as any).adsbygoogle || [];
+      (window as any).adsbygoogle.push({});
+    } catch (e: any) {
+      console.error(e);
+    }
+  }, []);
+
+
+  useEffect(() => {
     fetchRecordings();
   }, [fetchRecordings]);
 
@@ -619,6 +629,13 @@ export default function DashboardPage() {
             )}
           </>
         )}
+        {/* <!-- dashboard_bottom --> */}
+<ins className="adsbygoogle"
+     style={{display:"block"}}
+     data-ad-client="ca-pub-7034676662232707"
+     data-ad-slot="3763122396"
+     data-ad-format="auto"
+     data-full-width-responsive="true"></ins>
       </div>
     </AppLayout>
   );

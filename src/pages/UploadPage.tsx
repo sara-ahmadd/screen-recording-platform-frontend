@@ -44,6 +44,16 @@ export default function UploadPage() {
   const blocker = useBlocker(shouldWarnBeforeLeave);
 
   useEffect(() => {
+    try {
+      (window as any).adsbygoogle = (window as any).adsbygoogle || [];
+      (window as any).adsbygoogle.push({});
+    } catch (e: any) {
+      console.error(e);
+    }
+  }, []);
+
+
+  useEffect(() => {
     if (blocker.state !== "blocked") return;
     const confirmed = window.confirm(
       "Upload is still in progress. Your changes may not be saved. Are you sure you want to leave this page?",
@@ -381,6 +391,13 @@ export default function UploadPage() {
           </CardContent>
         </Card>
       </div>
+      {/* <!-- upload_bottom --> */}
+<ins className="adsbygoogle"
+     style={{display:"block"}}
+     data-ad-client="ca-pub-7034676662232707"
+     data-ad-slot="5096385360"
+     data-ad-format="auto"
+     data-full-width-responsive="true"></ins>
     </AppLayout>
   );
 }

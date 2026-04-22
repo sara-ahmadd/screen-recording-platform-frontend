@@ -29,6 +29,16 @@ export default function Index() {
       return raw;
     }
   }, [searchParams]);
+
+  useEffect(() => {
+    try {
+      (window as any).adsbygoogle = (window as any).adsbygoogle || [];
+      (window as any).adsbygoogle.push({});
+    } catch (e: any) {
+      console.error(e);
+    }
+  }, []);
+
   const avatarSrc = useAvatarSrc(user?.avatar_url || user?.avatar);
   const { toast } = useToast();
   const [plans, setPlans] = useState<any[]>([]);
@@ -231,7 +241,14 @@ export default function Index() {
         </div>
       </section>
       </Reveal>
-
+  {/* Ad here */}
+  {/* <!-- landing _top --> */}
+      <ins className="adsbygoogle block"
+        data-ad-client="ca-pub-7034676662232707"
+        data-ad-slot="9591210325"
+        data-ad-format="auto"
+        data-full-width-responsive="true"
+      ></ins>
       {/* Features */}
       <Reveal from="right">
       <section className="max-w-6xl mx-auto px-6 py-20">
@@ -396,7 +413,13 @@ export default function Index() {
           </section>
         </Reveal>
       )}
-
+{/* <!-- landing_bottom --> */}
+<ins className="adsbygoogle"
+     style={{display:"block"}}
+     data-ad-client="ca-pub-7034676662232707"
+     data-ad-slot="2452228548"
+     data-ad-format="auto"
+     data-full-width-responsive="true"></ins>
       {/* Testimonials */}
       <Reveal from="left">
       <section className="max-w-6xl mx-auto px-6 py-16">
