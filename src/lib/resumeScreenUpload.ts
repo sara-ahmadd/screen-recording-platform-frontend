@@ -5,7 +5,7 @@ import {
 } from "@/lib/multipartResume";
 
 /** Same chunk size as RecordScreen (main + camera queues). */
-const SCREEN_CHUNK_BYTES = 2 * 1024 * 1024;
+const SCREEN_CHUNK_BYTES = 5 * 1024 * 1024;
 
 function parseUploadStatePayload(raw: unknown) {
   const r = raw as Record<string, unknown>;

@@ -19,7 +19,7 @@ import {
   extractPresignedUrlFromPayload,
 } from "@/lib/multipartResume";
 
-const PART_SIZE = 2 * 1024 * 1024; // 2MB
+const PART_SIZE = 5 * 1024 * 1024; // 5MB
 const VIDEO_DURATION_LIMIT_ERROR = "video duration exceeds current plan limit";
 
 export default function UploadPage() {

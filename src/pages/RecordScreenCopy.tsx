@@ -31,7 +31,7 @@ type MainSource = "screen" | "camera";
 type UploadedPart = { partNumber: number; eTag: string };
 
 const CHUNK_TIMESLICE_MS = 1000;
-const TARGET_UPLOAD_CHUNK_SIZE = 2 * 1024 * 1024;
+const TARGET_UPLOAD_CHUNK_SIZE = 5 * 1024 * 1024;
 
 export default function RecordScreenCopy() {
   const navigate = useNavigate();
