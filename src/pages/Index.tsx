@@ -16,7 +16,7 @@ import { usePaidToFreeSubscribe } from "@/hooks/usePaidToFreeSubscribe";
 import { PaidToFreeDialogs } from "@/components/PaidToFreeDialogs";
 
 export default function Index() {
-  const { user, selectedWorkspaceId, refreshUser } = useAuth();
+  const { user, selectedWorkspaceId, refreshUser, lastAuthError } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
@@ -126,7 +126,9 @@ export default function Index() {
           setAccessToken(token);
           if (refresh) setRefreshToken(refresh);
           const meOk = await refreshUser();
-          if (!meOk) throw new Error("Could not verify Google session.");
+          if (!meOk) {
+            throw new Error(lastAuthError || "Could not verify Google session.");
+          }
           toast({
             variant: "success",
             title: "Signed in",
@@ -134,17 +136,27 @@ export default function Index() {
           });
           navigate("/dashboard");
         } catch (err: any) {
+          const errMsg = err?.message || "Please try again.";
+          const isInactive = String(errMsg).toLowerCase().includes("inactive");
           toast({
             title: "Google login failed",
-            description: err?.message || "Please try again.",
+            description: errMsg,
             variant: "destructive",
           });
+          if (isInactive) {
+            const emailFromError =
+              String(errMsg).match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i)?.[0] || "";
+            const next = emailFromError
+              ? `/login?inactive=1&email=${encodeURIComponent(emailFromError)}`
+              : "/login?inactive=1";
+            navigate(next);
+          }
         }
       },
     });
 
     googleApi.prompt();
-  }, [navigate, refreshUser, toast, user]);
+  }, [lastAuthError, navigate, refreshUser, toast, user]);
 
   return (
     <div className="min-h-screen bg-background">

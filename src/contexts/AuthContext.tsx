@@ -21,6 +21,7 @@ interface User {
 interface AuthContextType {
   user: User | null;
   selectedWorkspaceId: string | null;
+  lastAuthError: string | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<any>;
   register: (data: { user_name: string; email: string; password: string; confirmPassword: string }) => Promise<any>;
@@ -34,6 +35,7 @@ const AuthContext = createContext<AuthContextType | null>(null);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [selectedWorkspaceId, setSelectedWorkspaceIdState] = useState<string | null>(() => getSelectedWorkspaceId());
+  const [lastAuthError, setLastAuthError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const refreshingTokenRef = useRef(false);
 
@@ -47,6 +49,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const data = await authApi.me();
       const profile = data.user || data;
       setUser(profile);
+      setLastAuthError(null);
 
       const workspaceIds = (profile.workspaces || []).map((ws: Workspace) => String(ws.id));
       if (selectedWorkspaceId && !workspaceIds.includes(selectedWorkspaceId)) {
@@ -55,7 +58,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       connectSocket();
       return true;
-    } catch {
+    } catch (err: any) {
+      setLastAuthError(err?.message || "Could not verify login session.");
       setUser(null);
       setAccessToken(null);
       setRefreshToken(null);
@@ -174,7 +178,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, selectedWorkspaceId, loading, login, register, logout, refreshUser, setSelectedWorkspaceId }}>
+    <AuthContext.Provider value={{ user, selectedWorkspaceId, lastAuthError, loading, login, register, logout, refreshUser, setSelectedWorkspaceId }}>
       {children}
     </AuthContext.Provider>
   );

@@ -1,12 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useBlocker, useNavigate } from "react-router-dom";
 import { getSelectedWorkspaceId, recordingsApi } from "@/lib/api";
 import AppLayout from "@/components/AppLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
@@ -31,7 +30,6 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { trackClientEvent } from "@/lib/analyticsClient";
-import { resumeScreenRecordingFromServer } from "@/lib/resumeScreenUpload";
 
 type RecordingState = "idle" | "recording" | "paused" | "stopping" | "processing";
 
@@ -43,11 +41,10 @@ type UploadedPart = { partNumber: number; eTag: string };
 type CameraPreviewPosition = { left: number; top: number };
 
 const CHUNK_TIMESLICE_MS = 1000;
-const TARGET_UPLOAD_CHUNK_SIZE = 5 * 1024 * 1024;
+const TARGET_UPLOAD_CHUNK_SIZE = 2 * 1024 * 1024;
 
 export default function RecordScreenCopy() {
   const navigate = useNavigate();
-  const [searchParams, setSearchParams] = useSearchParams();
   const { toast } = useToast();
 
   const [state, setState] = useState<RecordingState>("idle");
@@ -59,6 +56,7 @@ export default function RecordScreenCopy() {
   const [workspaceAlertOpen, setWorkspaceAlertOpen] = useState(false);
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
   const [permissionsDialogOpen, setPermissionsDialogOpen] = useState(false);
+  const [startingCountdown, setStartingCountdown] = useState(false);
   const [countdownOpen, setCountdownOpen] = useState(false);
   const [countdown, setCountdown] = useState(3);
   const [detachedControlsActive, setDetachedControlsActive] = useState(false);
@@ -76,6 +74,9 @@ export default function RecordScreenCopy() {
   const [floatingPreviewMode, setFloatingPreviewMode] = useState<FloatingPreviewMode>("inline");
   const [cameraPreviewPosition, setCameraPreviewPosition] = useState<CameraPreviewPosition | null>(null);
   const [cameraPreviewDragging, setCameraPreviewDragging] = useState(false);
+  const shouldWarnBeforeLeave =
+    state === "recording" || state === "paused" || state === "stopping";
+  const blocker = useBlocker(shouldWarnBeforeLeave);
   const recordingStateRef = useRef<RecordingState>("idle");
   const cameraEnabledRef = useRef(false);
 
@@ -124,33 +125,6 @@ export default function RecordScreenCopy() {
   const controlsPipWindowRef = useRef<Window | null>(null);
   const nativeCameraPipActiveRef = useRef(false);
   const cameraPreviewContainerRef = useRef<HTMLDivElement | null>(null);
-  const [uploadingDrafts, setUploadingDrafts] = useState<
-    { id: number; title?: string }[]
-  >([]);
-  const [screenResuming, setScreenResuming] = useState(false);
-  const [resumeProgress, setResumeProgress] = useState(0);
-
-  const refreshUploadingDrafts = useCallback(async () => {
-    try {
-      const listRes = await recordingsApi.myRecordings({
-        limit: 200,
-        page: 1,
-        filters: { unfinishedMultipart: true },
-      });
-      const rows =
-        (listRes as { recordings?: { id?: number; title?: string }[] }).recordings ??
-        (listRes as { data?: { id?: number; title?: string }[] }).data ??
-        [];
-      setUploadingDrafts(
-        rows.map((r) => ({
-          id: Number(r.id),
-          title: typeof r.title === "string" ? r.title : undefined,
-        })),
-      );
-    } catch {
-      setUploadingDrafts([]);
-    }
-  }, []);
 
   const formattedTime = useMemo(() => {
     const m = Math.floor(elapsed / 60);
@@ -269,7 +243,7 @@ export default function RecordScreenCopy() {
 
   const safeDeleteDraft = useCallback(async (recordingId: number) => {
     try {
-      await recordingsApi.delete(recordingId);
+      await recordingsApi.delete(recordingId, undefined, { permanent: true });
     } catch {
       // Ignore cleanup failures; recording draft will be cleaned server-side eventually.
     }
@@ -1124,7 +1098,6 @@ export default function RecordScreenCopy() {
           "Chunks already in the cloud can be finished below or from another device. Anything not uploaded is lost.",
         variant: "destructive",
       });
-      void refreshUploadingDrafts();
       setState("idle");
       stopAllStreams();
     } finally {
@@ -1415,14 +1388,23 @@ export default function RecordScreenCopy() {
   }, [state, cameraEnabled]);
 
   useEffect(() => {
+    if (blocker.state !== "blocked") return;
+    const confirmed = window.confirm(
+      "Recording is still in progress. Your changes may not be saved. Are you sure you want to leave this page?",
+    );
+    if (confirmed) blocker.proceed();
+    else blocker.reset();
+  }, [blocker]);
+
+  useEffect(() => {
     const onBeforeUnload = (event: BeforeUnloadEvent) => {
-      if (state !== "recording" && state !== "paused" && state !== "stopping") return;
+      if (!shouldWarnBeforeLeave) return;
       event.preventDefault();
       event.returnValue = "";
     };
     window.addEventListener("beforeunload", onBeforeUnload);
     return () => window.removeEventListener("beforeunload", onBeforeUnload);
-  }, [state]);
+  }, [shouldWarnBeforeLeave]);
 
   useEffect(() => {
     const onVisibilityChange = () => {
@@ -1440,82 +1422,6 @@ export default function RecordScreenCopy() {
     return () => document.removeEventListener("visibilitychange", onVisibilityChange);
   }, [cameraEnabled]);
 
-  const discardIncompleteUpload = useCallback(
-    async (recordingId: number) => {
-      try {
-        await recordingsApi.abortMultipartUpload(recordingId);
-      } catch {
-        /* ignore */
-      }
-      setUploadingDrafts((prev) => prev.filter((x) => x.id !== recordingId));
-      void refreshUploadingDrafts();
-      toast({
-        title: "Discarded",
-        description: "Multipart session aborted on the server.",
-      });
-    },
-    [toast, refreshUploadingDrafts],
-  );
-
-  const runResumeScreenJob = useCallback(
-    async (recordingId: number) => {
-      setScreenResuming(true);
-      setResumeProgress(0);
-      try {
-        await resumeScreenRecordingFromServer(recordingId, {
-          onProgress: (pct) => setResumeProgress(pct),
-        });
-        toast({ title: "Upload complete", description: "Your recording is being processed." });
-        setState("processing");
-        setTimeout(() => navigate(`/recording/${recordingId}`), 1200);
-        void refreshUploadingDrafts();
-      } catch (e: unknown) {
-        const msg = e instanceof Error ? e.message : "Try again.";
-        toast({ title: "Resume failed", description: msg, variant: "destructive" });
-      } finally {
-        setScreenResuming(false);
-      }
-    },
-    [navigate, toast, refreshUploadingDrafts],
-  );
-
-  useEffect(() => {
-    void refreshUploadingDrafts();
-  }, [state, screenResuming, refreshUploadingDrafts]);
-
-  useEffect(() => {
-    const id = searchParams.get("resumeScreenId");
-    if (!id) return;
-    const rid = Number(id);
-    if (!Number.isFinite(rid)) return;
-    void (async () => {
-      try {
-        const listRes = await recordingsApi.myRecordings({
-          limit: 200,
-          page: 1,
-          filters: { status: "uploading" },
-        });
-        const rows =
-          (listRes as { recordings?: { id?: number; title?: string }[] }).recordings ??
-          (listRes as { data?: { id?: number; title?: string }[] }).data ??
-          [];
-        const rec = rows.find((r) => Number(r.id) === rid);
-        toast({
-          title: "Recording still uploading",
-          description: rec?.title
-            ? `Finish «${rec.title}» below. You can also open this page on another signed-in device.`
-            : `Finish recording #${rid} below when possible.`,
-        });
-      } catch {
-        toast({
-          title: "Recording still uploading",
-          description: `Finish recording #${rid} below when possible.`,
-        });
-      }
-      setSearchParams({});
-    })();
-  }, [searchParams, setSearchParams, toast]);
-
   return (
     <AppLayout>
       <div className="p-6 md:p-8 max-w-7xl mx-auto space-y-6">
@@ -1525,54 +1431,6 @@ export default function RecordScreenCopy() {
             1080p screen recording with webcam/mic controls and robust upload.
           </p>
         </div>
-
-        {uploadingDrafts.length > 0 && (
-          <Card className="glass border-amber-500/35">
-            <CardContent className="p-4 space-y-3">
-              <p className="text-sm font-semibold">
-                Uploads in progress — finish screen and/or camera multipart from parts already in the cloud
-              </p>
-              <ul className="space-y-2">
-                {uploadingDrafts.map((job) => (
-                  <li
-                    key={job.id}
-                    className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border px-3 py-2 text-sm"
-                  >
-                    <span className="truncate">
-                      {job.title ?? `Recording #${job.id}`}
-                    </span>
-                    <div className="flex items-center gap-2">
-                      <Button
-                        size="sm"
-                        variant="secondary"
-                        disabled={screenResuming}
-                        onClick={() => void runResumeScreenJob(job.id)}
-                      >
-                        {screenResuming ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-                        Finish upload
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        className="text-destructive"
-                        disabled={screenResuming}
-                        onClick={() => void discardIncompleteUpload(job.id)}
-                      >
-                        Discard
-                      </Button>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-              {screenResuming && (
-                <div className="space-y-1">
-                  <Progress value={resumeProgress} className="h-2" />
-                  <p className="text-xs text-muted-foreground">{resumeProgress}%</p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        )}
 
         {state === "idle" && (
           <Card className="glass border-primary/20">
@@ -1758,7 +1616,7 @@ export default function RecordScreenCopy() {
             <p className="text-base font-semibold">
               {state === "stopping" ? "Finalizing recording..." : "Processing recording..."}
             </p>
-            <p className="text-sm text-muted-foreground">Please keep this tab open.</p>
+            <p className="text-sm text-muted-foreground">Please keep this tab open, operation might take some minutes.</p>
           </div>
         </div>
       )}
@@ -1857,7 +1715,13 @@ export default function RecordScreenCopy() {
         </DialogContent>
       </Dialog>
 
-      <Dialog open={permissionsDialogOpen} onOpenChange={setPermissionsDialogOpen}>
+      <Dialog
+        open={permissionsDialogOpen}
+        onOpenChange={(open) => {
+          setPermissionsDialogOpen(open);
+          if (!open) setStartingCountdown(false);
+        }}
+      >
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>Permissions</DialogTitle>
@@ -1942,6 +1806,7 @@ export default function RecordScreenCopy() {
             <Button
               variant="outline"
               onClick={() => {
+                setStartingCountdown(false);
                 setPermissionsDialogOpen(false);
                 setShareDialogOpen(true);
               }}
@@ -1950,7 +1815,10 @@ export default function RecordScreenCopy() {
             </Button>
             <Button
               className="gradient-primary"
+              disabled={startingCountdown}
               onClick={async () => {
+                if (startingCountdown) return;
+                setStartingCountdown(true);
                 trackClientEvent({
                   eventType: "click",
                   eventName: "record_start_countdown",
@@ -1963,15 +1831,18 @@ export default function RecordScreenCopy() {
                   setPermissionsDialogOpen(false);
                   setCountdown(3);
                   setCountdownOpen(true);
+                  setStartingCountdown(false);
                 } catch (err: any) {
                   toast({
                     title: "Could not prepare recording",
                     description: err?.message || "Please try again.",
                     variant: "destructive",
                   });
+                  setStartingCountdown(false);
                 }
               }}
             >
+              {startingCountdown ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : null}
               Start countdown
             </Button>
           </DialogFooter>

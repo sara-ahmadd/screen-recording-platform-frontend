@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { recordingsApi } from "@/lib/api";
 import { getSocket } from "@/lib/socket";
 import AppLayout from "@/components/AppLayout";
@@ -7,19 +7,23 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useToast } from "@/hooks/use-toast";
 import { toastApiSuccess } from "@/lib/appToast";
 import { useConfirmDialog } from "@/contexts/ConfirmDialogContext";
-import { Play, Download, Link2, Trash2, Droplets, Edit2, Loader2, ArrowLeft, RotateCcw } from "lucide-react";
+import { Play, Download, Link2, Trash2, Droplets, Edit2, Loader2, ArrowLeft, RotateCcw, SearchX, LayoutDashboard } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { getCurrentWorkspaceSubscription, isPaidSubscription } from "@/lib/workspaceSubscription";
+import { resumeScreenRecordingFromServer } from "@/lib/resumeScreenUpload";
+import { trackClientEvent } from "@/lib/analyticsClient";
 
 export default function RecordingDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { user, selectedWorkspaceId } = useAuth();
   const { toast } = useToast();
   const confirm = useConfirmDialog();
@@ -30,6 +34,9 @@ export default function RecordingDetailPage() {
   const [publicLink, setPublicLink] = useState("");
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
   const [reprocessing, setReprocessing] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [resumingUpload, setResumingUpload] = useState(false);
+  const [resumeProgress, setResumeProgress] = useState(0);
   const sizeInMb = typeof recording?.size === "number" ? (recording.size / (1024 * 1024)).toFixed(2) : null;
   const durationInMin = typeof recording?.duration === "number" ? (recording.duration / 60).toFixed(2) : null;
   const isPrivate = (recording?.visibility || "public") === "private";
@@ -172,19 +179,73 @@ export default function RecordingDetailPage() {
   };
 
   const handleDelete = async () => {
+    if (deleting) return;
     const confirmed = await confirm({
       title: "Delete recording?",
-      description: "This recording will be permanently removed.",
-      confirmText: "Delete",
+      description: "This recording will be moved to trash and will be permanently deleted after the grace period.",
+      confirmText: "Move to trash",
       cancelText: "Cancel",
     });
     if (!confirmed) return;
     try {
+      setDeleting(true);
       const delRes = await recordingsApi.delete(Number(id));
-      toastApiSuccess(delRes, { title: "Deleted", fallbackDescription: "Recording deleted." });
+      toastApiSuccess(delRes, {
+        title: "Moved to trash",
+        fallbackDescription:
+          "Recording moved to trash and will be permanently deleted after the grace period.",
+      });
+      trackClientEvent({
+        eventType: "click",
+        eventName: "recording_moved_to_trash",
+        metadata: { recordingId: Number(id), route: `/recording/${id}` },
+      });
       navigate("/dashboard");
     } catch (err: any) {
       toast({ title: "Error", description: err.message, variant: "destructive" });
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  const handleDeletePermanently = async () => {
+    if (deleting) return;
+    const confirmed = await confirm({
+      title: "Delete recording permanently?",
+      description: "This action cannot be undone.",
+      confirmText: "Delete permanently",
+      cancelText: "Cancel",
+    });
+    if (!confirmed) return;
+    try {
+      setDeleting(true);
+      const delRes = await recordingsApi.delete(Number(id), undefined, {
+        permanent: true,
+      });
+      toastApiSuccess(delRes, {
+        title: "Deleted permanently",
+        fallbackDescription: "Recording permanently deleted successfully.",
+      });
+      trackClientEvent({
+        eventType: "click",
+        eventName: "recording_permanently_deleted",
+        metadata: { recordingId: Number(id), route: `/recording/${id}` },
+      });
+      navigate("/dashboard");
+    } catch (err: any) {
+      const msg = String(err?.message || "");
+      if (msg.toLowerCase().includes("not found")) {
+        toast({
+          variant: "success",
+          title: "Already deleted",
+          description: "This recording was already permanently deleted.",
+        });
+        navigate("/dashboard");
+      } else {
+        toast({ title: "Error", description: msg, variant: "destructive" });
+      }
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -254,12 +315,73 @@ export default function RecordingDetailPage() {
     }
   };
 
+  const handleResumeUpload = useCallback(async () => {
+    if (!Number.isFinite(recordingId) || resumingUpload) return;
+    setResumingUpload(true);
+    setResumeProgress(0);
+    try {
+      await resumeScreenRecordingFromServer(recordingId, {
+        onProgress: (pct) => setResumeProgress(pct),
+      });
+      setRecording((prev: any) => (prev ? { ...prev, status: "processing" } : prev));
+      toast({
+        variant: "success",
+        title: "Upload resumed",
+        description: "Upload finalization completed. Processing has started.",
+      });
+      await loadRecording();
+    } catch (err: any) {
+      toast({
+        title: "Resume failed",
+        description: err?.message || "Could not resume this upload.",
+        variant: "destructive",
+      });
+    } finally {
+      setResumingUpload(false);
+      setResumeProgress(0);
+    }
+  }, [loadRecording, recordingId, resumingUpload, toast]);
+
+  useEffect(() => {
+    if (loading || !recording) return;
+    if (searchParams.get("resumeUpload") !== "1") return;
+    const nextParams = new URLSearchParams(searchParams);
+    nextParams.delete("resumeUpload");
+    setSearchParams(nextParams, { replace: true });
+    void handleResumeUpload();
+  }, [handleResumeUpload, loading, recording, searchParams, setSearchParams]);
+
   if (loading) {
     return <AppLayout><div className="flex justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div></AppLayout>;
   }
 
   if (!recording) {
-    return <AppLayout><div className="p-8 text-center text-muted-foreground">Recording not found</div></AppLayout>;
+    return (
+      <AppLayout>
+        <div className="p-6 md:p-8 min-h-[calc(100vh-5rem)] flex items-center justify-center">
+          <Card className="glass border-border/70 shadow-lg w-full max-w-3xl">
+            <CardContent className="py-16 px-6 md:px-10 text-center">
+              <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-muted/70">
+                <SearchX className="h-7 w-7 text-muted-foreground" />
+              </div>
+              <h1 className="text-2xl font-semibold tracking-tight">Recording not found</h1>
+              <p className="mt-2 text-sm text-muted-foreground max-w-md mx-auto">
+                This recording may have been deleted, moved, or is no longer available in your workspace.
+              </p>
+              <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
+                <Button onClick={() => navigate("/dashboard")} className="gap-2">
+                  <LayoutDashboard className="h-4 w-4" />
+                  Back to Dashboard
+                </Button>
+                <Button variant="outline" onClick={() => window.location.reload()}>
+                  Refresh
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </AppLayout>
+    );
   }
 
   return (
@@ -344,7 +466,26 @@ export default function RecordingDetailPage() {
               </Badge>
             </div>
 
+            {(resumingUpload || resumeProgress > 0) && (
+              <div className="mb-5 rounded-lg border border-amber-500/40 bg-amber-500/10 px-4 py-3">
+                <p className="text-sm font-medium text-amber-600 mb-2">
+                  Resuming upload and finalizing already uploaded parts...
+                </p>
+                <Progress value={resumeProgress} className="h-2" />
+              </div>
+            )}
+
             <div className="flex flex-wrap gap-3">
+              {recording.status === "uploading" && (
+                <Button variant="outline" className="gap-2" onClick={() => void handleResumeUpload()} disabled={resumingUpload}>
+                  {resumingUpload ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <RotateCcw className="h-4 w-4" />
+                  )}
+                  Resume Upload
+                </Button>
+              )}
               {isFreePlanWorkspace ? (
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -354,7 +495,7 @@ export default function RecordingDetailPage() {
                       </Button>
                     </span>
                   </TooltipTrigger>
-                  <TooltipContent side="top" className="max-w-xs">
+                  <TooltipContent side="top" className="z-[100] max-w-[260px] whitespace-normal text-center">
                     Upgrade your plan to download this video.
                   </TooltipContent>
                 </Tooltip>
@@ -386,7 +527,7 @@ export default function RecordingDetailPage() {
                       </Button>
                     </span>
                   </TooltipTrigger>
-                  <TooltipContent side="top" className="max-w-xs">
+                  <TooltipContent side="top" className="z-[100] max-w-[260px] whitespace-normal text-center">
                     Upgrade your plan to remove the watermark from this video.
                   </TooltipContent>
                 </Tooltip>
@@ -405,10 +546,31 @@ export default function RecordingDetailPage() {
                   Retry Processing
                 </Button>
               )}
-              <Button variant="outline" className="text-destructive hover:text-white gap-2" onClick={handleDelete}>
-                <Trash2 className="h-4 w-4" /> Delete
+              <Button
+                variant="outline"
+                className="gap-2"
+                onClick={handleDelete}
+                disabled={deleting}
+              >
+                {deleting ? (
+                  <Loader2 className="h-4 w-4 animate-spin text-white" />
+                ) : (
+                  <Trash2 className="h-4 w-4" />
+                )}{" "}
+                Move to Trash
+              </Button>
+              <Button
+                variant="outline"
+                className="text-destructive hover:text-white gap-2"
+                onClick={handleDeletePermanently}
+                disabled={deleting}
+              >
+                <Trash2 className="h-4 w-4" /> Delete Permanently
               </Button>
             </div>
+            <p className="mt-3 text-xs text-muted-foreground">
+              Items in Trash are permanently deleted after 30 days.
+            </p>
 
           </CardContent>
         </Card>

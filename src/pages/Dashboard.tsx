@@ -10,7 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { toastApiSuccess } from "@/lib/appToast";
 import { messageFromApiSuccessResponse } from "@/lib/apiMessage";
 import { useConfirmDialog } from "@/contexts/ConfirmDialogContext";
-import { Upload, Play, Clock, AlertCircle, ChevronLeft, ChevronRight, Trash2, Loader2, ArrowUpDown, Calendar as CalendarIcon, MoreVertical, RotateCcw } from "lucide-react";
+import { Upload, Play, Clock, AlertCircle, ChevronLeft, ChevronRight, Trash2, Loader2, ArrowUpDown, Calendar as CalendarIcon, MoreVertical, RotateCcw, Info } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Calendar } from "@/components/ui/calendar";
@@ -47,6 +47,7 @@ export default function DashboardPage() {
   const [endDateFilter, setEndDateFilter] = useState<Date | undefined>();
   const [hoveredDate, setHoveredDate] = useState<Date | undefined>();
   const [reprocessingIds, setReprocessingIds] = useState<number[]>([]);
+  const [deletingIds, setDeletingIds] = useState<number[]>([]);
   const limit = 12;
 
   const formatDateForApi = (date?: Date) => (date ? date.toLocaleDateString("en-US") : undefined);
@@ -198,22 +199,69 @@ export default function DashboardPage() {
   };
 
   const handleDelete = async (id: number) => {
-    const confirmed = await confirm({
-      title: "Delete recording?",
-      description: "This recording will be permanently removed.",
-      confirmText: "Delete",
-      cancelText: "Cancel",
-    });
-    if (!confirmed) return;
+    if (deletingIds.includes(id)) return;
     try {
+      setDeletingIds((prev) => [...prev, id]);
       const delRes = await recordingsApi.delete(id);
+      setRecordings((prev) => prev.filter((item) => item.id !== id));
+      setTotal((prev) => Math.max(0, prev - 1));
       toastApiSuccess(delRes, {
-        title: "Recording deleted",
-        fallbackDescription: "Recording deleted.",
+        title: "Moved to trash",
+        fallbackDescription:
+          "Recording moved to trash and will be permanently deleted after the grace period.",
+      });
+      trackClientEvent({
+        eventType: "click",
+        eventName: "recording_moved_to_trash",
+        metadata: { recordingId: id, route: "/dashboard" },
       });
       fetchRecordings();
     } catch (err: any) {
       toast({ title: "Error", description: err.message, variant: "destructive" });
+    } finally {
+      setDeletingIds((prev) => prev.filter((itemId) => itemId !== id));
+    }
+  };
+
+  const handleDeletePermanently = async (id: number) => {
+    if (deletingIds.includes(id)) return;
+    const confirmed = await confirm({
+      title: "Delete recording permanently?",
+      description: "This action cannot be undone.",
+      confirmText: "Delete permanently",
+      cancelText: "Cancel",
+    });
+    if (!confirmed) return;
+    try {
+      setDeletingIds((prev) => [...prev, id]);
+      const delRes = await recordingsApi.delete(id, undefined, { permanent: true });
+      setRecordings((prev) => prev.filter((item) => item.id !== id));
+      setTotal((prev) => Math.max(0, prev - 1));
+      toastApiSuccess(delRes, {
+        title: "Deleted permanently",
+        fallbackDescription: "Recording permanently deleted successfully.",
+      });
+      trackClientEvent({
+        eventType: "click",
+        eventName: "recording_permanently_deleted",
+        metadata: { recordingId: id, route: "/dashboard" },
+      });
+      fetchRecordings();
+    } catch (err: any) {
+      const msg = String(err?.message || "");
+      if (msg.toLowerCase().includes("not found")) {
+        setRecordings((prev) => prev.filter((item) => item.id !== id));
+        setTotal((prev) => Math.max(0, prev - 1));
+        toast({
+          variant: "success",
+          title: "Already deleted",
+          description: "This recording was already permanently deleted.",
+        });
+      } else {
+        toast({ title: "Error", description: msg, variant: "destructive" });
+      }
+    } finally {
+      setDeletingIds((prev) => prev.filter((itemId) => itemId !== id));
     }
   };
 
@@ -300,6 +348,9 @@ export default function DashboardPage() {
             </Link>
           </div>
         </div>
+        <p className="text-xs text-muted-foreground mb-4">
+          Items in Trash are permanently deleted after 30 days.
+        </p>
 
         <div className="grid gap-3 md:grid-cols-6 mb-6">
           <Input
@@ -435,6 +486,22 @@ export default function DashboardPage() {
                       </div>
                     </Link>
                     <div className="p-4">
+                      {rec.status === "uploading" && (
+                        <div className="mb-3 rounded-md border border-amber-300/50 bg-amber-500/10 px-2.5 py-2">
+                          <div className="flex items-center justify-between gap-2">
+                            <p className="flex items-center gap-1.5 text-[11px] font-medium text-amber-500">
+                              <Info className="h-3 w-3" />
+                              Upload paused.
+                            </p>
+                            <Link
+                              to={`/recording/${rec.id}?resumeUpload=1`}
+                              className="text-[11px] font-semibold text-amber-600 hover:text-amber-500 underline underline-offset-2"
+                            >
+                              Resume upload
+                            </Link>
+                          </div>
+                        </div>
+                      )}
                       <div className="flex items-start justify-between gap-2">
                         <Link to={`/recording/${rec.id}`} className="flex-1 min-w-0">
                           <h3 className="font-medium truncate hover:text-primary transition-colors">{rec.title}</h3>
@@ -447,31 +514,6 @@ export default function DashboardPage() {
                           {new Date(rec.createdAt).toLocaleDateString()}
                         </span>
                         <div className="flex items-center gap-1 flex-wrap justify-end">
-                          {(rec.status === "uploading" || rec.cameraMultipartUploadId) && (
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button variant="outline" size="sm" className="h-7 w-7 p-0" aria-label="Upload actions">
-                                  <MoreVertical className="h-3.5 w-3.5" />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end">
-                                <DropdownMenuItem asChild>
-                                  <Link to={`/record?resumeScreenId=${rec.id}`}>Finish screen</Link>
-                                </DropdownMenuItem>
-                                <DropdownMenuItem asChild>
-                                  <Link to={`/upload?resumeRecordingId=${rec.id}`}>Resume file</Link>
-                                </DropdownMenuItem>
-                                <DropdownMenuItem
-                                  className="text-destructive focus:text-white"
-                                  onSelect={() => {
-                                    void handleCancelStuckUpload(rec.id);
-                                  }}
-                                >
-                                  Cancel upload
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          )}
                           <div className="flex items-center gap-1.5 rounded-md border border-border px-2 py-1">
                             <span className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Visibility</span>
                             <Select
@@ -505,9 +547,57 @@ export default function DashboardPage() {
                               Retry
                             </Button>
                           )}
-                          <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-muted-foreground hover:text-white" onClick={() => handleDelete(rec.id)}>
-                            <Trash2 className="h-3.5 w-3.5" />
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-7 w-7 p-0 text-muted-foreground hover:text-white"
+                            onClick={() => handleDelete(rec.id)}
+                            disabled={deletingIds.includes(rec.id)}
+                          >
+                            {deletingIds.includes(rec.id) ? (
+                              <Loader2 className="h-3.5 w-3.5 animate-spin text-white" />
+                            ) : (
+                              <Trash2 className="h-3.5 w-3.5" />
+                            )}
                           </Button>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="outline" size="sm" className="h-7 w-7 p-0" aria-label="Recording actions">
+                                <MoreVertical className="h-3.5 w-3.5" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem asChild>
+                                <Link to={`/recording/${rec.id}`}>Open details</Link>
+                              </DropdownMenuItem>
+                              {(rec.status === "uploading" || rec.cameraMultipartUploadId) && (
+                                <>
+                                  <DropdownMenuItem asChild>
+                                    <Link to={`/recording/${rec.id}?resumeUpload=1`}>Resume upload</Link>
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem asChild>
+                                    <Link to={`/recording/${rec.id}?resumeUpload=1`}>Open and resume</Link>
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem
+                                    className="text-destructive focus:text-white"
+                                    onSelect={() => {
+                                      void handleCancelStuckUpload(rec.id);
+                                    }}
+                                  >
+                                    Cancel upload
+                                  </DropdownMenuItem>
+                                </>
+                              )}
+                              <DropdownMenuItem
+                                className="text-destructive focus:text-white"
+                                onSelect={() => {
+                                  void handleDeletePermanently(rec.id);
+                                }}
+                              >
+                                Delete permanently
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
                         </div>
                       </div>
                     </div>

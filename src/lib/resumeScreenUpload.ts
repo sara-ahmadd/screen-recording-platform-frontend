@@ -1,8 +1,11 @@
 import { getSelectedWorkspaceId, recordingsApi } from "@/lib/api";
-import { parseListPartsResponse, sortUploadedParts } from "@/lib/multipartResume";
+import {
+  parseListPartsResponse,
+  sortUploadedParts,
+} from "@/lib/multipartResume";
 
 /** Same chunk size as RecordScreen (main + camera queues). */
-const SCREEN_CHUNK_BYTES = 5 * 1024 * 1024;
+const SCREEN_CHUNK_BYTES = 2 * 1024 * 1024;
 
 function parseUploadStatePayload(raw: unknown) {
   const r = raw as Record<string, unknown>;
@@ -46,7 +49,11 @@ export async function resumeScreenRecordingFromServer(
 
   if (mainId) {
     options?.onProgress?.(pct);
-    const partsRaw = await recordingsApi.getUploadedParts(recordingId, mainId, ws);
+    const partsRaw = await recordingsApi.getUploadedParts(
+      recordingId,
+      mainId,
+      ws,
+    );
     const parts = sortUploadedParts(parseListPartsResponse(partsRaw));
     if (parts.length === 0) {
       throw new Error(

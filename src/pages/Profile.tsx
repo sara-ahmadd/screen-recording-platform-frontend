@@ -5,6 +5,8 @@ import { toastApiSuccess } from "@/lib/appToast";
 import { useAuth } from "@/contexts/AuthContext";
 import { WorkspaceActiveSubscriptionDetails } from "@/components/WorkspaceActiveSubscriptionDetails";
 import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
+import { useConfirmDialog } from "@/contexts/ConfirmDialogContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,7 +16,9 @@ import { Loader2, UserCircle2 } from "lucide-react";
 import { useAvatarSrc } from "@/hooks/useAvatarSrc";
 
 export default function ProfilePage() {
-  const { user, refreshUser, selectedWorkspaceId } = useAuth();
+  const { user, refreshUser, selectedWorkspaceId, logout } = useAuth();
+  const navigate = useNavigate();
+  const confirm = useConfirmDialog();
   const [selectedWorkspaceDetails, setSelectedWorkspaceDetails] = useState<any>(null);
   const [subscriptionDetailsLoading, setSubscriptionDetailsLoading] = useState(false);
   const { toast } = useToast();
@@ -28,6 +32,7 @@ export default function ProfilePage() {
   const [otpDialogOpen, setOtpDialogOpen] = useState(false);
   const [avatarPreviewOpen, setAvatarPreviewOpen] = useState(false);
   const [avatarLoadFailed, setAvatarLoadFailed] = useState(false);
+  const [deletingAccount, setDeletingAccount] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -145,6 +150,36 @@ export default function ProfilePage() {
     }
   };
 
+  const handleDeleteAccount = async () => {
+    if (deletingAccount) return;
+    const confirmed = await confirm({
+      title: "Delete your account?",
+      description:
+        "This will permanently remove your account and cannot be undone.",
+      confirmText: "Delete account",
+      cancelText: "Keep account",
+    });
+    if (!confirmed) return;
+    setDeletingAccount(true);
+    try {
+      const res = await authApi.deleteMe();
+      toastApiSuccess(res, {
+        title: "Account deleted",
+        fallbackDescription: "Your account has been deleted.",
+      });
+      await logout();
+      navigate("/login", { replace: true });
+    } catch (err: any) {
+      toast({
+        title: "Delete account failed",
+        description: err.message,
+        variant: "destructive",
+      });
+    } finally {
+      setDeletingAccount(false);
+    }
+  };
+
   return (
     <AppLayout>
       <div className="p-6 md:p-8 max-w-7xl mx-auto">
@@ -214,10 +249,23 @@ export default function ProfilePage() {
                   required
                 />
               </div>
+              <div className="flex flex-wrap gap-3 pt-2">
 
               <Button type="submit" className="gradient-primary" disabled={saving}>
                 {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save changes"}
               </Button>
+              <div className="flex flex-wrap gap-3">
+                <Button
+                  type="button"
+                  variant="destructive"
+                  onClick={() => void handleDeleteAccount()}
+                  disabled={deletingAccount}
+                >
+                  {deletingAccount ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : null}
+                  Delete account
+                </Button>
+              </div>
+              </div>
             </form>
           </CardContent>
         </Card>

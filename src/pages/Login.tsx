@@ -6,14 +6,15 @@ import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/ui/password-input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { toastApiSuccess, toastSuccess } from "@/lib/appToast";
-import { setAccessToken, setRefreshToken } from "@/lib/api";
+import { authApi, setAccessToken, setRefreshToken } from "@/lib/api";
 import { getPendingInviteToken } from "@/lib/inviteFlow";
 import { Loader2, Monitor } from "lucide-react";
 
 export default function LoginPage() {
-  const { login, refreshUser } = useAuth();
+  const { login, refreshUser, lastAuthError } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
@@ -21,6 +22,14 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [showActivateAccount, setShowActivateAccount] = useState(false);
+  const [requestActivationDialogOpen, setRequestActivationDialogOpen] = useState(false);
+  const [activationDialogOpen, setActivationDialogOpen] = useState(false);
+  const [requestActivationEmail, setRequestActivationEmail] = useState("");
+  const [activationEmail, setActivationEmail] = useState("");
+  const [activationOtp, setActivationOtp] = useState("");
+  const [sendingActivationOtp, setSendingActivationOtp] = useState(false);
+  const [activatingAccount, setActivatingAccount] = useState(false);
   const PENDING_GOOGLE_LOGIN_KEY = "pending_google_login";
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
   const isIgnorableGoogleCorsError = (err: unknown) => {
@@ -31,6 +40,66 @@ export default function LoginPage() {
       msg.includes("cors") ||
       msg.includes("accounts.google.com/o/oauth2/v2/auth")
     );
+  };
+  const isInactiveError = (message?: string) =>
+    String(message || "").toLowerCase().includes("inactive");
+
+  const handleRequestActivation = async () => {
+    const targetEmail = requestActivationEmail.trim();
+    if (!targetEmail) {
+      toast({
+        title: "Email required",
+        description: "Enter your email first.",
+        variant: "destructive",
+      });
+      return;
+    }
+    setSendingActivationOtp(true);
+    try {
+      const res = await authApi.activateAccount({ email: targetEmail });
+      setRequestActivationDialogOpen(false);
+      setActivationEmail(targetEmail);
+      setActivationOtp("");
+      setActivationDialogOpen(true);
+      toastApiSuccess(res, {
+        title: "Activation OTP sent",
+        fallbackDescription: "Check your email and enter OTP to activate your account.",
+      });
+    } catch (err: any) {
+      toast({
+        title: "Activation request failed",
+        description: err.message || "Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setSendingActivationOtp(false);
+    }
+  };
+
+  const handleVerifyActivation = async () => {
+    if (!activationEmail.trim() || !activationOtp.trim()) return;
+    setActivatingAccount(true);
+    try {
+      const res = await authApi.verify({
+        email: activationEmail.trim(),
+        otp: activationOtp.trim(),
+      });
+      setActivationDialogOpen(false);
+      setShowActivateAccount(false);
+      setActivationOtp("");
+      toastApiSuccess(res, {
+        title: "Account activated",
+        fallbackDescription: "Your account is now active. You can sign in.",
+      });
+    } catch (err: any) {
+      toast({
+        title: "Activation failed",
+        description: err.message || "Invalid OTP.",
+        variant: "destructive",
+      });
+    } finally {
+      setActivatingAccount(false);
+    }
   };
 
   const GoogleIcon = () => (
@@ -60,6 +129,20 @@ export default function LoginPage() {
   };
 
   useEffect(() => {
+    const sp = new URLSearchParams(location.search);
+    const inactiveFlag = sp.get("inactive");
+    const hintedEmail = sp.get("email");
+    if (inactiveFlag === "1") {
+      setShowActivateAccount(true);
+      if (hintedEmail) {
+        setEmail(hintedEmail);
+        setRequestActivationEmail(hintedEmail);
+        setActivationEmail(hintedEmail);
+      }
+    }
+  }, [location.search]);
+
+  useEffect(() => {
     async function completeGoogleLogin() {
       const inviteToken = getPendingInviteToken();
       const postLoginPath = inviteToken
@@ -76,15 +159,22 @@ export default function LoginPage() {
           setAccessToken(accessTokenFromQuery);
           if (refreshTokenFromQuery) setRefreshToken(refreshTokenFromQuery);
           const meOk = await refreshUser(); // Calls GET /auth/me
-          if (!meOk) throw new Error("Could not verify login session.");
+          if (!meOk) {
+            throw new Error(lastAuthError || "Could not verify login session.");
+          }
           localStorage.removeItem(PENDING_GOOGLE_LOGIN_KEY);
           toastSuccess("Signed in", "Google login successful.");
           navigate(postLoginPath, { replace: true });
         } catch (err: any) {
           if (!isIgnorableGoogleCorsError(err)) {
+            const errMsg = err?.message || "Please try again.";
+            if (isInactiveError(errMsg)) {
+              setShowActivateAccount(true);
+              setActivationEmail((prev) => prev || email);
+            }
             toast({
               title: "Google login failed",
-              description: err.message || "Please try again.",
+              description: errMsg,
               variant: "destructive",
             });
           }
@@ -119,7 +209,9 @@ export default function LoginPage() {
         setAccessToken(token);
         if (refresh) setRefreshToken(refresh);
         const meOk = await refreshUser(); // Calls GET /auth/me
-        if (!meOk) throw new Error("Could not verify login session.");
+        if (!meOk) {
+          throw new Error(lastAuthError || "Could not verify login session.");
+        }
         localStorage.removeItem(PENDING_GOOGLE_LOGIN_KEY);
         toastApiSuccess(data, {
           title: "Signed in",
@@ -129,9 +221,14 @@ export default function LoginPage() {
       } catch (err: any) {
         localStorage.removeItem(PENDING_GOOGLE_LOGIN_KEY);
         if (!isIgnorableGoogleCorsError(err)) {
+          const errMsg = err?.message || "Please try again.";
+          if (isInactiveError(errMsg)) {
+            setShowActivateAccount(true);
+            setActivationEmail((prev) => prev || email);
+          }
           toast({
             title: "Google login failed",
-            description: err.message || "Please try again.",
+            description: errMsg,
             variant: "destructive",
           });
         }
@@ -141,13 +238,14 @@ export default function LoginPage() {
     }
 
     completeGoogleLogin();
-  }, [API_BASE_URL, location.search, navigate, refreshUser, toast]);
+  }, [API_BASE_URL, lastAuthError, location.search, navigate, refreshUser, toast]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     try {
       const loginRes = await login(email, password);
+      setShowActivateAccount(false);
       toastApiSuccess(loginRes, { title: "Signed in", fallbackDescription: "Welcome back." });
       const inviteToken = getPendingInviteToken();
       if (inviteToken) {
@@ -156,7 +254,14 @@ export default function LoginPage() {
         navigate("/dashboard");
       }
     } catch (err: any) {
-      toast({ title: "Login failed", description: err.message, variant: "destructive" });
+      const errMsg = err?.message || "Please try again.";
+      if (isInactiveError(errMsg)) {
+        setShowActivateAccount(true);
+        setActivationEmail(email.trim());
+      } else {
+        setShowActivateAccount(false);
+      }
+      toast({ title: "Login failed", description: errMsg, variant: "destructive" });
     } finally {
       setLoading(false);
     }
@@ -194,6 +299,19 @@ export default function LoginPage() {
                 {!googleLoading ? <GoogleIcon /> : null}
                 {!googleLoading ? <span className="ml-2">Continue with Google</span> : "Continue with Google"}
               </Button>
+              {showActivateAccount && (
+                <Button
+                  type="button"
+                  variant="secondary"
+                  className="w-full"
+                  onClick={() => {
+                    setRequestActivationEmail((prev) => prev || email.trim());
+                    setRequestActivationDialogOpen(true);
+                  }}
+                >
+                  Activate account
+                </Button>
+              )}
             </form>
             <div className="mt-4 text-center text-sm text-muted-foreground space-y-1">
               <Link to="/forgot-password" className="text-primary hover:underline block">Forgot password?</Link>
@@ -202,6 +320,75 @@ export default function LoginPage() {
           </CardContent>
         </Card>
       </div>
+
+      <Dialog open={requestActivationDialogOpen} onOpenChange={setRequestActivationDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Activate Account</DialogTitle>
+            <DialogDescription>
+              Enter the email address you want to activate.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="request_activation_email">Email</Label>
+              <Input
+                id="request_activation_email"
+                type="email"
+                value={requestActivationEmail}
+                onChange={(e) => setRequestActivationEmail(e.target.value)}
+                placeholder="you@example.com"
+              />
+            </div>
+            <Button
+              className="w-full gradient-primary"
+              onClick={() => void handleRequestActivation()}
+              disabled={sendingActivationOtp || !requestActivationEmail.trim()}
+            >
+              {sendingActivationOtp ? <Loader2 className="h-4 w-4 animate-spin" /> : "Send OTP"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={activationDialogOpen} onOpenChange={setActivationDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Activate Account</DialogTitle>
+            <DialogDescription>
+              Enter your email and the OTP sent to activate your account.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="activation_email">Email</Label>
+              <Input
+                id="activation_email"
+                type="email"
+                value={activationEmail}
+                onChange={(e) => setActivationEmail(e.target.value)}
+                placeholder="you@example.com"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="activation_otp">OTP</Label>
+              <Input
+                id="activation_otp"
+                value={activationOtp}
+                onChange={(e) => setActivationOtp(e.target.value)}
+                placeholder="Enter OTP"
+              />
+            </div>
+            <Button
+              className="w-full gradient-primary"
+              onClick={() => void handleVerifyActivation()}
+              disabled={activatingAccount || !activationEmail.trim() || !activationOtp.trim()}
+            >
+              {activatingAccount ? <Loader2 className="h-4 w-4 animate-spin" /> : "Verify & Activate"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

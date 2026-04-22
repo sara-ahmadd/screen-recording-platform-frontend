@@ -107,7 +107,7 @@ export async function apiFetch<T = any>(
     path !== "/accept-invite" &&
     !path.startsWith("/workspace/accept-invite") &&
     path !== "/analytics/events" &&
-    path !== "/feedback"
+    !path.startsWith("/feedback")
   ) {
     try {
       const parsed = JSON.parse(String(requestBody));
@@ -249,6 +249,17 @@ export const authApi = {
     apiFetch("/auth/update-password", {
       method: "PATCH",
       body: JSON.stringify(data),
+    }),
+  activateAccount: (data: { email: string }) =>
+    apiFetch("/auth/activate-account", {
+      method: "POST",
+      body: JSON.stringify(data),
+      skipAuth: true,
+    }),
+  deleteMe: () =>
+    apiFetch("/auth/me", {
+      method: "DELETE",
+      body: JSON.stringify({}),
     }),
 };
 
@@ -421,8 +432,12 @@ export const recordingsApi = {
       method: "PATCH",
       body: JSON.stringify(data),
     }),
-  delete: (id: number, workspaceId?: string) =>
-    apiFetch(`/recordings/${id}`, {
+  delete: (
+    id: number,
+    workspaceId?: string,
+    options?: { permanent?: boolean },
+  ) =>
+    apiFetch(`/recordings/${id}${options?.permanent ? "?permanent=true" : ""}`, {
       method: "DELETE",
       body: JSON.stringify(workspaceId ? { workspaceId } : {}),
     }),
