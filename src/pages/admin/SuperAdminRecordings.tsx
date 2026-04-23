@@ -6,6 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import { Label } from "@radix-ui/react-label";
 
 export default function SuperAdminRecordingsPage() {
   const { toast } = useToast();
@@ -14,28 +15,43 @@ export default function SuperAdminRecordingsPage() {
   const [title, setTitle] = useState("");
   const [status, setStatus] = useState("");
   const [visibility, setVisibility] = useState("");
+  const [workspaceId, setWorkspaceId] = useState("");
   const [order, setOrder] = useState<"ASC" | "DESC">("DESC");
+  const [trashView, setTrashView] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await superAdminApi.recordings.list({
-        page: 1,
-        limit: 100,
-        order,
-        filters: {
-          title: title || undefined,
-          status: status || undefined,
-          visibility: visibility || undefined,
-        },
-      });
-      setRows(res?.recordings || res?.data || res || []);
+      const payload = trashView
+        ? await superAdminApi.recordings.trashList({
+            page: 1,
+            limit: 100,
+            order,
+            workspaceId: workspaceId.trim() || undefined,
+            filters: {
+              title: title || undefined,
+              status: status || undefined,
+              visibility: visibility || undefined,
+            },
+          })
+        : await superAdminApi.recordings.list({
+            page: 1,
+            limit: 100,
+            order,
+            workspaceId: workspaceId.trim() || undefined,
+            filters: {
+              title: title || undefined,
+              status: status || undefined,
+              visibility: visibility || undefined,
+            },
+          });
+      setRows(payload?.recordings || payload?.data?.data || payload?.data || payload || []);
     } catch (err: any) {
       toast({ title: "Error loading recordings", description: err.message, variant: "destructive" });
     } finally {
       setLoading(false);
     }
-  }, [order, status, title, visibility, toast]);
+  }, [order, status, title, visibility, workspaceId, trashView, toast]);
 
   useEffect(() => {
     void load();
@@ -64,6 +80,15 @@ export default function SuperAdminRecordingsPage() {
           <Input placeholder="Filter by title" value={title} onChange={(e) => setTitle(e.target.value)} className="max-w-xs" />
           <Input placeholder="Filter by status" value={status} onChange={(e) => setStatus(e.target.value)} className="max-w-xs" />
           <Input placeholder="Filter by visibility" value={visibility} onChange={(e) => setVisibility(e.target.value)} className="max-w-xs" />
+          <div className="flex flex-col gap-2">
+            <Label>Target workspaceId</Label>
+            <Input
+              placeholder="Target workspaceId"
+              value={workspaceId}
+              onChange={(e) => setWorkspaceId(e.target.value)}
+              className="max-w-xs"
+            />
+          </div>
           <Select value={order} onValueChange={(v: "ASC" | "DESC") => setOrder(v)}>
             <SelectTrigger className="w-[140px]"><SelectValue placeholder="Order" /></SelectTrigger>
             <SelectContent>
@@ -71,6 +96,14 @@ export default function SuperAdminRecordingsPage() {
               <SelectItem value="ASC">Oldest</SelectItem>
             </SelectContent>
           </Select>
+          <Button
+            variant="outline"
+            onClick={() => {
+              setTrashView((prev) => !prev);
+            }}
+          >
+            {trashView ? "Active Recordings" : "Trash"}
+          </Button>
           <Button variant="outline" onClick={() => void load()}>Apply filters</Button>
         </div>
         <AdminCrudTable

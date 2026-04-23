@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
-import { recordingsApi } from "@/lib/api";
+import { getSelectedWorkspaceId, recordingsApi } from "@/lib/api";
 import { getSocket } from "@/lib/socket";
 import { Link } from "react-router-dom";
 import AppLayout from "@/components/AppLayout";
@@ -36,9 +36,11 @@ export default function DashboardPage() {
   const { toast } = useToast();
   const confirm = useConfirmDialog();
   const [recordings, setRecordings] = useState<Recording[]>([]);
+  const [trashRecordings, setTrashRecordings] = useState<Recording[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
+  const [viewMode, setViewMode] = useState<"active" | "trash">("active");
   const [order, setOrder] = useState<"DESC" | "ASC">("DESC");
   const [titleFilter, setTitleFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
@@ -75,6 +77,31 @@ export default function DashboardPage() {
       setLoading(false);
     }
   }, [page, order, titleFilter, statusFilter, visibilityFilter, startDateFilter, endDateFilter, toast]);
+  
+  
+  const fetchTrashRecordings = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await recordingsApi.myTrashRecordingsWithFilters({
+        page,
+        limit,
+        order,
+        filters: {
+          title: titleFilter.trim() || undefined,
+          status: statusFilter.trim() || undefined,
+          visibility: visibilityFilter.trim() || undefined,
+          startDate: formatDateForApi(startDateFilter),
+          endDate: formatDateForApi(endDateFilter),
+        },
+      });
+      setTrashRecordings(res.data?.data || []);
+      setTotal(res.total || res.count || 0);
+    } catch (err: any) {
+      toast({ title: "Error loading trash recordings", description: err.message, variant: "destructive" });
+    } finally {
+      setLoading(false);
+    }
+  }, [page, order, titleFilter, statusFilter, visibilityFilter, startDateFilter, endDateFilter, toast]);
 
   useEffect(() => {
     try {
@@ -87,12 +114,16 @@ export default function DashboardPage() {
 
 
   useEffect(() => {
-    fetchRecordings();
-  }, [fetchRecordings]);
+    if (viewMode === "active") {
+      void fetchRecordings();
+      return;
+    }
+    void fetchTrashRecordings();
+  }, [viewMode, fetchRecordings, fetchTrashRecordings]);
 
   useEffect(() => {
     setPage(1);
-  }, [titleFilter, statusFilter, visibilityFilter, startDateFilter, endDateFilter, order]);
+  }, [titleFilter, statusFilter, visibilityFilter, startDateFilter, endDateFilter, order, viewMode]);
 
   const resetFilters = () => {
     setTitleFilter("");
@@ -225,7 +256,7 @@ export default function DashboardPage() {
         eventName: "recording_moved_to_trash",
         metadata: { recordingId: id, route: "/dashboard" },
       });
-      fetchRecordings();
+      if (viewMode === "active") void fetchRecordings();
     } catch (err: any) {
       toast({ title: "Error", description: err.message, variant: "destructive" });
     } finally {
@@ -256,7 +287,7 @@ export default function DashboardPage() {
         eventName: "recording_permanently_deleted",
         metadata: { recordingId: id, route: "/dashboard" },
       });
-      fetchRecordings();
+      if (viewMode === "active") void fetchRecordings();
     } catch (err: any) {
       const msg = String(err?.message || "");
       if (msg.toLowerCase().includes("not found")) {
@@ -287,6 +318,25 @@ export default function DashboardPage() {
       });
     } catch (err: any) {
       toast({ title: "Error", description: err.message, variant: "destructive" });
+    }
+  };
+
+  const handleRestore = async (id: number) => {
+    if (deletingIds.includes(id)) return;
+    try {
+      setDeletingIds((prev) => [...prev, id]);
+      const selectedWorkspace = getSelectedWorkspaceId();
+      const restoreRes = await recordingsApi.restore(id, selectedWorkspace);
+      setTrashRecordings((prev) => prev.filter((item) => item.id !== id));
+      setTotal((prev) => Math.max(0, prev - 1));
+      toastApiSuccess(restoreRes, {
+        title: "Recording restored",
+        fallbackDescription: "Recording has been restored from trash.",
+      });
+    } catch (err: any) {
+      toast({ title: "Restore failed", description: err.message, variant: "destructive" });
+    } finally {
+      setDeletingIds((prev) => prev.filter((itemId) => itemId !== id));
     }
   };
 
@@ -331,7 +381,7 @@ export default function DashboardPage() {
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-2xl font-bold">My Recordings</h1>
-            <p className="text-muted-foreground text-sm mt-1">{total} recording{total !== 1 ? "s" : ""}</p>
+              <p className="text-muted-foreground text-sm mt-1">{total} recording{total !== 1 ? "s" : ""}</p>
           </div>
           <div className="flex items-center gap-2">
             <Button
@@ -358,9 +408,11 @@ export default function DashboardPage() {
             </Link>
           </div>
         </div>
-        <p className="text-xs text-muted-foreground mb-4">
-          Items in Trash are permanently deleted after 30 days.
-        </p>
+        {viewMode === "trash" && (
+          <p className="text-xs text-muted-foreground mb-4">
+            Items in Trash are permanently deleted after 30 days.
+          </p>
+        )}
 
         <div className="grid gap-3 md:grid-cols-6 mb-6">
           <Input
@@ -449,9 +501,27 @@ export default function DashboardPage() {
             </PopoverContent>
           </Popover>
           <Button variant="outline" onClick={resetFilters}>Reset filters</Button>
+          <Button
+            variant={viewMode === "trash" ? "default" : "outline"}
+            onClick={() => {
+              setPage(1);
+              setViewMode("trash");
+            }}
+          >
+            Trash
+          </Button>
+          <Button
+            variant={viewMode === "active" ? "default" : "outline"}
+            onClick={() => {
+              setPage(1);
+              setViewMode("active");
+            }}
+          >
+            Active Recordings
+          </Button>
         </div>
 
-        {loading ? (
+        {viewMode === "active" && (loading ? (
           <div className="flex justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>
         ) : recordings.length === 0 ? (
           <Card className="glass">
@@ -628,13 +698,94 @@ export default function DashboardPage() {
               </div>
             )}
           </>
-        )}
+        ) )}
+        {viewMode === "trash" && (loading ? (
+          <div className="flex justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>
+        ) : trashRecordings.length === 0 ? (
+          <Card className="glass">
+            <CardContent className="flex flex-col items-center justify-center py-20 text-center">
+              <div className="gradient-primary rounded-2xl p-4 mb-4">
+                <Play className="h-8 w-8 text-primary-foreground" />
+              </div>
+              <h3 className="text-lg font-semibold mb-2">No trashed recordings</h3>
+              <p className="text-muted-foreground mb-4">Deleted recordings will appear here.</p>
+            </CardContent>
+          </Card>
+        ) : (
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {trashRecordings.map((rec) => (
+                <Card key={rec.id} className="glass group hover:border-primary/30 transition-all animate-fade-in">
+                  <CardContent className="p-0">
+                    <Link to={`/recording/${rec.id}`}>
+                      <div className="aspect-video bg-secondary/50 rounded-t-lg flex items-center justify-center relative overflow-hidden">
+                        {rec.thumbUrl ? (
+                          <img src={rec.thumbUrl} alt={rec.title} className="w-full h-full object-cover" />
+                        ) : (
+                          <Play className="h-10 w-10 text-muted-foreground/40" />
+                        )}
+                        <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/5 transition-colors flex items-center justify-center">
+                          <div className="opacity-0 group-hover:opacity-100 transition-opacity gradient-primary rounded-full p-3">
+                            <Play className="h-5 w-5 text-primary-foreground" />
+                          </div>
+                        </div>
+                      </div>
+                    </Link>
+                    <div className="p-4">
+                      <div className="flex items-start justify-between gap-2">
+                        <Link to={`/recording/${rec.id}`} className="flex-1 min-w-0">
+                          <h3 className="font-medium truncate hover:text-primary transition-colors">{rec.title}</h3>
+                        </Link>
+                        {statusBadge(rec.status)}
+                      </div>
+                      <div className="flex items-center justify-between mt-3">
+                        <span className="text-xs text-muted-foreground flex items-center gap-1">
+                          <Clock className="h-3 w-3" />
+                          {new Date(rec.createdAt).toLocaleDateString()}
+                        </span>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="h-7 px-2 gap-1.5"
+                          onClick={() => {
+                            void handleRestore(rec.id);
+                          }}
+                          disabled={deletingIds.includes(rec.id)}
+                        >
+                          {deletingIds.includes(rec.id) ? (
+                            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                          ) : (
+                            <RotateCcw className="h-3.5 w-3.5" />
+                          )}
+                          Restore
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+
+            {totalPages > 1 && (
+              <div className="flex items-center justify-center gap-2 mt-8">
+                <Button variant="outline" size="sm" onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1}>
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+                <span className="text-sm text-muted-foreground">Page {page} of {totalPages}</span>
+                <Button variant="outline" size="sm" onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page === totalPages}>
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
+            )}
+          </>
+        ) )}
         {/* <!-- dashboard_bottom --> */}
 <ins className="adsbygoogle"
      style={{display:"block"}}
      data-ad-client="ca-pub-7034676662232707"
      data-ad-slot="3763122396"
      data-ad-format="auto"
+     data-adtest="on"
      data-full-width-responsive="true"></ins>
       </div>
     </AppLayout>

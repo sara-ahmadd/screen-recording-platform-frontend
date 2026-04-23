@@ -287,15 +287,22 @@ export const recordingsApi = {
         chunkSize ? { partNumbers, chunkSize } : { partNumbers },
       ),
     }),
-  getUploadedParts: (id: number, uploadId: string, workspaceId?: string | number) => {
+  getUploadedParts: (
+    id: number,
+    uploadId: string,
+    workspaceId?: string | number,
+  ) => {
     const sp = new URLSearchParams();
     if (workspaceId != null && workspaceId !== "") {
       sp.set("workspaceId", String(workspaceId));
     }
     const query = sp.toString();
-    return apiFetch(`/recordings/${id}/uploads/${uploadId}/parts${query ? `?${query}` : ""}`, {
-      method: "GET",
-    });
+    return apiFetch(
+      `/recordings/${id}/uploads/${uploadId}/parts${query ? `?${query}` : ""}`,
+      {
+        method: "GET",
+      },
+    );
   },
   completeUpload: (
     id: number,
@@ -427,6 +434,50 @@ export const recordingsApi = {
     }
     return apiFetch(`/recordings/my-recordings?${sp}`);
   },
+  myTrashRecordings: () => {
+    const selectedWorkspaceId = getSelectedWorkspaceId();
+    return apiFetch(
+      `/recordings/trash-recordings?workspaceId=${selectedWorkspaceId}`,
+      {
+        method: "GET",
+      },
+    );
+  },
+  myTrashRecordingsWithFilters: (
+    params: {
+      limit?: number;
+      page?: number;
+      order?: string;
+      filters?: {
+        status?: string;
+        title?: string;
+        visibility?: string;
+        startDate?: string;
+        endDate?: string;
+        unfinishedMultipart?: boolean;
+      };
+    } = {},
+  ) => {
+    const sp = new URLSearchParams();
+    const selectedWorkspaceId = getSelectedWorkspaceId();
+    if (params.limit) sp.set("limit", String(params.limit));
+    if (params.page) sp.set("page", String(params.page));
+    if (params.order) sp.set("order", params.order);
+    if (selectedWorkspaceId) sp.set("workspaceId", selectedWorkspaceId);
+    if (params.filters?.status)
+      sp.set("filters[status]", params.filters.status);
+    if (params.filters?.title) sp.set("filters[title]", params.filters.title);
+    if (params.filters?.visibility)
+      sp.set("filters[visibility]", params.filters.visibility);
+    if (params.filters?.startDate)
+      sp.set("filters[startDate]", params.filters.startDate);
+    if (params.filters?.endDate)
+      sp.set("filters[endDate]", params.filters.endDate);
+    if (params.filters?.unfinishedMultipart) {
+      sp.set("filters[unfinishedMultipart]", "true");
+    }
+    return apiFetch(`/recordings/trash-recordings?${sp}`, { method: "GET" });
+  },
   update: (id: number, data: { title?: string; visibility?: string }) =>
     apiFetch(`/recordings/${id}`, {
       method: "PATCH",
@@ -437,10 +488,13 @@ export const recordingsApi = {
     workspaceId?: string,
     options?: { permanent?: boolean },
   ) =>
-    apiFetch(`/recordings/${id}${options?.permanent ? "?permanent=true" : ""}`, {
-      method: "DELETE",
-      body: JSON.stringify(workspaceId ? { workspaceId } : {}),
-    }),
+    apiFetch(
+      `/recordings/${id}${options?.permanent ? "?permanent=true" : ""}`,
+      {
+        method: "DELETE",
+        body: JSON.stringify(workspaceId ? { workspaceId } : {}),
+      },
+    ),
   removeWatermark: (id: number, workspaceId?: string) =>
     apiFetch(`/recordings/remove-watermark/${id}`, {
       method: "POST",
@@ -465,6 +519,11 @@ export const recordingsApi = {
   getPublicLink: (id: number) => apiFetch(`/recordings/public-link/${id}`),
   previewLink: (token: string) =>
     apiFetch(`/recordings/preview-link/${token}`, { skipAuth: true }),
+  restore: (id: number, workspaceId?: string) =>
+    apiFetch(`/recordings/restore/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(workspaceId ? { workspaceId } : {}),
+    }),
 };
 
 // Subscriptions
@@ -632,6 +691,7 @@ export const superAdminApi = {
         limit?: number;
         page?: number;
         order?: string;
+        workspaceId?: string;
         filters?: {
           status?: string;
           title?: string;
@@ -645,6 +705,7 @@ export const superAdminApi = {
       if (params.limit) sp.set("limit", String(params.limit));
       if (params.page) sp.set("page", String(params.page));
       if (params.order) sp.set("order", params.order);
+      if (params.workspaceId) sp.set("workspaceId", params.workspaceId);
       if (params.filters?.status)
         sp.set("filters[status]", params.filters.status);
       if (params.filters?.title) sp.set("filters[title]", params.filters.title);
@@ -655,6 +716,37 @@ export const superAdminApi = {
       if (params.filters?.endDate)
         sp.set("filters[endDate]", params.filters.endDate);
       return apiFetch(`/recordings/all?${sp}`);
+    },
+    trashList: (
+      params: {
+        limit?: number;
+        page?: number;
+        order?: string;
+        workspaceId?: string;
+        filters?: {
+          status?: string;
+          title?: string;
+          visibility?: string;
+          startDate?: string;
+          endDate?: string;
+        };
+      } = {},
+    ) => {
+      const sp = new URLSearchParams();
+      if (params.limit) sp.set("limit", String(params.limit));
+      if (params.page) sp.set("page", String(params.page));
+      if (params.order) sp.set("order", params.order);
+      if (params.workspaceId) sp.set("workspaceId", params.workspaceId);
+      if (params.filters?.status)
+        sp.set("filters[status]", params.filters.status);
+      if (params.filters?.title) sp.set("filters[title]", params.filters.title);
+      if (params.filters?.visibility)
+        sp.set("filters[visibility]", params.filters.visibility);
+      if (params.filters?.startDate)
+        sp.set("filters[startDate]", params.filters.startDate);
+      if (params.filters?.endDate)
+        sp.set("filters[endDate]", params.filters.endDate);
+      return apiFetch(`/recordings/trash-recordings?${sp}`);
     },
     create: (data: Record<string, any>) =>
       apiFetch("/recordings", {

@@ -12,6 +12,7 @@ import { toastApiSuccess } from "@/lib/appToast";
 import { useConfirmDialog } from "@/contexts/ConfirmDialogContext";
 import { Upload, FileVideo, X, Loader2 } from "lucide-react";
 import { trackClientEvent } from "@/lib/analyticsClient";
+import { getSocket } from "@/lib/socket";
 import {
   mergeByPartNumber,
   parseListPartsResponse,
@@ -37,9 +38,12 @@ export default function UploadPage() {
     recordingId: number;
     uploadId: string;
   } | null>(null);
+  const [processingRecordingId, setProcessingRecordingId] = useState<number | null>(null);
   const [cancellingUpload, setCancellingUpload] = useState(false);
   const cancelRequestedRef = useRef(false);
   const chunkAbortControllerRef = useRef<AbortController | null>(null);
+  const processingInitiatedRef = useRef(false);
+  const processingFailureDeleteInFlightRef = useRef<Set<number>>(new Set());
   const shouldWarnBeforeLeave = step === "uploading" && !cancelRequestedRef.current;
 
   const blocker = useBlocker(shouldWarnBeforeLeave);
@@ -72,6 +76,42 @@ export default function UploadPage() {
     window.addEventListener("beforeunload", onBeforeUnload);
     return () => window.removeEventListener("beforeunload", onBeforeUnload);
   }, [shouldWarnBeforeLeave]);
+
+  useEffect(() => {
+    if (step !== "processing" || !processingRecordingId) return;
+    const socket = getSocket();
+    const getEventRecordingId = (data: any) =>
+      Number(data?.recordingId ?? data?.recording_id ?? data?.id ?? data?.recording?.id ?? NaN);
+
+    const onProcessingInitiated = (data: any) => {
+      const eventRecordingId = getEventRecordingId(data);
+      if (!Number.isFinite(eventRecordingId) || eventRecordingId !== processingRecordingId) return;
+      processingInitiatedRef.current = true;
+    };
+
+    const onProcessingFailed = (data: any) => {
+      const eventRecordingId = getEventRecordingId(data);
+      if (!Number.isFinite(eventRecordingId) || eventRecordingId !== processingRecordingId) return;
+      if (!processingInitiatedRef.current) return;
+      if (processingFailureDeleteInFlightRef.current.has(processingRecordingId)) return;
+      processingFailureDeleteInFlightRef.current.add(processingRecordingId);
+      void recordingsApi
+        .delete(processingRecordingId, undefined, { permanent: true })
+        .catch(() => {
+          // Ignore cleanup failures from background socket handling.
+        })
+        .finally(() => {
+          processingFailureDeleteInFlightRef.current.delete(processingRecordingId);
+        });
+    };
+
+    socket.on("processing_initiated", onProcessingInitiated);
+    socket.on("processing_failed", onProcessingFailed);
+    return () => {
+      socket.off("processing_initiated", onProcessingInitiated);
+      socket.off("processing_failed", onProcessingFailed);
+    };
+  }, [step, processingRecordingId]);
 
   const handleFile = (f: File) => {
     setFile(f);
@@ -216,6 +256,8 @@ export default function UploadPage() {
       );
 
       setStep("processing");
+      setProcessingRecordingId(recordingId);
+      processingInitiatedRef.current = false;
       toastApiSuccess(completeRes, {
         title: "Upload complete",
         fallbackDescription: "Your video is now being processed.",
@@ -246,6 +288,8 @@ export default function UploadPage() {
       if (cancelRequestedRef.current) {
         toast({ title: "Upload cancelled", variant: "success" });
         setStep("select");
+        setProcessingRecordingId(null);
+        processingInitiatedRef.current = false;
         setFile(null);
         setTitle("");
         return;
@@ -256,6 +300,8 @@ export default function UploadPage() {
         variant: "destructive",
       });
       setStep("select");
+      setProcessingRecordingId(null);
+      processingInitiatedRef.current = false;
     } finally {
       cancelRequestedRef.current = false;
       chunkAbortControllerRef.current = null;
@@ -412,6 +458,7 @@ export default function UploadPage() {
      data-ad-client="ca-pub-7034676662232707"
      data-ad-slot="5096385360"
      data-ad-format="auto"
+     data-adtest="on"
      data-full-width-responsive="true"></ins>
     </AppLayout>
   );
