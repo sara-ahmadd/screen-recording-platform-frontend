@@ -14,6 +14,7 @@ import {
 } from "@/lib/workspaceSubscription";
 import { usePaidToFreeSubscribe } from "@/hooks/usePaidToFreeSubscribe";
 import { PaidToFreeDialogs } from "@/components/PaidToFreeDialogs";
+import { Ad } from "@/components/Ads";
 
 export default function Index() {
   const { user, selectedWorkspaceId, refreshUser, lastAuthError } = useAuth();
@@ -30,14 +31,6 @@ export default function Index() {
     }
   }, [searchParams]);
 
-  useEffect(() => {
-    try {
-      (window as any).adsbygoogle = (window as any).adsbygoogle || [];
-      (window as any).adsbygoogle.push({});
-    } catch (e: any) {
-      console.error(e);
-    }
-  }, []);
 
   const avatarSrc = useAvatarSrc(user?.avatar_url || user?.avatar);
   const { toast } = useToast();
@@ -243,13 +236,7 @@ export default function Index() {
       </Reveal>
   {/* Ad here */}
   {/* <!-- landing _top --> */}
-      <ins className="adsbygoogle block"
-      style={{display:"block"}}
-        data-ad-client="ca-pub-7034676662232707"
-        data-ad-slot="9591210325"
-        data-ad-format="auto"
-        data-adtest="on"
-     data-full-width-responsive="true"></ins>
+      <Ad/>
       {/* Features */}
       <Reveal from="right">
       <section className="max-w-6xl mx-auto px-6 py-20">
@@ -415,13 +402,7 @@ export default function Index() {
         </Reveal>
       )}
 {/* <!-- landing_bottom --> */}
-<ins className="adsbygoogle"
-     style={{display:"block"}}
-     data-ad-client="ca-pub-7034676662232707"
-     data-ad-slot="2452228548"
-     data-ad-format="auto"
-     data-adtest="on"
-     data-full-width-responsive="true"></ins>
+    <Ad/>
       {/* Testimonials */}
       <Reveal from="left">
       <section className="max-w-6xl mx-auto px-6 py-16">
@@ -523,8 +504,27 @@ export default function Index() {
 
       {/* Footer */}
       <footer className="border-t border-border/50 py-8 mt-12">
-        <div className="max-w-6xl mx-auto px-6 text-center text-sm text-muted-foreground">
-          © {new Date().getFullYear()} ScreenFlow. All rights reserved.
+        <div className="max-w-6xl mx-auto px-6 flex flex-wrap items-center justify-between gap-4">
+          <p className="text-sm text-muted-foreground">
+            © {new Date().getFullYear()} ScreenFlow. All rights reserved.
+          </p>
+          <div className="flex flex-wrap items-center gap-4 text-sm">
+            <Link to="/privacy-policy" className="text-muted-foreground hover:text-foreground transition-colors">
+              Privacy Policy
+            </Link>
+            <Link to="/terms-and-conditions" className="text-muted-foreground hover:text-foreground transition-colors">
+              Terms & Conditions
+            </Link>
+            <Link to="/contact" className="text-muted-foreground hover:text-foreground transition-colors">
+              Contact
+            </Link>
+            <Link to="/about" className="text-muted-foreground hover:text-foreground transition-colors">
+              About
+            </Link>
+            <Link to="/blogs" className="text-muted-foreground hover:text-foreground transition-colors">
+              Blogs
+            </Link>
+          </div>
         </div>
       </footer>
 

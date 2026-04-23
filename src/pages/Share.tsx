@@ -46,14 +46,14 @@ export default function SharePage() {
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b border-border p-4">
-        <Link to="/" className="max-w-5xl mx-auto flex items-center gap-2">
+        <Link to="/" className="max-w-[95%] mx-auto flex items-center gap-2">
           <div className="gradient-primary rounded-lg p-1.5">
             <Monitor className="h-4 w-4 text-primary-foreground" />
           </div>
           <span className="font-bold">ScreenFlow</span>
         </Link>
       </header>
-      <main className="max-w-5xl mx-auto p-6">
+      <main className="max-w-[95%] mx-auto p-6">
         <div className="aspect-video bg-secondary/30 rounded-xl overflow-hidden mb-4">
           {data?.videoUrl ? (
             <video

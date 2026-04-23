@@ -164,7 +164,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             </div>
           </button>
           <Button variant="ghost" size="sm" className="w-full justify-start text-sidebar-foreground/70 hover:text-white" onClick={handleLogout}>
-            <LogOut className="h-4 w-4 mr-2" /> Sign out
+            <LogOut className="h-4 w-4 mr-2 mt-3" /> Sign out
           </Button>
         </div>
       </aside>

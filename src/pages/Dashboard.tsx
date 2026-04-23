@@ -18,6 +18,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 import { trackClientEvent } from "@/lib/analyticsClient";
+import { Ad } from "@/components/Ads";
 
 interface Recording {
   id: number;
@@ -103,14 +104,6 @@ export default function DashboardPage() {
     }
   }, [page, order, titleFilter, statusFilter, visibilityFilter, startDateFilter, endDateFilter, toast]);
 
-  useEffect(() => {
-    try {
-      (window as any).adsbygoogle = (window as any).adsbygoogle || [];
-      (window as any).adsbygoogle.push({});
-    } catch (e: any) {
-      console.error(e);
-    }
-  }, []);
 
 
   useEffect(() => {
@@ -780,13 +773,7 @@ export default function DashboardPage() {
           </>
         ) )}
         {/* <!-- dashboard_bottom --> */}
-<ins className="adsbygoogle"
-     style={{display:"block"}}
-     data-ad-client="ca-pub-7034676662232707"
-     data-ad-slot="3763122396"
-     data-ad-format="auto"
-     data-adtest="on"
-     data-full-width-responsive="true"></ins>
+          <Ad/>
       </div>
     </AppLayout>
   );

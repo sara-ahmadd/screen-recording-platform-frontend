@@ -19,6 +19,7 @@ import {
   sortUploadedParts,
   extractPresignedUrlFromPayload,
 } from "@/lib/multipartResume";
+import { Ad } from "@/components/Ads";
 
 const PART_SIZE = 5 * 1024 * 1024; // 5MB
 const VIDEO_DURATION_LIMIT_ERROR = "video duration exceeds current plan limit";
@@ -48,14 +49,6 @@ export default function UploadPage() {
 
   const blocker = useBlocker(shouldWarnBeforeLeave);
 
-  useEffect(() => {
-    try {
-      (window as any).adsbygoogle = (window as any).adsbygoogle || [];
-      (window as any).adsbygoogle.push({});
-    } catch (e: any) {
-      console.error(e);
-    }
-  }, []);
 
 
   useEffect(() => {
@@ -201,6 +194,15 @@ export default function UploadPage() {
 
     return completeRes;
   };
+useEffect(() => {
+  const socket = getSocket();
+  socket.on("processing_failed", (data: any) => {
+    if (!processingInitiatedRef.current) return;
+    if (processingFailureDeleteInFlightRef.current.has(processingRecordingId)) return;
+    processingFailureDeleteInFlightRef.current.add(processingRecordingId);
+    void recordingsApi.delete(processingRecordingId, undefined, { permanent: true }).catch(() => {
+  })
+})},[processingRecordingId])
 
   const handleUpload = async () => {
     const fileToUse = file;
@@ -257,7 +259,9 @@ export default function UploadPage() {
 
       setStep("processing");
       setProcessingRecordingId(recordingId);
-      processingInitiatedRef.current = false;
+      // Upload finalize means backend processing has started for this recording,
+      // even if the realtime "processing_initiated" event arrives earlier/later.
+      processingInitiatedRef.current = true;
       toastApiSuccess(completeRes, {
         title: "Upload complete",
         fallbackDescription: "Your video is now being processed.",
@@ -453,13 +457,7 @@ export default function UploadPage() {
         </Card>
       </div>
       {/* <!-- upload_bottom --> */}
-<ins className="adsbygoogle"
-     style={{display:"block"}}
-     data-ad-client="ca-pub-7034676662232707"
-     data-ad-slot="5096385360"
-     data-ad-format="auto"
-     data-adtest="on"
-     data-full-width-responsive="true"></ins>
+        <Ad/>
     </AppLayout>
   );
 }

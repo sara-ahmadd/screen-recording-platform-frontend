@@ -31,6 +31,11 @@ import FeedbackPage from "./pages/Feedback";
 import AcceptInvitePage from "./pages/AcceptInvite";
 import SelectWorkspacePage from "./pages/SelectWorkspace";
 import ProfilePage from "./pages/Profile";
+import PrivacyPolicyPage from "./pages/PrivacyPolicy";
+import TermsAndConditionsPage from "./pages/TermsAndConditions";
+import ContactPage from "./pages/Contact";
+import AboutPage from "./pages/About";
+import BlogsPage from "./pages/Blogs";
 import SuperAdminRecordingsPage from "./pages/admin/SuperAdminRecordings";
 import SuperAdminWorkspacesPage from "./pages/admin/SuperAdminWorkspaces";
 import SuperAdminUsersPage from "./pages/admin/SuperAdminUsers";
@@ -78,6 +83,11 @@ export const routes: RouteRecord[] = [
       { path: "share/:shareToken", element: <SharePage /> },
       { path: "accept-invite", element: <AcceptInvitePage /> },
       { path: "workspace/accept-invite", element: <AcceptInvitePage /> },
+      { path: "privacy-policy", element: <PrivacyPolicyPage /> },
+      { path: "terms-and-conditions", element: <TermsAndConditionsPage /> },
+      { path: "contact", element: <ContactPage /> },
+      { path: "about", element: <AboutPage /> },
+      { path: "blogs", element: <BlogsPage /> },
       { path: "select-workspace", element: <ProtectedRoute><SelectWorkspacePage /></ProtectedRoute> },
       { path: "dashboard", element: <ProtectedRoute><Dashboard /></ProtectedRoute> },
       { path: "record", element: <ProtectedRoute><RecordScreen /></ProtectedRoute> },
