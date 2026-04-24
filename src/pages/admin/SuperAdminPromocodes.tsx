@@ -53,7 +53,7 @@ export default function SuperAdminPromocodesPage() {
             code: "",
             expirationDate: "",
             usageLimit: 1,
-            usagePerUsageLimit: 1,
+            usagePerUserLimit: 1,
             planId: "",
           }}
           hiddenFormFields={["status"]}
