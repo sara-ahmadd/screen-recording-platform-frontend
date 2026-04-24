@@ -79,7 +79,7 @@ export default function SuperAdminPromocodesPage() {
                 code: payload.code,
                 expirationDate: payload.expirationDate,
                 usageLimit: Number(payload.usageLimit || 0),
-                usagePerUsageLimit: Number(payload.usagePerUsageLimit || 0),
+                usagePerUserLimit: Number(payload.usagePerUserLimit || 0),
                 ...(payload.planId != null && payload.planId !== "" ? { planId: Number(payload.planId) } : {}),
               };
               await superAdminApi.promocodes.create(createPayload);
@@ -94,8 +94,8 @@ export default function SuperAdminPromocodesPage() {
             try {
               const updatePayload = {
                 ...(payload.status != null && payload.status !== "" ? { status: payload.status } : {}),
-                ...(payload.usagePerUsageLimit != null && payload.usagePerUsageLimit !== ""
-                  ? { usagePerUsageLimit: Number(payload.usagePerUsageLimit) }
+                ...(payload.usagePerUserLimit != null && payload.usagePerUserLimit !== ""
+                  ? { usagePerUserLimit: Number(payload.usagePerUserLimit) }
                   : {}),
                 ...(payload.planId != null && payload.planId !== "" ? { planId: Number(payload.planId) } : {}),
               };
