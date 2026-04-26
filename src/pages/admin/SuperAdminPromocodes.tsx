@@ -93,6 +93,7 @@ export default function SuperAdminPromocodesPage() {
           onUpdate={async (id, payload) => {
             try {
               const updatePayload = {
+                ...(payload.code&&{code: payload.code}),
                 ...(payload.status != null && payload.status !== "" ? { status: payload.status } : {}),
                 ...(payload.usagePerUserLimit != null && payload.usagePerUserLimit !== ""
                   ? { usagePerUserLimit: Number(payload.usagePerUserLimit) }

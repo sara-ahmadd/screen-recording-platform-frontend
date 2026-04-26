@@ -532,14 +532,52 @@ export const subscriptionApi = {
     type: "monthly" | "yearly" | "null";
     planId: string;
     workspaceId: string;
+    country?: string;
+    billingData?: {
+      first_name?: string;
+      last_name?: string;
+      email?: string;
+      phone_number?: string;
+      apartment?: string;
+      floor?: string;
+      street?: string;
+      building?: string;
+      shipping_method?: string;
+      postal_code?: string;
+      city?: string;
+      country?: string;
+      state?: string;
+    };
   }) =>
     apiFetch("/subscription", { method: "POST", body: JSON.stringify(data) }),
   update: (id: number) =>
     apiFetch(`/subscription/update/${id}`, { method: "PATCH" }),
   details: (id: number) => apiFetch(`/subscription/details/${id}`),
+  paymobStatus: (id: number) => apiFetch(`/subscription/paymob/status/${id}`),
   upgrade: (
     id: number,
-    data: { type: string; planId: string; id: string; workspaceId: string },
+    data: {
+      type: string;
+      planId: string;
+      id: string;
+      workspaceId: string;
+      country?: string;
+      billingData?: {
+        first_name?: string;
+        last_name?: string;
+        email?: string;
+        phone_number?: string;
+        apartment?: string;
+        floor?: string;
+        street?: string;
+        building?: string;
+        shipping_method?: string;
+        postal_code?: string;
+        city?: string;
+        country?: string;
+        state?: string;
+      };
+    },
   ) =>
     apiFetch(`/subscription/upgrade/${id}`, {
       method: "PATCH",

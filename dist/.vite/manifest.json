@@ -1,6 +1,6 @@
 {
-  "_client-Cb2A-Myp.js": {
-    "file": "assets/client-Cb2A-Myp.js",
+  "_client-CGHpdyeN.js": {
+    "file": "assets/client-CGHpdyeN.js",
     "name": "client",
     "isDynamicEntry": true,
     "imports": [
@@ -8,15 +8,15 @@
     ]
   },
   "index.html": {
-    "file": "assets/app-D7sfj4eq.js",
+    "file": "assets/app-DWMbHxI3.js",
     "name": "app",
     "src": "index.html",
     "isEntry": true,
     "dynamicImports": [
-      "_client-Cb2A-Myp.js"
+      "_client-CGHpdyeN.js"
     ],
     "css": [
-      "assets/app-sNXeLMoZ.css"
+      "assets/app-DCAB_bUk.css"
     ]
   }
 }
