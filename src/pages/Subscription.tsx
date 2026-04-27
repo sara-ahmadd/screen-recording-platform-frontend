@@ -6,11 +6,18 @@ import { paymentsApi, plansApi, subscriptionApi } from "@/lib/api";
 import { getCurrentWorkspaceSubscription } from "@/lib/workspaceSubscription";
 import { buildAvatarSrc } from "@/hooks/useAvatarSrc";
 import { useToast } from "@/hooks/use-toast";
-import { toastApiSuccess } from "@/lib/appToast";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Check, Loader2 } from "lucide-react";
 import { SubscriptionBillingDialog, type BillingSubmitPayload } from "@/components/billing/SubscriptionBillingDialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 type SubscriptionType = "monthly" | "yearly";
 
@@ -27,6 +34,20 @@ export default function SubscriptionPage() {
   const [submitting, setSubmitting] = useState(false);
   const [type, setType] = useState<SubscriptionType>("monthly");
   const [billingDialogOpen, setBillingDialogOpen] = useState(false);
+  const [pendingCheckout, setPendingCheckout] = useState<{
+    checkoutUrl: string;
+    usd: number;
+    providerAmount: number;
+    currency: string;
+  } | null>(null);
+  const [successDetails, setSuccessDetails] = useState<{
+    mainMessage: string;
+    providerMessage: string;
+    requiresCheckout: boolean;
+    usd: number;
+    providerAmount: number;
+    currency: string;
+  } | null>(null);
 
   const selectedWorkspace = useMemo(() => {
     if (!selectedWorkspaceId) return null;
@@ -111,16 +132,34 @@ export default function SubscriptionPage() {
           } as any);
       const sessionUrl =
         subscriptionRes.session_url || subscriptionRes.sessionUrl || subscriptionRes.url || subscriptionRes.checkoutUrl;
+      const result = subscriptionRes?.result ?? {};
+      const amountUsd = Number(result?.checkoutAmountUsd ?? subscriptionRes?.amount_usd ?? 0);
+      const amountProvider = Number(
+        result?.checkoutAmountProvider ?? subscriptionRes?.amount_provider ?? 0,
+      );
+      const currency = String(
+        result?.checkoutCurrency ?? subscriptionRes?.provider_currency ?? "EGP",
+      ).toUpperCase();
       if (sessionUrl) {
-        window.location.href = sessionUrl;
+        setPendingCheckout({
+          checkoutUrl: String(sessionUrl),
+          usd: Number.isFinite(amountUsd) ? amountUsd : 0,
+          providerAmount: Number.isFinite(amountProvider) ? amountProvider : 0,
+          currency,
+        });
         return true;
       }
 
-      toastApiSuccess(subscriptionRes, {
-        title: "Subscription updated",
-        fallbackDescription: "Your plan has been updated.",
+      setSuccessDetails({
+        mainMessage: String(
+          subscriptionRes?.message || "Subscription updated successfully",
+        ),
+        providerMessage: String(result?.message || "No payment required."),
+        requiresCheckout: Boolean(result?.requiresCheckout),
+        usd: Number.isFinite(amountUsd) ? amountUsd : 0,
+        providerAmount: Number.isFinite(amountProvider) ? amountProvider : 0,
+        currency,
       });
-      navigate("/billing");
       return true;
     } catch (err: any) {
       toast({ title: "Subscription failed", description: err.message, variant: "destructive" });
@@ -298,6 +337,78 @@ export default function SubscriptionPage() {
         defaultEmail={user?.email || ""}
         onSubmit={handleBillingDataConfirm}
       />
+
+      <Dialog
+        open={Boolean(pendingCheckout)}
+        onOpenChange={(open) => {
+          if (!open) setPendingCheckout(null);
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirm payment</DialogTitle>
+            <DialogDescription>
+              You&apos;re about to pay ${pendingCheckout?.usd.toFixed(2)} USD (~{" "}
+              {pendingCheckout?.providerAmount.toFixed(2)}{" "}
+              {pendingCheckout?.currency}).
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setPendingCheckout(null)}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              className="gradient-primary"
+              onClick={() => {
+                if (!pendingCheckout?.checkoutUrl) return;
+                window.location.href = pendingCheckout.checkoutUrl;
+              }}
+            >
+              Confirm
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={Boolean(successDetails)}
+        onOpenChange={(open) => {
+          if (!open) setSuccessDetails(null);
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Subscription updated successfully</DialogTitle>
+            <DialogDescription className="whitespace-pre-line">
+              {successDetails
+                ? `${successDetails.mainMessage}
+
+${successDetails.providerMessage}
+
+Payment required: ${successDetails.requiresCheckout ? "Yes" : "No"}
+Amount: $${successDetails.usd.toFixed(2)} USD (${successDetails.providerAmount.toFixed(2)} ${successDetails.currency})`
+                : ""}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              type="button"
+              className="gradient-primary"
+              onClick={() => {
+                setSuccessDetails(null);
+                navigate("/billing");
+              }}
+            >
+              Go to Billing
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </AppLayout>
   );
 }
