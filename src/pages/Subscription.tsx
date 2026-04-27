@@ -2,26 +2,17 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import AppLayout from "@/components/AppLayout";
 import { useAuth } from "@/contexts/AuthContext";
-import { plansApi, subscriptionApi } from "@/lib/api";
+import { paymentsApi, plansApi, subscriptionApi } from "@/lib/api";
 import { getCurrentWorkspaceSubscription } from "@/lib/workspaceSubscription";
 import { buildAvatarSrc } from "@/hooks/useAvatarSrc";
 import { useToast } from "@/hooks/use-toast";
 import { toastApiSuccess } from "@/lib/appToast";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Check, Loader2 } from "lucide-react";
 import { SubscriptionBillingDialog, type BillingSubmitPayload } from "@/components/billing/SubscriptionBillingDialog";
 
 type SubscriptionType = "monthly" | "yearly";
-
-type CheckoutPreview = {
-  sessionUrl: string;
-  subscriptionId: number;
-  amountUsd?: number;
-  amountProvider?: number;
-  providerCurrency?: string;
-};
 
 export default function SubscriptionPage() {
   const [searchParams] = useSearchParams();
@@ -36,11 +27,6 @@ export default function SubscriptionPage() {
   const [submitting, setSubmitting] = useState(false);
   const [type, setType] = useState<SubscriptionType>("monthly");
   const [billingDialogOpen, setBillingDialogOpen] = useState(false);
-  const [checkoutDialogOpen, setCheckoutDialogOpen] = useState(false);
-  const [checkoutPreview, setCheckoutPreview] = useState<CheckoutPreview | null>(null);
-  const [iframeLoading, setIframeLoading] = useState(false);
-  const [paymentError, setPaymentError] = useState<string | null>(null);
-  const [statusPolling, setStatusPolling] = useState(false);
 
   const selectedWorkspace = useMemo(() => {
     if (!selectedWorkspaceId) return null;
@@ -87,44 +73,6 @@ export default function SubscriptionPage() {
     }
   }, [requestedType]);
 
-  useEffect(() => {
-    if (!checkoutDialogOpen || !checkoutPreview?.subscriptionId) return;
-    let cancelled = false;
-    setStatusPolling(true);
-    const poll = async () => {
-      try {
-        const res = await subscriptionApi.paymobStatus(checkoutPreview.subscriptionId);
-        const status = String(
-          res?.status ?? res?.subscription?.status ?? "",
-        ).toLowerCase();
-        if (cancelled) return;
-        if (status === "active") {
-          closePaymentModal();
-          toast({
-            title: "Payment successful",
-            description: "Your subscription is now active.",
-          });
-          navigate("/billing");
-          return;
-        }
-        if (status === "failed" || status === "canceled" || status === "cancelled") {
-          setPaymentError("Payment failed. You can complete payment again in this window.");
-        }
-      } catch {
-        // Keep polling; transient network errors should not terminate checkout.
-      }
-    };
-    void poll();
-    const timer = window.setInterval(() => {
-      void poll();
-    }, 3500);
-    return () => {
-      cancelled = true;
-      window.clearInterval(timer);
-      setStatusPolling(false);
-    };
-  }, [checkoutDialogOpen, checkoutPreview?.subscriptionId, navigate, toast]);
-
   const featureList = (selectedPlan: any) => {
     const features = [];
     if (selectedPlan.maxVideosPerMonth) features.push(`${selectedPlan.maxVideosPerMonth} videos/month`);
@@ -136,18 +84,6 @@ export default function SubscriptionPage() {
     if (selectedPlan.canSharePublicLink) features.push("Public sharing");
     if (selectedPlan.teamAccess) features.push("Team collaboration");
     return features;
-  };
-
-  const parseNumber = (value: unknown): number | undefined => {
-    const num = Number(value);
-    return Number.isFinite(num) ? num : undefined;
-  };
-
-  const closePaymentModal = () => {
-    setCheckoutDialogOpen(false);
-    setIframeLoading(false);
-    setStatusPolling(false);
-    setPaymentError(null);
   };
 
   const submitSubscription = async (paymentData?: BillingSubmitPayload): Promise<boolean> => {
@@ -164,35 +100,19 @@ export default function SubscriptionPage() {
         ...(paymentData?.billingData ? { billingData: paymentData.billingData } : {}),
       };
 
-      const subscriptionRes =
-        currentSubscriptionId == null
-          ? await subscriptionApi.create(payloadBase as any)
-          : await subscriptionApi.upgrade(Number(currentSubscriptionId), {
-              ...payloadBase,
-              id: String(currentSubscriptionId),
-            });
-      const returnedSubId = Number(
-        subscriptionRes?.subscription?.id ?? currentSubscriptionId ?? 0,
-      );
-
+      const subscriptionRes = isFreePlan
+        ? await subscriptionApi.create(payloadBase as any)
+        : await paymentsApi.createCheckoutSession({
+            ...payloadBase,
+            type,
+            ...(currentSubscriptionId != null
+              ? { subscriptionId: Number(currentSubscriptionId) }
+              : {}),
+          } as any);
       const sessionUrl =
         subscriptionRes.session_url || subscriptionRes.sessionUrl || subscriptionRes.url || subscriptionRes.checkoutUrl;
       if (sessionUrl) {
-        const amountUsd = parseNumber(subscriptionRes.amount_usd);
-        const amountProvider = parseNumber(subscriptionRes.amount_provider);
-        const providerCurrency =
-          subscriptionRes.provider_currency || subscriptionRes.providerCurrency || undefined;
-
-        setCheckoutPreview({
-          sessionUrl,
-          subscriptionId: returnedSubId,
-          amountUsd,
-          amountProvider,
-          providerCurrency: providerCurrency ? String(providerCurrency).toUpperCase() : undefined,
-        });
-        setIframeLoading(true);
-        setPaymentError(null);
-        setCheckoutDialogOpen(true);
+        window.location.href = sessionUrl;
         return true;
       }
 
@@ -378,114 +298,6 @@ export default function SubscriptionPage() {
         defaultEmail={user?.email || ""}
         onSubmit={handleBillingDataConfirm}
       />
-
-      <Dialog
-        open={checkoutDialogOpen}
-        onOpenChange={(open) => {
-          if (!open) {
-            closePaymentModal();
-            return;
-          }
-          setCheckoutDialogOpen(true);
-        }}
-      >
-        <DialogContent className="w-[95vw] max-w-5xl max-h-[85vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Complete payment</DialogTitle>
-            <DialogDescription>
-              Paymob checkout is embedded here. Do not close this window until payment finishes.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-3 text-sm">
-            <div className="rounded-md border border-border p-3">
-              <p className="text-muted-foreground">Plan price (USD)</p>
-              <p className="font-semibold">
-                {checkoutPreview?.amountUsd != null ? `$${checkoutPreview.amountUsd}` : "Not provided"}
-              </p>
-            </div>
-            <div className="rounded-md border border-border p-3">
-              <p className="text-muted-foreground">
-                You will be charged {checkoutPreview?.providerCurrency ? `(${checkoutPreview.providerCurrency})` : ""}
-              </p>
-              <p className="font-semibold">
-                {checkoutPreview?.amountProvider != null
-                  ? `${checkoutPreview.amountProvider} ${checkoutPreview?.providerCurrency || ""}`.trim()
-                  : "Not provided"}
-              </p>
-            </div>
-            {paymentError ? (
-              <div className="rounded-md border border-destructive/40 bg-destructive/5 px-3 py-2 text-sm text-destructive">
-                {paymentError}
-              </div>
-            ) : null}
-            <div className="relative rounded-md border border-border bg-background overflow-hidden min-h-[620px]">
-              {iframeLoading ? (
-                <div className="absolute inset-0 z-10 grid place-items-center bg-background/85">
-                  <div className="inline-flex items-center gap-2 text-sm text-muted-foreground">
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    Loading payment page...
-                  </div>
-                </div>
-              ) : null}
-              {checkoutPreview?.sessionUrl ? (
-                <iframe
-                  title="Paymob Checkout"
-                  src={checkoutPreview.sessionUrl}
-                  className="w-full h-[72vh] min-h-[620px]"
-                  onLoad={() => setIframeLoading(false)}
-                  allow="payment"
-                />
-              ) : null}
-            </div>
-          </div>
-          <DialogFooter>
-            <Button type="button" variant="outline" onClick={closePaymentModal}>
-              Close
-            </Button>
-            <Button
-              type="button"
-              className="gradient-primary"
-              onClick={async () => {
-                if (!checkoutPreview?.subscriptionId) return;
-                try {
-                  setStatusPolling(true);
-                  const res = await subscriptionApi.paymobStatus(checkoutPreview.subscriptionId);
-                  const status = String(
-                    res?.status ?? res?.subscription?.status ?? "",
-                  ).toLowerCase();
-                  if (status === "active") {
-                    closePaymentModal();
-                    toast({
-                      title: "Payment successful",
-                      description: "Your subscription is now active.",
-                    });
-                    navigate("/billing");
-                    return;
-                  }
-                  if (status === "failed") {
-                    setPaymentError("Payment failed. Please retry in the iframe.");
-                  } else {
-                    toast({
-                      title: "Still pending",
-                      description: "Payment is not confirmed yet. Complete checkout in the iframe.",
-                    });
-                  }
-                } catch (err: any) {
-                  toast({
-                    title: "Status check failed",
-                    description: err?.message || "Try again in a moment.",
-                    variant: "destructive",
-                  });
-                } finally {
-                  setStatusPolling(false);
-                }
-              }}
-            >
-              {statusPolling ? <Loader2 className="h-4 w-4 animate-spin" /> : "Check status"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </AppLayout>
   );
 }

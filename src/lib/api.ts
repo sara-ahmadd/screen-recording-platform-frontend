@@ -585,6 +585,35 @@ export const subscriptionApi = {
     }),
 };
 
+export const paymentsApi = {
+  createCheckoutSession: (data: {
+    planId: string;
+    workspaceId: string;
+    type?: "monthly" | "yearly";
+    country?: string;
+    billingData?: {
+      first_name?: string;
+      last_name?: string;
+      email?: string;
+      phone_number?: string;
+      apartment?: string;
+      floor?: string;
+      street?: string;
+      building?: string;
+      shipping_method?: string;
+      postal_code?: string;
+      city?: string;
+      country?: string;
+      state?: string;
+    };
+    subscriptionId?: number;
+  }) =>
+    apiFetch("/payments/checkout-session", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+};
+
 // Plans
 export const plansApi = {
   getAll: () => apiFetch("/plan/all"),

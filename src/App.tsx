@@ -47,6 +47,8 @@ import SuperAdminFeedbackPage from "./pages/admin/SuperAdminFeedback";
 import SuperAdminAnalyticsVisualsPage from "./pages/admin/SuperAdminAnalyticsVisuals";
 import NotFound from "./pages/NotFound";
 import RecordScreenCopy from "./pages/RecordScreenCopy";
+import PaymentSuccessPage from "./pages/PaymentSuccess";
+import PaymentFailedPage from "./pages/PaymentFailed";
 
 const queryClient = new QueryClient();
 
@@ -101,6 +103,8 @@ export const routes: RouteRecord[] = [
       { path: "notifications", element: <ProtectedRoute><NotificationsPage /></ProtectedRoute> },
       { path: "feedback", element: <ProtectedRoute><FeedbackPage /></ProtectedRoute> },
       { path: "profile", element: <ProtectedRoute><ProfilePage /></ProtectedRoute> },
+      { path: "payment/success", element: <PaymentSuccessPage /> },
+      { path: "payment/failed", element: <PaymentFailedPage /> },
       {
         path: "super-admin/recordings",
         element: <ProtectedRoute requireSuperAdmin><SuperAdminRecordingsPage /></ProtectedRoute>,
