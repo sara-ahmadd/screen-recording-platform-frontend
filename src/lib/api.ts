@@ -591,6 +591,7 @@ export const paymentsApi = {
     workspaceId: string;
     type?: "monthly" | "yearly";
     country?: string;
+    promoCode?: string;
     billingData?: {
       first_name?: string;
       last_name?: string;
@@ -608,7 +609,7 @@ export const paymentsApi = {
     };
     subscriptionId?: number;
   }) =>
-    apiFetch("/payments/checkout-session", {
+    apiFetch("/subscription/checkout-session", {
       method: "POST",
       body: JSON.stringify(data),
     }),

@@ -10,6 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Check, Loader2 } from "lucide-react";
 import { SubscriptionBillingDialog, type BillingSubmitPayload } from "@/components/billing/SubscriptionBillingDialog";
+import { trackClientEvent } from "@/lib/analyticsClient";
 import {
   Dialog,
   DialogContent,
@@ -34,9 +35,10 @@ export default function SubscriptionPage() {
   const [submitting, setSubmitting] = useState(false);
   const [type, setType] = useState<SubscriptionType>("monthly");
   const [billingDialogOpen, setBillingDialogOpen] = useState(false);
+  const [promoCode, setPromoCode] = useState("");
+  const [promoError, setPromoError] = useState<string | null>(null);
   const [pendingCheckout, setPendingCheckout] = useState<{
     checkoutUrl: string;
-    usd: number;
     providerAmount: number;
     currency: string;
   } | null>(null);
@@ -110,15 +112,25 @@ export default function SubscriptionPage() {
   const submitSubscription = async (paymentData?: BillingSubmitPayload): Promise<boolean> => {
     if (!selectedWorkspaceId || !plan) return false;
     setSubmitting(true);
+    setPromoError(null);
     try {
       const isFreePlan = Number(plan?.monthlyPrice || 0) === 0 && Number(plan?.yearlyPrice || 0) === 0;
       const payloadType = isFreePlan ? "null" : type;
+      const promoCodeTrimmed = paymentData?.promoCode?.trim() || "";
+      if (promoCodeTrimmed) {
+        trackClientEvent({
+          eventType: "click",
+          eventName: "promo_applied_attempt",
+          metadata: { code: promoCodeTrimmed, route: "/subscription" },
+        });
+      }
       const payloadBase = {
         type: payloadType,
         planId: String(plan.id),
         workspaceId: selectedWorkspaceId,
         ...(paymentData?.country ? { country: paymentData.country } : {}),
         ...(paymentData?.billingData ? { billingData: paymentData.billingData } : {}),
+        ...(promoCodeTrimmed ? { promoCode: promoCodeTrimmed } : {}),
       };
 
       const subscriptionRes = isFreePlan
@@ -133,7 +145,6 @@ export default function SubscriptionPage() {
       const sessionUrl =
         subscriptionRes.session_url || subscriptionRes.sessionUrl || subscriptionRes.url || subscriptionRes.checkoutUrl;
       const result = subscriptionRes?.result ?? {};
-      const amountUsd = Number(result?.checkoutAmountUsd ?? subscriptionRes?.amount_usd ?? 0);
       const amountProvider = Number(
         result?.checkoutAmountProvider ?? subscriptionRes?.amount_provider ?? 0,
       );
@@ -143,10 +154,16 @@ export default function SubscriptionPage() {
       if (sessionUrl) {
         setPendingCheckout({
           checkoutUrl: String(sessionUrl),
-          usd: Number.isFinite(amountUsd) ? amountUsd : 0,
           providerAmount: Number.isFinite(amountProvider) ? amountProvider : 0,
           currency,
         });
+        if (promoCodeTrimmed) {
+          trackClientEvent({
+            eventType: "click",
+            eventName: "promo_applied_success",
+            metadata: { code: promoCodeTrimmed, route: "/subscription" },
+          });
+        }
         return true;
       }
 
@@ -156,13 +173,39 @@ export default function SubscriptionPage() {
         ),
         providerMessage: String(result?.message || "No payment required."),
         requiresCheckout: Boolean(result?.requiresCheckout),
-        usd: Number.isFinite(amountUsd) ? amountUsd : 0,
+        usd: Number.isFinite(
+          Number(result?.checkoutAmountUsd ?? subscriptionRes?.amount_usd ?? 0),
+        )
+          ? Number(result?.checkoutAmountUsd ?? subscriptionRes?.amount_usd ?? 0)
+          : 0,
         providerAmount: Number.isFinite(amountProvider) ? amountProvider : 0,
         currency,
       });
+      if (promoCodeTrimmed) {
+        trackClientEvent({
+          eventType: "click",
+          eventName: "promo_applied_success",
+          metadata: { code: promoCodeTrimmed, route: "/subscription" },
+        });
+      }
       return true;
     } catch (err: any) {
-      toast({ title: "Subscription failed", description: err.message, variant: "destructive" });
+      const errorMessage = String(err?.message || "Subscription failed");
+      const attemptedPromoCode = paymentData?.promoCode?.trim() || "";
+      if (attemptedPromoCode) {
+        setPromoError(errorMessage);
+        trackClientEvent({
+          eventType: "click",
+          eventName: "promo_applied_failed",
+          metadata: {
+            code: attemptedPromoCode,
+            errorMessage,
+            route: "/subscription",
+          },
+        });
+      } else {
+        toast({ title: "Subscription failed", description: errorMessage, variant: "destructive" });
+      }
       return false;
     } finally {
       setSubmitting(false);
@@ -178,6 +221,7 @@ export default function SubscriptionPage() {
       return;
     }
 
+    setPromoError(null);
     setBillingDialogOpen(true);
   };
 
@@ -335,6 +379,12 @@ export default function SubscriptionPage() {
         onOpenChange={setBillingDialogOpen}
         submitting={submitting}
         defaultEmail={user?.email || ""}
+        promoCode={promoCode}
+        promoError={promoError}
+        onPromoCodeChange={(value) => {
+          setPromoCode(value);
+          if (promoError) setPromoError(null);
+        }}
         onSubmit={handleBillingDataConfirm}
       />
 
@@ -348,9 +398,8 @@ export default function SubscriptionPage() {
           <DialogHeader>
             <DialogTitle>Confirm payment</DialogTitle>
             <DialogDescription>
-              You&apos;re about to pay ${pendingCheckout?.usd.toFixed(2)} USD (~{" "}
-              {pendingCheckout?.providerAmount.toFixed(2)}{" "}
-              {pendingCheckout?.currency}).
+              Payable amount: {pendingCheckout?.providerAmount.toFixed(2)}{" "}
+              {pendingCheckout?.currency}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>

@@ -66,6 +66,7 @@ type FormValues = z.infer<typeof formSchema>;
 
 export type BillingSubmitPayload = {
   country: string;
+  promoCode?: string;
   billingData: {
     first_name: string;
     last_name: string;
@@ -88,6 +89,9 @@ type SubscriptionBillingDialogProps = {
   onOpenChange: (open: boolean) => void;
   submitting: boolean;
   defaultEmail?: string;
+  promoCode: string;
+  promoError?: string | null;
+  onPromoCodeChange: (value: string) => void;
   onSubmit: (payload: BillingSubmitPayload) => Promise<void>;
 };
 
@@ -128,6 +132,9 @@ export function SubscriptionBillingDialog({
   onOpenChange,
   submitting,
   defaultEmail,
+  promoCode,
+  promoError,
+  onPromoCodeChange,
   onSubmit,
 }: SubscriptionBillingDialogProps) {
   const [countries, setCountries] = useState<CountryOption[]>([]);
@@ -242,6 +249,7 @@ export function SubscriptionBillingDialog({
 
     const payload: BillingSubmitPayload = {
       country: normalizedCountry,
+      ...(promoCode.trim() ? { promoCode: promoCode.trim() } : {}),
       billingData: {
         first_name: values.first_name.trim(),
         last_name: values.last_name.trim(),
@@ -394,6 +402,14 @@ export function SubscriptionBillingDialog({
                   </SelectContent>
                 </Select>
               </Field>
+
+              <Field label="Promo Code" error={promoError || undefined}>
+                <Input
+                  value={promoCode}
+                  onChange={(event) => onPromoCodeChange(event.target.value)}
+                  placeholder="Enter promo code (optional)"
+                />
+              </Field>
             </div>
           </div>
 
@@ -402,7 +418,7 @@ export function SubscriptionBillingDialog({
               Cancel
             </Button>
             <Button type="submit" className="gradient-primary" disabled={!isValid || submitting || formSubmitting || countriesLoading || citiesLoading}>
-              {submitting || formSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : "Continue"}
+              {submitting || formSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : "Continue to payment"}
             </Button>
           </DialogFooter>
         </form>
