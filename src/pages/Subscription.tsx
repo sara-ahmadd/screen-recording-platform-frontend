@@ -405,9 +405,10 @@ export default function SubscriptionPage() {
           <DialogHeader>
             <DialogTitle>Confirm payment</DialogTitle>
             <DialogDescription>
-              Payable amount:${pendingCheckout.checkoutAmountUsd} ~ {pendingCheckout?.providerAmount.toFixed(2)}{" "}
-              {pendingCheckout?.currency}
-            </DialogDescription>
+            {pendingCheckout
+              ? `Payable amount: $${pendingCheckout?.checkoutAmountUsd?.toFixed(2)} ~ ${pendingCheckout?.providerAmount?.toFixed(2)} ${pendingCheckout.currency}`
+              : ""}
+          </DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <Button
