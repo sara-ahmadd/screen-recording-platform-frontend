@@ -11,7 +11,8 @@ import { useToast } from "@/hooks/use-toast";
 import { toastApiSuccess, toastSuccess } from "@/lib/appToast";
 import { authApi, setAccessToken, setRefreshToken } from "@/lib/api";
 import { getPendingInviteToken } from "@/lib/inviteFlow";
-import { Loader2, Monitor } from "lucide-react";
+import { Loader2 } from "lucide-react";
+import Logo from "@/components/Logo";
 
 export default function LoginPage() {
   const { login, refreshUser, lastAuthError } = useAuth();
@@ -271,10 +272,7 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <div className="w-full max-w-md animate-fade-in">
         <Link to="/" className="flex items-center justify-center gap-2 mb-8">
-          <div className="gradient-primary rounded-xl p-2">
-            <Monitor className="h-6 w-6 text-primary-foreground" />
-          </div>
-          <span className="text-2xl font-bold gradient-text">theRec</span>
+          <Logo imageClassName="h-auto" />
         </Link>
         <Card className="glass">
           <CardHeader className="text-center">

@@ -634,7 +634,7 @@ export default function WorkspacesPage() {
                               onClick={handleLeaveWorkspace}
                               title="Leave workspace"
                             >
-                              <LogOut className="h-3.5 w-3.5" />
+                              <LogOut className="h-3.5" />
                             </Button>
                           )}
                           {canRemove && (

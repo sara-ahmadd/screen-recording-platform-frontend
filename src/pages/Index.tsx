@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Monitor, Play, Upload, Users, Shield, Zap, ArrowRight, Check, Loader2, CircleCheck } from "lucide-react";
+import { Play, Upload, Users, Shield, Zap, ArrowRight, Check, Loader2, CircleCheck } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAvatarSrc } from "@/hooks/useAvatarSrc";
 import { authApi, plansApi, setAccessToken, setRefreshToken } from "@/lib/api";
@@ -15,6 +15,7 @@ import {
 import { usePaidToFreeSubscribe } from "@/hooks/usePaidToFreeSubscribe";
 import { PaidToFreeDialogs } from "@/components/PaidToFreeDialogs";
 import { Ad } from "@/components/Ads";
+import Logo from "@/components/Logo";
 
 export default function Index() {
   const { user, selectedWorkspaceId, refreshUser, lastAuthError } = useAuth();
@@ -164,13 +165,10 @@ export default function Index() {
   return (
     <div className="min-h-screen bg-background">
       {/* Nav */}
-      <nav className="border-b border-border/50 backdrop-blur-sm sticky top-0 z-50 bg-background/80">
+      <nav className="border-b border-border/50 backdrop-blur-sm sticky top-0 pt-3 z-50 bg-background/80">
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2">
-            <div className="gradient-primary rounded-xl p-2">
-              <Monitor className="h-5 w-5 text-primary-foreground" />
-            </div>
-            <span className="text-lg font-bold">theRec</span>
+            <Logo imageClassName="h-auto" withText textClassName="text-lg font-bold" />
           </Link>
           <div className="flex items-center gap-3">
             {user ? (

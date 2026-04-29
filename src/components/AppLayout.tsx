@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { Monitor, LayoutDashboard, Upload, Users, CreditCard, Bell, LogOut, Video, PanelLeftClose, PanelLeftOpen, Shield, MessageSquare } from "lucide-react";
+import { LayoutDashboard, Upload, Users, CreditCard, Bell, LogOut, Video, PanelLeftClose, PanelLeftOpen, Shield, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useAvatarSrc } from "@/hooks/useAvatarSrc";
 import { useConfirmDialog } from "@/contexts/ConfirmDialogContext";
+import Logo from "@/components/Logo";
 
 const baseNavItems = [
   { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
@@ -64,10 +65,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       {!isSidebarOpen && (
         <div className="fixed top-4 left-4 z-[65] hidden md:flex items-center gap-2 rounded-lg border bg-background px-2 py-1.5 shadow-sm">
           <Link to="/" className="flex items-center gap-2">
-            <div className="gradient-primary rounded-lg p-1.5">
-              <Monitor className="h-4 w-4 text-primary-foreground" />
-            </div>
-            <span className="font-bold">theRec</span>
+            <Logo imageClassName="h-auto" withText textClassName="font-bold" />
           </Link>
           <Button
             type="button"
@@ -101,10 +99,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       >
         <div className="p-6 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2">
-            <div className="gradient-primary rounded-xl p-2">
-              <Monitor className="h-5 w-5 text-primary-foreground" />
-            </div>
-            <span className="text-lg font-bold text-sidebar-foreground">theRec</span>
+            <Logo imageClassName="h-auto" withText textClassName="text-lg font-bold text-sidebar-foreground" />
           </Link>
           <Button
             type="button"
@@ -179,10 +174,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       >
         <header className="md:hidden sticky top-0 z-30 flex items-center justify-between p-4 border-b border-border bg-background">
           <Link to="/" className="flex items-center gap-2">
-            <div className="gradient-primary rounded-lg p-1.5">
-              <Monitor className="h-4 w-4 text-primary-foreground" />
-            </div>
-            <span className="font-bold">theRec</span>
+            <Logo imageClassName="h-auto" withText textClassName="font-bold" />
           </Link>
           <Button type="button" size="icon" variant="outline" onClick={() => setIsSidebarOpen((v) => !v)}>
             {isSidebarOpen ? <PanelLeftClose className="h-4 w-4" /> : <PanelLeftOpen className="h-4 w-4" />}
