@@ -39,6 +39,7 @@ export default function SubscriptionPage() {
   const [promoError, setPromoError] = useState<string | null>(null);
   const [pendingCheckout, setPendingCheckout] = useState<{
     checkoutUrl: string;
+    checkoutAmountUsd:number;
     providerAmount: number;
     currency: string;
   } | null>(null);
@@ -154,6 +155,11 @@ export default function SubscriptionPage() {
       if (sessionUrl) {
         setPendingCheckout({
           checkoutUrl: String(sessionUrl),
+          checkoutAmountUsd: Number.isFinite(
+            Number(result?.checkoutAmountUsd ?? subscriptionRes?.amount_usd ?? 0),
+          )
+            ? Number(result?.checkoutAmountUsd ?? subscriptionRes?.amount_usd ?? 0)
+            : 0,
           providerAmount: Number.isFinite(amountProvider) ? amountProvider : 0,
           currency,
         });
@@ -398,7 +404,7 @@ export default function SubscriptionPage() {
           <DialogHeader>
             <DialogTitle>Confirm payment</DialogTitle>
             <DialogDescription>
-              Payable amount: {pendingCheckout?.providerAmount.toFixed(2)}{" "}
+              Payable amount:${pendingCheckout.checkoutAmountUsd} ~ {pendingCheckout?.providerAmount.toFixed(2)}{" "}
               {pendingCheckout?.currency}
             </DialogDescription>
           </DialogHeader>
