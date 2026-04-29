@@ -128,6 +128,7 @@ export default function SubscriptionPage() {
       const payloadBase = {
         type: payloadType,
         planId: String(plan.id),
+        subscriptionId: String(currentSubscriptionId),
         workspaceId: selectedWorkspaceId,
         ...(paymentData?.country ? { country: paymentData.country } : {}),
         ...(paymentData?.billingData ? { billingData: paymentData.billingData } : {}),
