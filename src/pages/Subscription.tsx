@@ -139,7 +139,7 @@ export default function SubscriptionPage() {
             ...payloadBase,
             type,
             ...(currentSubscriptionId != null
-              ? { subscriptionId: Number(currentSubscriptionId) }
+              ? { subscriptionId: String(currentSubscriptionId) }
               : {}),
           } as any);
       const sessionUrl =
