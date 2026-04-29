@@ -4,12 +4,12 @@ import { Rocket, Users, ShieldCheck } from "lucide-react";
 export default function AboutPage() {
   return (
     <PublicPageLayout
-      title="About ScreenFlow"
+      title="About theRec"
       subtitle="Built for teams that want faster communication through clear video."
     >
       <div className="space-y-6">
         <p className="text-sm leading-6 text-muted-foreground">
-          ScreenFlow is a modern screen recording SaaS platform focused on speed, collaboration, and reliable video
+          theRec is a modern screen recording SaaS platform focused on speed, collaboration, and reliable video
           workflows. We help teams replace long meetings and unclear text threads with concise, visual updates.
         </p>
 

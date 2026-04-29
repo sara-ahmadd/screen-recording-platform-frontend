@@ -170,13 +170,13 @@ export default function Index() {
             <div className="gradient-primary rounded-xl p-2">
               <Monitor className="h-5 w-5 text-primary-foreground" />
             </div>
-            <span className="text-lg font-bold">ScreenFlow</span>
+            <span className="text-lg font-bold">theRec</span>
           </Link>
           <div className="flex items-center gap-3">
             {user ? (
               <Link to="/profile" className="flex items-center gap-2 rounded-full border border-border bg-card/70 px-3 py-1.5">
                 {avatarSrc ? (
-                  <img src={avatarSrc} alt={user.user_name || "User avatar"} className="h-7 w-7 rounded-full object-cover" />
+                  <img src={avatarSrc} alt={user.user_name || "User avatar"} loading="lazy" className="h-7 w-7 rounded-full object-cover" />
                 ) : (
                   <div className="h-7 w-7 rounded-full gradient-primary flex items-center justify-center text-xs font-bold text-primary-foreground">
                     {user?.user_name?.[0]?.toUpperCase() || "U"}
@@ -412,7 +412,7 @@ export default function Index() {
         <div className="grid md:grid-cols-3 gap-6">
           {[
             {
-              quote: "ScreenFlow helped us cut meeting time by half. We now share quick video updates instead.",
+              quote: "theRec helped us cut meeting time by half. We now share quick video updates instead.",
               name: "Aya O.",
               role: "Product Manager",
             },
@@ -506,7 +506,7 @@ export default function Index() {
       <footer className="border-t border-border/50 py-8 mt-12">
         <div className="max-w-6xl mx-auto px-6 flex flex-wrap items-center justify-between gap-4">
           <p className="text-sm text-muted-foreground">
-            © {new Date().getFullYear()} ScreenFlow. All rights reserved.
+            © {new Date().getFullYear()} theRec. All rights reserved.
           </p>
           <div className="flex flex-wrap items-center gap-4 text-sm">
             <Link to="/privacy-policy" className="text-muted-foreground hover:text-foreground transition-colors">

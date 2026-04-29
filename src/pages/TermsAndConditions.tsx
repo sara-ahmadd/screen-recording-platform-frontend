@@ -4,13 +4,13 @@ export default function TermsAndConditionsPage() {
   return (
     <PublicPageLayout
       title="Terms & Conditions"
-      subtitle="Rules and responsibilities for using ScreenFlow."
+      subtitle="Rules and responsibilities for using theRec."
     >
       <div className="space-y-6 text-sm leading-6 text-muted-foreground">
         <section>
           <h2 className="text-lg font-semibold text-foreground mb-2">1. Service usage</h2>
           <p>
-            By using ScreenFlow, you agree to use the platform lawfully and responsibly. You are responsible for all
+            By using theRec, you agree to use the platform lawfully and responsibly. You are responsible for all
             activity under your account and workspace.
           </p>
         </section>
@@ -42,7 +42,7 @@ export default function TermsAndConditionsPage() {
         <section>
           <h2 className="text-lg font-semibold text-foreground mb-2">5. Prohibited behavior</h2>
           <p>
-            You may not use ScreenFlow to violate laws, abuse infrastructure, distribute malware, or infringe rights
+            You may not use theRec to violate laws, abuse infrastructure, distribute malware, or infringe rights
             of others. We may suspend access for serious violations.
           </p>
         </section>
@@ -50,7 +50,7 @@ export default function TermsAndConditionsPage() {
         <section>
           <h2 className="text-lg font-semibold text-foreground mb-2">6. Limitation of liability</h2>
           <p>
-            ScreenFlow is provided on an "as available" basis. To the extent permitted by law, we are not liable for
+            theRec is provided on an "as available" basis. To the extent permitted by law, we are not liable for
             indirect or consequential losses arising from service use.
           </p>
         </section>

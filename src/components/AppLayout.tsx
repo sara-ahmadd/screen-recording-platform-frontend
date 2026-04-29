@@ -67,7 +67,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             <div className="gradient-primary rounded-lg p-1.5">
               <Monitor className="h-4 w-4 text-primary-foreground" />
             </div>
-            <span className="font-bold">ScreenFlow</span>
+            <span className="font-bold">theRec</span>
           </Link>
           <Button
             type="button"
@@ -104,7 +104,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             <div className="gradient-primary rounded-xl p-2">
               <Monitor className="h-5 w-5 text-primary-foreground" />
             </div>
-            <span className="text-lg font-bold text-sidebar-foreground">ScreenFlow</span>
+            <span className="text-lg font-bold text-sidebar-foreground">theRec</span>
           </Link>
           <Button
             type="button"
@@ -150,6 +150,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               <img
                 src={sidebarAvatarUrl}
                 alt={user.user_name || "User avatar"}
+                loading="lazy"
                 className="h-8 w-8 rounded-full object-cover border border-sidebar-border"
                 onError={() => setAvatarFailed(true)}
               />
@@ -181,7 +182,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             <div className="gradient-primary rounded-lg p-1.5">
               <Monitor className="h-4 w-4 text-primary-foreground" />
             </div>
-            <span className="font-bold">ScreenFlow</span>
+            <span className="font-bold">theRec</span>
           </Link>
           <Button type="button" size="icon" variant="outline" onClick={() => setIsSidebarOpen((v) => !v)}>
             {isSidebarOpen ? <PanelLeftClose className="h-4 w-4" /> : <PanelLeftOpen className="h-4 w-4" />}

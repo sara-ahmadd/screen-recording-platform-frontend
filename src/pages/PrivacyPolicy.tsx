@@ -4,7 +4,7 @@ export default function PrivacyPolicyPage() {
   return (
     <PublicPageLayout
       title="Privacy Policy"
-      subtitle="How ScreenFlow collects, uses, and protects your information."
+      subtitle="How theRec collects, uses, and protects your information."
     >
       <div className="space-y-6 text-sm leading-6 text-muted-foreground">
         <section>

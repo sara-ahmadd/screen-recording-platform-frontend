@@ -45,7 +45,7 @@ export default function PublicVideoPage() {
           <div className="gradient-primary rounded-lg p-1.5">
             <Monitor className="h-4 w-4 text-primary-foreground" />
           </div>
-          <span className="font-bold">ScreenFlow</span>
+          <span className="font-bold">theRec</span>
         </Link>
       </header>
       <main className="max-w-[95%] mx-auto p-6">

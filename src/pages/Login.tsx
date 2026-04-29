@@ -274,7 +274,7 @@ export default function LoginPage() {
           <div className="gradient-primary rounded-xl p-2">
             <Monitor className="h-6 w-6 text-primary-foreground" />
           </div>
-          <span className="text-2xl font-bold gradient-text">ScreenFlow</span>
+          <span className="text-2xl font-bold gradient-text">theRec</span>
         </Link>
         <Card className="glass">
           <CardHeader className="text-center">

@@ -12,4 +12,4 @@ Allow: /
 
 User-agent: *
 Allow: /
-Sitemap: https://screenflow.app/sitemap.xml
+Sitemap: https://therec.site/sitemap.xml

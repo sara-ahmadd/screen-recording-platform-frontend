@@ -30,7 +30,7 @@ export default function PublicPageLayout({
             <div className="gradient-primary rounded-xl p-2">
               <Monitor className="h-5 w-5 text-primary-foreground" />
             </div>
-            <span className="text-lg font-bold">ScreenFlow</span>
+            <span className="text-lg font-bold">theRec</span>
           </Link>
           <div className="flex items-center gap-2">
             <Link to="/login">
@@ -54,7 +54,7 @@ export default function PublicPageLayout({
       <footer className="border-t border-border/50 py-8">
         <div className="max-w-[95%] mx-auto px-6 flex flex-wrap items-center justify-between gap-4">
           <p className="text-sm text-muted-foreground">
-            © {new Date().getFullYear()} ScreenFlow. All rights reserved.
+            © {new Date().getFullYear()} theRec. All rights reserved.
           </p>
           <div className="flex flex-wrap items-center gap-4 text-sm">
             {footerLinks.map((item) => (

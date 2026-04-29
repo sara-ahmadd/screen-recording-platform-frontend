@@ -3,7 +3,7 @@ import PublicPageLayout from "@/components/PublicPageLayout";
 
 const articles = [
   {
-    title: "How Screen Recording Flow Works in ScreenFlow",
+    title: "How Screen Recording Flow Works in theRec",
     body: "A recording starts from capture or upload, then moves into multipart transfer, processing, thumbnail generation, and final shareable output. Understanding this flow helps teams debug delays and improve recording quality.",
     points: [
       "Capture or upload stage",

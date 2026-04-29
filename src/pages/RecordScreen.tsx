@@ -1653,7 +1653,7 @@ export default function RecordScreenCopy() {
               <div className="gradient-primary rounded-lg p-1.5">
                 <Monitor className="h-4 w-4 text-primary-foreground" />
               </div>
-              ScreenFlow
+              theRec
             </DialogTitle>
             <DialogDescription>Choose what to share before starting recording.</DialogDescription>
           </DialogHeader>
