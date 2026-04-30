@@ -11,12 +11,12 @@ export default function ContactPage() {
         <div className="glass rounded-xl p-4 border border-border/50">
           <Mail className="h-5 w-5 text-primary mb-2" />
           <h2 className="font-semibold mb-1">Email support</h2>
-          <p className="text-sm text-muted-foreground">support@therec.site</p>
+          <p className="text-sm text-muted-foreground">support@updates.therec.site</p>
         </div>
         <div className="glass rounded-xl p-4 border border-border/50">
           <MessageSquare className="h-5 w-5 text-primary mb-2" />
           <h2 className="font-semibold mb-1">General inquiries</h2>
-          <p className="text-sm text-muted-foreground">hello@therec.site</p>
+          <p className="text-sm text-muted-foreground">hello@updates.therec.site</p>
         </div>
         <div className="glass rounded-xl p-4 border border-border/50">
           <Clock className="h-5 w-5 text-primary mb-2" />

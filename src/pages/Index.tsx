@@ -16,6 +16,9 @@ import { usePaidToFreeSubscribe } from "@/hooks/usePaidToFreeSubscribe";
 import { PaidToFreeDialogs } from "@/components/PaidToFreeDialogs";
 import { Ad } from "@/components/Ads";
 import Logo from "@/components/Logo";
+import { headerLinks } from "@/components/PublicPageLayout";
+import ThemeToggle from "@/components/ThemeToggle";
+import NotificationsBell from "@/components/NotificationsBell";
 
 export default function Index() {
   const { user, selectedWorkspaceId, refreshUser, lastAuthError } = useAuth();
@@ -164,12 +167,25 @@ export default function Index() {
 
   return (
     <div className="min-h-screen bg-background">
+      <ThemeToggle />
+      <NotificationsBell />
       {/* Nav */}
       <nav className="border-b border-border/50 backdrop-blur-sm sticky top-0 pt-3 z-50 bg-background/80">
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2">
             <Logo imageClassName="h-auto" withText textClassName="text-lg font-bold" />
           </Link>
+          <div className="hidden md:flex items-center gap-5">
+          {headerLinks?.length > 0 && headerLinks?.map((item) => (
+            <Link
+            key={item.href}
+            to={item.href}
+            className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+            >
+                {item.label}
+              </Link>
+            ))}
+            </div>
           <div className="flex items-center gap-3">
             {user ? (
               <Link to="/profile" className="flex items-center gap-2 rounded-full border border-border bg-card/70 px-3 py-1.5">
@@ -230,6 +246,16 @@ export default function Index() {
             </>
           )}
         </div>
+        <p className="mt-6 text-sm text-muted-foreground max-w-3xl mx-auto">
+          theRec is the official website for recording your screen, uploading videos, and collaborating with your workspace team.
+          To use core features, we request account/profile information and recording metadata only to authenticate users,
+          organize workspaces, process videos, and enable secure sharing.
+          Read our full policy here:{" "}
+          <Link to="/privacy-policy" className="underline underline-offset-4 hover:text-foreground">
+            Privacy Policy
+          </Link>
+          .
+        </p>
       </section>
       </Reveal>
   {/* Ad here */}
@@ -254,6 +280,52 @@ export default function Index() {
           ))}
         </div>
       </section>
+      </Reveal>
+
+      {/* Google verification info */}
+      <Reveal from="left">
+        <section className="max-w-6xl mx-auto px-6 py-8 md:py-12">
+          <div className="glass rounded-2xl p-6 md:p-8">
+            <h2 className="text-2xl md:text-3xl font-bold">Site information and data use transparency</h2>
+            <p className="text-muted-foreground mt-3">
+              This public homepage is accessible without login and describes exactly what theRec does and why user data is requested.
+            </p>
+            <div className="mt-5 grid md:grid-cols-2 gap-4 text-sm">
+              <div className="rounded-xl border border-border p-4 bg-background/60">
+                <p className="font-semibold mb-1">What theRec does</p>
+                <p className="text-muted-foreground">
+                  Record your screen, upload videos, organize content in workspaces, and share recordings privately or publicly with your team.
+                </p>
+              </div>
+              <div className="rounded-xl border border-border p-4 bg-background/60">
+                <p className="font-semibold mb-1">Why we request user data</p>
+                <p className="text-muted-foreground">
+                  We use profile and workspace data for sign-in, account security, team collaboration, subscription handling, and notification delivery.
+                </p>
+              </div>
+              <div className="rounded-xl border border-border p-4 bg-background/60">
+                <p className="font-semibold mb-1">Recorded content handling</p>
+                <p className="text-muted-foreground">
+                  Recording files and metadata are processed to generate playable videos, thumbnails, and sharing options selected by the user.
+                </p>
+              </div>
+              <div className="rounded-xl border border-border p-4 bg-background/60">
+                <p className="font-semibold mb-1">Policy and legal links</p>
+                <p className="text-muted-foreground">
+                  Please review our{" "}
+                  <Link to="/privacy-policy" className="underline underline-offset-4 hover:text-foreground">
+                    Privacy Policy
+                  </Link>{" "}
+                  and{" "}
+                  <Link to="/terms-and-conditions" className="underline underline-offset-4 hover:text-foreground">
+                    Terms & Conditions
+                  </Link>
+                  .
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
       </Reveal>
 
       {/* How it works */}

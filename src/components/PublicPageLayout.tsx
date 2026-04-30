@@ -1,13 +1,19 @@
 import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
-import { Monitor } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import Logo from "./Logo";
 
 type PublicPageLayoutProps = {
   title: string;
   subtitle: string;
   children: ReactNode;
 };
+
+export const headerLinks = [
+  { href: "/contact", label: "Contact" },
+  { href: "/about", label: "About" },
+  { href: "/blogs", label: "Blogs" },
+];
 
 const footerLinks = [
   { href: "/privacy-policy", label: "Privacy Policy" },
@@ -27,11 +33,19 @@ export default function PublicPageLayout({
       <nav className="border-b border-border/50 backdrop-blur-sm sticky top-0 z-50 bg-background/80">
         <div className="max-w-[95%] mx-auto px-6 h-16 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2">
-            <div className="gradient-primary rounded-xl p-2">
-              <Monitor className="h-5 w-5 text-primary-foreground" />
-            </div>
-            <span className="text-lg font-bold">theRec</span>
+            <Logo imageClassName="h-auto" withText textClassName="font-bold" />
           </Link>
+          <div className="hidden md:flex items-center gap-5">
+            {headerLinks.map((item) => (
+              <Link
+                key={item.href}
+                to={item.href}
+                className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+              >
+                {item.label}
+              </Link>
+            ))}
+          </div>
           <div className="flex items-center gap-2">
             <Link to="/login">
               <Button variant="ghost">Sign in</Button>
@@ -39,6 +53,19 @@ export default function PublicPageLayout({
             <Link to="/register">
               <Button className="gradient-primary">Get Started</Button>
             </Link>
+          </div>
+        </div>
+        <div className="md:hidden border-t border-border/40">
+          <div className="max-w-[95%] mx-auto px-6 h-12 flex items-center gap-4 overflow-x-auto">
+            {headerLinks.map((item) => (
+              <Link
+                key={item.href}
+                to={item.href}
+                className="text-sm font-medium whitespace-nowrap text-muted-foreground hover:text-foreground transition-colors"
+              >
+                {item.label}
+              </Link>
+            ))}
           </div>
         </div>
       </nav>

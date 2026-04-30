@@ -9,8 +9,6 @@ import SeoManager from "@/components/SeoManager";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ConfirmDialogProvider } from "@/contexts/ConfirmDialogContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
-import ThemeToggle from "@/components/ThemeToggle";
-import NotificationsBell from "@/components/NotificationsBell";
 import Index from "./pages/Index";
 import LoginPage from "./pages/Login";
 import RegisterPage from "./pages/Register";
@@ -59,10 +57,8 @@ const RootLayout = () => (
         <Toaster />
         <Sonner />
         <SeoManager />
-        <ThemeToggle />
         <ConfirmDialogProvider>
           <AuthProvider>
-            <NotificationsBell />
             <Outlet />
           </AuthProvider>
         </ConfirmDialogProvider>

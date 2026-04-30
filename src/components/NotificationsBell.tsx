@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Bell, CheckCheck, Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { cn } from "@/lib/utils";
 
 interface NotificationItem {
   id: number;
@@ -109,7 +110,11 @@ const NOTIFICATION_REFRESH_EVENTS = new Set([
   "subscription_upgraded",
 ]);
 
-export default function NotificationsBell() {
+type NotificationsBellProps = {
+  className?: string;
+};
+
+export default function NotificationsBell({ className }: NotificationsBellProps) {
   const { user } = useAuth();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
@@ -267,7 +272,7 @@ export default function NotificationsBell() {
           type="button"
           size="icon"
           variant="outline"
-          className="fixed top-4 right-16 z-[60] rounded-full shadow-sm"
+          className={cn("fixed top-4 right-16 z-[65] rounded-full shadow-sm", className)}
           aria-label="Notifications"
           title="Notifications"
         >
@@ -280,7 +285,7 @@ export default function NotificationsBell() {
         </Button>
       </DropdownMenuTrigger>
 
-      <DropdownMenuContent align="end" className="w-[360px] p-0">
+      <DropdownMenuContent align="end" className="w-[360px] p-0 z-[65]">
         <div className="p-3">
           <DropdownMenuLabel className="px-0">Notifications</DropdownMenuLabel>
         </div>

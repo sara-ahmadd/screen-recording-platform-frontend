@@ -7,6 +7,8 @@ import { cn } from "@/lib/utils";
 import { useAvatarSrc } from "@/hooks/useAvatarSrc";
 import { useConfirmDialog } from "@/contexts/ConfirmDialogContext";
 import Logo from "@/components/Logo";
+import ThemeToggle from "@/components/ThemeToggle";
+import NotificationsBell from "@/components/NotificationsBell";
 
 const baseNavItems = [
   { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
@@ -63,22 +65,36 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-background">
       {!isSidebarOpen && (
-        <div className="fixed top-4 left-4 z-[65] hidden md:flex items-center gap-2 rounded-lg border bg-background px-2 py-1.5 shadow-sm">
-          <Link to="/" className="flex items-center gap-2">
-            <Logo imageClassName="h-auto" withText textClassName="font-bold" />
-          </Link>
-          <Button
-            type="button"
-            size="icon"
-            variant="ghost"
-            className="h-8 w-8"
-            onClick={() => setIsSidebarOpen(true)}
-            title="Show sidebar"
-            aria-label="Show sidebar"
-          >
-            <PanelLeftOpen className="h-4 w-4" />
-          </Button>
+        <div className="fixed top-0 left-4 z-[60] flex w-[95%] mx-auto items-center justify-between border-b bg-background px-2 py-1.5">
+          <div className="flex items-center gap-2">
+            <Link to="/" className="flex items-center gap-2">
+              <Logo imageClassName="h-auto" withText textClassName="font-bold" />
+            </Link>
+            
+            <Button
+              type="button"
+              size="icon"
+              variant="ghost"
+              className="h-8 w-8"
+              onClick={() => setIsSidebarOpen(true)}
+              title="Show sidebar"
+              aria-label="Show sidebar"
+            >
+              <PanelLeftOpen className="h-4 w-4" />
+            </Button>
+          </div>
+          <div className="flex items-center gap-2">
+            <NotificationsBell className="static" />
+            <ThemeToggle className="static" />
+          </div>
         </div>
+      )}
+
+      {isSidebarOpen && (
+        <>
+          <NotificationsBell />
+          <ThemeToggle />
+        </>
       )}
 
       {isSidebarOpen && (
@@ -93,7 +109,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       {/* Sidebar */}
       <aside
         className={cn(
-          "fixed left-0 top-0 z-40 h-screen w-64 flex-col bg-sidebar border-r border-sidebar-border transition-transform duration-200",
+          "fixed left-0 top-0 z-40 h-screen w-64 flex-col bg-sidebar border-r border-sidebar-border transition-transform duration-200 overflow-y-auto",
           isSidebarOpen ? "translate-x-0 flex" : "-translate-x-full hidden md:flex"
         )}
       >
@@ -180,7 +196,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             {isSidebarOpen ? <PanelLeftClose className="h-4 w-4" /> : <PanelLeftOpen className="h-4 w-4" />}
           </Button>
         </header>
-        <main className="flex-1">{children}</main>
+        <main className="flex-1 mt-14">{children}</main>
       </div>
     </div>
   );

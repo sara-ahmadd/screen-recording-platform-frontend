@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Progress } from "@/components/ui/progress";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { toastApiSuccess } from "@/lib/appToast";
@@ -42,6 +43,7 @@ type CameraPreviewPosition = { left: number; top: number };
 
 const CHUNK_TIMESLICE_MS = 1000;
 const TARGET_UPLOAD_CHUNK_SIZE = 5 * 1024 * 1024;
+const PROCESSING_ESTIMATE_SECONDS = 120;
 
 export default function RecordScreenCopy() {
   const navigate = useNavigate();
@@ -59,6 +61,7 @@ export default function RecordScreenCopy() {
   const [startingCountdown, setStartingCountdown] = useState(false);
   const [countdownOpen, setCountdownOpen] = useState(false);
   const [countdown, setCountdown] = useState(3);
+  const [processingElapsedSeconds, setProcessingElapsedSeconds] = useState(0);
   const [detachedControlsActive, setDetachedControlsActive] = useState(false);
   const [shareTarget, setShareTarget] = useState<ShareTarget>("screen");
   const [shareSystemSound, setShareSystemSound] = useState(true);
@@ -1340,6 +1343,23 @@ export default function RecordScreenCopy() {
   }, [countdown, pendingDraftId, pendingDraftTitle]);
 
   useEffect(() => {
+    if (state !== "stopping" && state !== "processing") {
+      setProcessingElapsedSeconds(0);
+      return;
+    }
+    const timer = setInterval(() => {
+      setProcessingElapsedSeconds((prev) => prev + 1);
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [state]);
+
+  const processingProgress = Math.min(
+    95,
+    Math.round((processingElapsedSeconds / PROCESSING_ESTIMATE_SECONDS) * 100),
+  );
+  const remainingSeconds = Math.max(0, PROCESSING_ESTIMATE_SECONDS - processingElapsedSeconds);
+
+  useEffect(() => {
     if (state !== "recording" && state !== "paused") {
       closeDetachedControlsWindow();
       void exitNativeCameraPictureInPicture();
@@ -1611,12 +1631,18 @@ export default function RecordScreenCopy() {
 
       {(state === "stopping" || state === "processing") && (
         <div className="fixed inset-0 z-50 bg-background/70 backdrop-blur-sm flex items-center justify-center">
-          <div className="rounded-2xl border border-border bg-card px-8 py-7 shadow-2xl text-center space-y-3">
+          <div className="rounded-2xl border border-border bg-card px-8 py-7 shadow-2xl text-center space-y-3 w-full max-w-md">
             <Loader2 className="h-10 w-10 animate-spin text-primary mx-auto" />
             <p className="text-base font-semibold">
               {state === "stopping" ? "Finalizing recording..." : "Processing recording..."}
             </p>
             <p className="text-sm text-muted-foreground">Please keep this tab open, operation might take some minutes.</p>
+            <div className="pt-1 space-y-1">
+              <Progress value={processingProgress} className="h-2" />
+              <p className="text-xs text-muted-foreground text-right">
+                {remainingSeconds > 0 ? `Estimated wait: ${remainingSeconds}s` : "Almost done..."}
+              </p>
+            </div>
           </div>
         </div>
       )}

@@ -1,6 +1,6 @@
 {
-  "_client-DJl7HfLx.js": {
-    "file": "assets/client-DJl7HfLx.js",
+  "_client-BdFavBuf.js": {
+    "file": "assets/client-BdFavBuf.js",
     "name": "client",
     "isDynamicEntry": true,
     "imports": [
@@ -8,22 +8,22 @@
     ]
   },
   "index.html": {
-    "file": "assets/app-CSmxP-Qc.js",
+    "file": "assets/app-D0N4UgHL.js",
     "name": "app",
     "src": "index.html",
     "isEntry": true,
     "dynamicImports": [
-      "_client-DJl7HfLx.js"
+      "_client-BdFavBuf.js"
     ],
     "css": [
-      "assets/app-Dqi7VX1X.css"
+      "assets/app-bfUGgTGK.css"
     ],
     "assets": [
-      "assets/logo-CoyUjlz4.png"
+      "assets/logo-Bbe7nbNw.png"
     ]
   },
   "src/assets/logo.png": {
-    "file": "assets/logo-CoyUjlz4.png",
+    "file": "assets/logo-Bbe7nbNw.png",
     "src": "src/assets/logo.png"
   }
 }

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Moon, Sun } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 type Theme = "light" | "dark";
 
@@ -10,7 +11,11 @@ function resolveTheme(): Theme {
   return "light";
 }
 
-export default function ThemeToggle() {
+type ThemeToggleProps = {
+  className?: string;
+};
+
+export default function ThemeToggle({ className }: ThemeToggleProps) {
   const [theme, setTheme] = useState<Theme>("light");
 
   useEffect(() => {
@@ -30,7 +35,7 @@ export default function ThemeToggle() {
       type="button"
       size="icon"
       variant="outline"
-      className="fixed top-4 right-4 z-[60] rounded-full shadow-sm"
+      className={cn("fixed top-4 right-4 z-[60] rounded-full shadow-sm", className)}
       onClick={toggleTheme}
       aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
       title={theme === "dark" ? "Light mode" : "Dark mode"}
