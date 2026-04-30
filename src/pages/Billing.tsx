@@ -2,7 +2,11 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { subscriptionApi, workspaceApi } from "@/lib/api";
-import { getCurrentWorkspaceSubscription, isSubscriptionActiveForDisplay } from "@/lib/workspaceSubscription";
+import {
+  getCurrentWorkspaceSubscription,
+  isSubscriptionActiveForDisplay,
+  mergeWorkspaceSubscriptionPayload,
+} from "@/lib/workspaceSubscription";
 import { toastApiSuccess } from "@/lib/appToast";
 import AppLayout from "@/components/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -54,10 +58,14 @@ export default function BillingPage() {
     return buildAvatarSrc(rawLogo);
   }, [selectedWorkspace]);
 
+  const workspaceForSubscription = useMemo(
+    () => mergeWorkspaceSubscriptionPayload(workspaceDetails, selectedWorkspace),
+    [workspaceDetails, selectedWorkspace],
+  );
+
   const currentSubscription = useMemo(() => {
-    const workspaceSource = workspaceDetails || selectedWorkspace;
-    return getCurrentWorkspaceSubscription(workspaceSource);
-  }, [selectedWorkspace, workspaceDetails]);
+    return getCurrentWorkspaceSubscription(workspaceForSubscription);
+  }, [workspaceForSubscription]);
 
   const currentPlanName = useMemo(() => {
     if (!currentSubscription) return "";
@@ -89,12 +97,13 @@ export default function BillingPage() {
   }, [currentSubscription, currentPlanName]);
 
   const subscriptionHistory = useMemo(() => {
-    const source = workspaceDetails || selectedWorkspace;
-    const subscriptions = Array.isArray(source?.subscriptions) ? source.subscriptions : [];
+    const subscriptions = Array.isArray(workspaceForSubscription?.subscriptions)
+      ? workspaceForSubscription.subscriptions
+      : [];
     return [...subscriptions].sort(
       (a, b) => new Date(b?.createdAt || 0).getTime() - new Date(a?.createdAt || 0).getTime()
     );
-  }, [selectedWorkspace, workspaceDetails]);
+  }, [workspaceForSubscription]);
 
   const loadWorkspaceDetails = useCallback(async () => {
     if (!selectedWorkspaceId) {

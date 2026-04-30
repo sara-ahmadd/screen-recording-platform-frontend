@@ -436,7 +436,7 @@ export default function WorkspacesPage() {
                             <img
                               src={logoSrc}
                               alt={`${workspaceData.name || ws.name || "Workspace"} logo`}
-                              className="h-11 w-11 rounded-md object-cover border border-border"
+                              className="h-11 w-11 rounded-md object-contain border border-border"
                               onError={() => {
                                 setHiddenWorkspaceLogos((prev) => ({ ...prev, [`${ws.id}:${logoSrc}`]: true }));
                               }}
@@ -719,7 +719,7 @@ export default function WorkspacesPage() {
                     <img
                       src={editingWorkspaceLogoPreview}
                       alt="Workspace logo preview"
-                      className="h-16 w-16 rounded-md object-cover border border-border"
+                      className="h-16 w-16 rounded-md object-contain border border-border"
                     />
                   </button>
                 ) : (

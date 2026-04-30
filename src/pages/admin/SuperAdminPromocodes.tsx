@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import AppLayout from "@/components/AppLayout";
 import AdminCrudTable from "@/components/admin/AdminCrudTable";
 import { plansApi, superAdminApi } from "@/lib/api";
@@ -9,6 +9,17 @@ export default function SuperAdminPromocodesPage() {
   const [rows, setRows] = useState<any[]>([]);
   const [plans, setPlans] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const statusOptions = useMemo(() => {
+    const discovered = Array.from(
+      new Set(
+        rows
+          .map((row) => String(row?.status || "").trim().toLowerCase())
+          .filter(Boolean),
+      ),
+    );
+    const base = ["active", "inactive", "disabled", "expired"];
+    return Array.from(new Set([...base, ...discovered]));
+  }, [rows]);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -46,8 +57,10 @@ export default function SuperAdminPromocodesPage() {
           title="Promocodes Table"
           rows={rows}
           loading={loading}
+          pinnedColumns={["code", "status", "type", "amount", "duration", "planId"]}
           createDefaults={{
             type: "percentage",
+            status: "active",
             duration: 30,
             amount: 0,
             code: "",
@@ -56,9 +69,9 @@ export default function SuperAdminPromocodesPage() {
             usagePerUserLimit: 1,
             planId: "",
           }}
-          hiddenFormFields={["status"]}
           fieldOptions={{
             type: ["percentage", "fixed"],
+            status: statusOptions,
           }}
           fieldSelectOptions={{
             planId: plans.map((plan: any) => ({
@@ -74,6 +87,7 @@ export default function SuperAdminPromocodesPage() {
             try {
               const createPayload = {
                 type: payload.type,
+                ...(payload.status != null && payload.status !== "" ? { status: payload.status } : {}),
                 duration: Number(payload.duration || 0),
                 amount: Number(payload.amount || 0),
                 code: payload.code,
@@ -92,14 +106,58 @@ export default function SuperAdminPromocodesPage() {
           }}
           onUpdate={async (id, payload) => {
             try {
-              const updatePayload = {
-                ...(payload.code&&{code: payload.code}),
-                ...(payload.status != null && payload.status !== "" ? { status: payload.status } : {}),
-                ...(payload.usagePerUserLimit != null && payload.usagePerUserLimit !== ""
-                  ? { usagePerUserLimit: Number(payload.usagePerUserLimit) }
-                  : {}),
-                ...(payload.planId != null && payload.planId !== "" ? { planId: Number(payload.planId) } : {}),
+              const current = rows.find((row) => Number(row?.id) === Number(id)) || {};
+              const normalizeDate = (value: any) => {
+                if (!value) return "";
+                const asString = String(value);
+                return asString.length >= 10 ? asString.slice(0, 10) : asString;
               };
+              const normalizedCurrent = {
+                type: String(current?.type || ""),
+                duration: current?.duration == null ? null : Number(current.duration),
+                amount: current?.amount == null ? null : Number(current.amount),
+                code: String(current?.code || ""),
+                expirationDate: normalizeDate(current?.expirationDate),
+                usageLimit: current?.usageLimit == null ? null : Number(current.usageLimit),
+                usagePerUserLimit: current?.usagePerUserLimit == null ? null : Number(current.usagePerUserLimit),
+                planId: current?.planId == null || current?.planId === "" ? null : Number(current.planId),
+                status: String(current?.status || ""),
+              };
+              const normalizedNext = {
+                type: String(payload?.type || ""),
+                duration: payload?.duration == null || payload?.duration === "" ? null : Number(payload.duration),
+                amount: payload?.amount == null || payload?.amount === "" ? null : Number(payload.amount),
+                code: String(payload?.code || ""),
+                expirationDate: normalizeDate(payload?.expirationDate),
+                usageLimit: payload?.usageLimit == null || payload?.usageLimit === "" ? null : Number(payload.usageLimit),
+                usagePerUserLimit:
+                  payload?.usagePerUserLimit == null || payload?.usagePerUserLimit === ""
+                    ? null
+                    : Number(payload.usagePerUserLimit),
+                planId: payload?.planId == null || payload?.planId === "" ? null : Number(payload.planId),
+                status: String(payload?.status || ""),
+              };
+              const keys: Array<keyof typeof normalizedNext> = [
+                "type",
+                "duration",
+                "amount",
+                "code",
+                "expirationDate",
+                "usageLimit",
+                "usagePerUserLimit",
+                "planId",
+                "status",
+              ];
+              const updatePayload = keys.reduce<Record<string, any>>((acc, key) => {
+                if (normalizedNext[key] !== normalizedCurrent[key]) {
+                  acc[key] = normalizedNext[key];
+                }
+                return acc;
+              }, {});
+              if (Object.keys(updatePayload).length === 0) {
+                toast({ title: "No changes", description: "No promo code fields were updated." });
+                return;
+              }
               await superAdminApi.promocodes.update(id, updatePayload);
               toast({ title: "Success", description: "Promocode updated successfully." });
               await load();

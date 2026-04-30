@@ -128,14 +128,14 @@ export default function SubscriptionPage() {
       const payloadBase = {
         type: payloadType,
         planId: String(plan.id),
-        subscriptionId: String(currentSubscriptionId),
+        ...(currentSubscriptionId &&{subscriptionId: String(currentSubscriptionId)}),
         workspaceId: selectedWorkspaceId,
         ...(paymentData?.country ? { country: paymentData.country } : {}),
         ...(paymentData?.billingData ? { billingData: paymentData.billingData } : {}),
         ...(promoCodeTrimmed ? { promoCode: promoCodeTrimmed } : {}),
       };
 
-      const subscriptionRes = isFreePlan
+      const subscriptionRes = isFreePlan || !currentSubscriptionId
         ? await subscriptionApi.create(payloadBase as any)
         : await paymentsApi.createCheckoutSession({
             ...payloadBase,

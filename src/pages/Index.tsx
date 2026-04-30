@@ -21,7 +21,7 @@ import ThemeToggle from "@/components/ThemeToggle";
 import NotificationsBell from "@/components/NotificationsBell";
 
 export default function Index() {
-  const { user, selectedWorkspaceId, refreshUser, lastAuthError } = useAuth();
+  const { user, selectedWorkspaceId, refreshUser, lastAuthError, loading } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
@@ -144,8 +144,11 @@ export default function Index() {
   }, []);
 
   useEffect(() => {
-    if (user) return;
     const googleApi = (window as any)?.google?.accounts?.id;
+    if (loading || user?.email) {
+      googleApi?.cancel?.();
+      return;
+    }
     const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID as string | undefined;
     if (!googleReady || !googleApi || !clientId) return;
 
@@ -197,7 +200,7 @@ export default function Index() {
     });
 
     googleApi.prompt();
-  }, [googleReady, lastAuthError, navigate, refreshUser, toast, user]);
+  }, [googleReady, lastAuthError, loading, navigate, refreshUser, toast, user?.email]);
 
   return (
     <div className="min-h-screen bg-background">

@@ -1,9 +1,24 @@
 import { isFreePlan } from "@/lib/plans";
 
+function normalizeSubscriptions(raw: unknown): any[] {
+  if (!Array.isArray(raw)) return [];
+  const out: any[] = [];
+  const stack = [...raw];
+  while (stack.length > 0) {
+    const item = stack.shift();
+    if (Array.isArray(item)) {
+      stack.unshift(...item);
+      continue;
+    }
+    if (item && typeof item === "object") out.push(item);
+  }
+  return out;
+}
+
 export function buildPlanNameByIdFromWorkspaces(workspaces: any[] | undefined): Map<number, string> {
   const map = new Map<number, string>();
   for (const ws of workspaces || []) {
-    const subscriptions = Array.isArray(ws?.subscriptions) ? ws.subscriptions : [];
+    const subscriptions = normalizeSubscriptions(ws?.subscriptions);
     for (const sub of subscriptions) {
       const id = Number(sub?.planId);
       const name = sub?.plan?.name;
@@ -24,6 +39,8 @@ export function isSubscriptionActiveForDisplay(sub: any | null): boolean {
   const raw = sub.status;
   const s = raw == null || raw === "" ? "" : String(raw).toLowerCase();
   if (s === "active" || s === "trialing" || s === "past_due") return true;
+  // Payment/checkout in progress — still the workspace's current subscription row.
+  if (s === "pending" || s === "incomplete" || s === "incomplete_expired") return true;
   // Backends sometimes omit status on free-tier rows; still treat as current.
   if (!s && isFreePlan(sub.plan)) return true;
   return false;
@@ -33,17 +50,63 @@ function newestFirst(a: any, b: any) {
   return new Date(b?.createdAt || 0).getTime() - new Date(a?.createdAt || 0).getTime();
 }
 
+/**
+ * Members/detail API responses sometimes omit nested `plan` on subscriptions; `/auth/me` usually has it.
+ * Merge so Billing and other UIs keep full plan fields when ids match.
+ */
+export function mergeWorkspaceSubscriptionPayload(fromApi: any | null, fromProfile: any | null): any | null {
+  if (!fromProfile && !fromApi) return null;
+  if (!fromApi) return fromProfile;
+  if (!fromProfile) return fromApi;
+
+  const profileSubs: any[] = normalizeSubscriptions(fromProfile.subscriptions);
+  const apiSubs: any[] = normalizeSubscriptions(fromApi.subscriptions);
+  const profileById = new Map(profileSubs.map((s) => [Number(s?.id), s]));
+
+  const hasUsefulPlan = (p: any) =>
+    p &&
+    typeof p === "object" &&
+    (p.name != null ||
+      p.id != null ||
+      Number(p.monthlyPrice ?? 0) > 0 ||
+      Number(p.yearlyPrice ?? 0) > 0);
+
+  const mergedSubs =
+    apiSubs.length > 0
+      ? apiSubs.map((s) => {
+          const rich = profileById.get(Number(s?.id));
+          return {
+            ...(rich || {}),
+            ...s,
+            plan: hasUsefulPlan(s?.plan) ? s.plan : rich?.plan ?? s?.plan,
+          };
+        })
+      : profileSubs;
+
+  return {
+    ...fromProfile,
+    ...fromApi,
+    subscriptions: mergedSubs,
+    subscriptionId: fromApi.subscriptionId ?? fromProfile.subscriptionId,
+  };
+}
+
 /** Matches Billing / workspace members resolution — only non-terminated subscriptions. */
 export function getCurrentWorkspaceSubscription(workspace: any | null): any | null {
   if (!workspace) return null;
-  const subscriptions: any[] = Array.isArray(workspace.subscriptions) ? workspace.subscriptions : [];
+  const subscriptions: any[] = normalizeSubscriptions(workspace.subscriptions);
 
   if (subscriptions.length === 0) {
     const single = workspace.subscription || null;
     return isSubscriptionActiveForDisplay(single) ? single : null;
   }
 
-  const activeSubscriptions = subscriptions.filter(isSubscriptionActiveForDisplay);
+  let activeSubscriptions = subscriptions.filter(isSubscriptionActiveForDisplay);
+  // If nothing "billable-active" yet, still show the row pointed to by workspace.subscriptionId (e.g. pending).
+  if (activeSubscriptions.length === 0 && workspace.subscriptionId && subscriptions.length > 0) {
+    const pinned = subscriptions.find((s) => Number(s?.id) === Number(workspace.subscriptionId));
+    if (pinned) activeSubscriptions = [pinned];
+  }
   if (activeSubscriptions.length === 0) return null;
 
   const workspaceSubscriptionId = workspace.subscriptionId;

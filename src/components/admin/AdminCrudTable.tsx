@@ -26,6 +26,7 @@ type AdminCrudTableProps = {
   fieldOptions?: Record<string, string[]>;
   fieldSelectOptions?: Record<string, Array<{ label: string; value: string }>>;
   fieldInputTypes?: Record<string, "text" | "number" | "date">;
+  pinnedColumns?: string[];
   allowCreate?: boolean;
   renderRowActions?: (row: any) => ReactNode;
   showSearchInput?: boolean;
@@ -53,6 +54,7 @@ export default function AdminCrudTable({
   fieldOptions = {},
   fieldSelectOptions = {},
   fieldInputTypes = {},
+  pinnedColumns = [],
   allowCreate = true,
   renderRowActions,
   showSearchInput = true,
@@ -88,8 +90,11 @@ export default function AdminCrudTable({
         if (!hiddenSet.has(k)) keys.add(k);
       });
     });
-    return [...keys].slice(0, 6);
-  }, [rows, hiddenSet]);
+    const allKeys = [...keys];
+    const prioritized = pinnedColumns.filter((col) => allKeys.includes(col) && !hiddenSet.has(col));
+    const rest = allKeys.filter((col) => !prioritized.includes(col));
+    return [...prioritized, ...rest].slice(0, 6);
+  }, [rows, hiddenSet, pinnedColumns]);
 
   const filteredRows = useMemo(() => {
     if (!search.trim()) return rows;
