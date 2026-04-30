@@ -64,39 +64,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-screen bg-background">
-      {!isSidebarOpen && (
-        <div className="fixed top-0 left-4 z-[60] flex w-[95%] mx-auto items-center justify-between border-b bg-background px-2 py-1.5">
-          <div className="flex items-center gap-2">
-            <Link to="/" className="flex items-center gap-2">
-              <Logo imageClassName="h-auto" withText textClassName="font-bold" />
-            </Link>
-            
-            <Button
-              type="button"
-              size="icon"
-              variant="ghost"
-              className="h-8 w-8"
-              onClick={() => setIsSidebarOpen(true)}
-              title="Show sidebar"
-              aria-label="Show sidebar"
-            >
-              <PanelLeftOpen className="h-4 w-4" />
-            </Button>
-          </div>
-          <div className="flex items-center gap-2">
-            <NotificationsBell className="static" />
-            <ThemeToggle className="static" />
-          </div>
-        </div>
-      )}
-
-      {isSidebarOpen && (
-        <>
-          <NotificationsBell />
-          <ThemeToggle />
-        </>
-      )}
-
       {isSidebarOpen && (
         <button
           type="button"
@@ -109,8 +76,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       {/* Sidebar */}
       <aside
         className={cn(
-          "fixed left-0 top-0 z-40 h-screen w-64 flex-col bg-sidebar border-r border-sidebar-border transition-transform duration-200 overflow-y-auto",
-          isSidebarOpen ? "translate-x-0 flex" : "-translate-x-full hidden md:flex"
+          "fixed left-0 top-0 z-40 h-screen w-64 flex-col bg-sidebar border-r border-sidebar-border transition-transform duration-200 overflow-y-auto flex",
+          isSidebarOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
         <div className="p-6 flex items-center justify-between">
@@ -181,22 +148,35 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         </div>
       </aside>
 
-      {/* Mobile header */}
       <div
         className={cn(
           "flex min-h-screen flex-col transition-all",
-          isSidebarOpen ? "md:ml-64" : "md:ml-0 md:pt-20"
+          isSidebarOpen ? "md:ml-64" : "md:ml-0"
         )}
       >
-        <header className="md:hidden sticky top-0 z-30 flex items-center justify-between p-4 border-b border-border bg-background">
-          <Link to="/" className="flex items-center gap-2">
-            <Logo imageClassName="h-auto" withText textClassName="font-bold" />
-          </Link>
-          <Button type="button" size="icon" variant="outline" onClick={() => setIsSidebarOpen((v) => !v)}>
-            {isSidebarOpen ? <PanelLeftClose className="h-4 w-4" /> : <PanelLeftOpen className="h-4 w-4" />}
-          </Button>
+        <header className="sticky top-0 z-30 border-b border-border bg-background/95 backdrop-blur-sm">
+          <div className={`flex h-16 items-center ${isSidebarOpen ? 'justify-end' : 'justify-between'} px-4 md:px-6`}>
+           {!isSidebarOpen&& <div className="flex min-w-0 items-center gap-2">
+              <Button
+                type="button"
+                size="icon"
+                variant="outline"
+                onClick={() => setIsSidebarOpen((v) => !v)}
+                aria-label={isSidebarOpen ? "Hide sidebar" : "Show sidebar"}
+              >
+                {isSidebarOpen ? <PanelLeftClose className="h-4 w-4" /> : <PanelLeftOpen className="h-4 w-4" />}
+              </Button>
+              <Link to="/" className="flex min-w-0 items-center gap-2">
+                <Logo imageClassName="h-auto" withText textClassName="font-bold" />
+              </Link>
+            </div>}
+            <div className="flex items-center gap-2">
+              <NotificationsBell className="static h-9 w-9" />
+              <ThemeToggle className="static h-9 w-9" />
+            </div>
+          </div>
         </header>
-        <main className="flex-1 mt-14">{children}</main>
+        <main className="flex-1">{children}</main>
       </div>
     </div>
   );

@@ -40,6 +40,7 @@ export default function Index() {
   const { toast } = useToast();
   const [plans, setPlans] = useState<any[]>([]);
   const [plansLoading, setPlansLoading] = useState(true);
+  const [googleReady, setGoogleReady] = useState(false);
   const [successDialogOpen, setSuccessDialogOpen] = useState(false);
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
   const [workspaceRequiredDialogOpen, setWorkspaceRequiredDialogOpen] = useState(false);
@@ -110,10 +111,43 @@ export default function Index() {
   }, [searchParams]);
 
   useEffect(() => {
+    if ((window as any)?.google?.accounts?.id) {
+      setGoogleReady(true);
+      return;
+    }
+
+    const onScriptReady = () => {
+      if ((window as any)?.google?.accounts?.id) {
+        setGoogleReady(true);
+      }
+    };
+
+    const script = document.querySelector('script[src="https://accounts.google.com/gsi/client"]');
+    if (script) {
+      script.addEventListener("load", onScriptReady, { once: true });
+      const timeout = window.setTimeout(onScriptReady, 800);
+      return () => {
+        script.removeEventListener("load", onScriptReady);
+        window.clearTimeout(timeout);
+      };
+    }
+
+    const dynamicScript = document.createElement("script");
+    dynamicScript.src = "https://accounts.google.com/gsi/client";
+    dynamicScript.async = true;
+    dynamicScript.defer = true;
+    dynamicScript.onload = onScriptReady;
+    document.head.appendChild(dynamicScript);
+    return () => {
+      dynamicScript.onload = null;
+    };
+  }, []);
+
+  useEffect(() => {
     if (user) return;
     const googleApi = (window as any)?.google?.accounts?.id;
     const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID as string | undefined;
-    if (!googleApi || !clientId) return;
+    if (!googleReady || !googleApi || !clientId) return;
 
     googleApi.initialize({
       client_id: clientId,
@@ -163,12 +197,10 @@ export default function Index() {
     });
 
     googleApi.prompt();
-  }, [lastAuthError, navigate, refreshUser, toast, user]);
+  }, [googleReady, lastAuthError, navigate, refreshUser, toast, user]);
 
   return (
     <div className="min-h-screen bg-background">
-      <ThemeToggle />
-      <NotificationsBell />
       {/* Nav */}
       <nav className="border-b border-border/50 backdrop-blur-sm sticky top-0 pt-3 z-50 bg-background/80">
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
@@ -186,9 +218,15 @@ export default function Index() {
               </Link>
             ))}
             </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 md:gap-3">
+            {user && (
+              <>
+                <NotificationsBell className="static h-9 w-9" />
+                <ThemeToggle className="static h-9 w-9" />
+              </>
+            )}
             {user ? (
-              <Link to="/profile" className="flex items-center gap-2 rounded-full border border-border bg-card/70 px-3 py-1.5">
+              <Link to="/profile" className="flex items-center gap-2 rounded-full border border-border bg-card/70 px-2.5 py-1.5 md:px-3">
                 {avatarSrc ? (
                   <img src={avatarSrc} alt={user.user_name || "User avatar"} loading="lazy" className="h-7 w-7 rounded-full object-cover" />
                 ) : (
@@ -196,10 +234,11 @@ export default function Index() {
                     {user?.user_name?.[0]?.toUpperCase() || "U"}
                   </div>
                 )}
-                <span className="text-sm text-foreground">{user.email}</span>
+                <span className="hidden lg:inline max-w-[220px] truncate text-sm text-foreground">{user.email}</span>
               </Link>
             ) : (
               <>
+                <ThemeToggle className="static h-9 w-9" />
                 <Link to="/login"><Button variant="ghost">Sign in</Button></Link>
                 <Link to="/register"><Button className="gradient-primary">Get Started</Button></Link>
               </>
