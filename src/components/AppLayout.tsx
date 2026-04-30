@@ -171,8 +171,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               </Link>
             </div>}
             <div className="flex items-center gap-2">
-              <NotificationsBell className="static h-9 w-9" />
-              <ThemeToggle className="static h-9 w-9" />
+              <NotificationsBell className="sticky h-9 w-9" />
+              <ThemeToggle className="sticky h-9 w-9" />
             </div>
           </div>
         </header>

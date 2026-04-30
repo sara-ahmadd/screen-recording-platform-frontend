@@ -221,8 +221,8 @@ export default function Index() {
           <div className="flex items-center gap-2 md:gap-3">
             {user && (
               <>
-                <NotificationsBell className="static h-9 w-9" />
-                <ThemeToggle className="static h-9 w-9" />
+                <NotificationsBell className="sticky h-9 w-9" />
+                <ThemeToggle className="sticky h-9 w-9" />
               </>
             )}
             {user ? (
