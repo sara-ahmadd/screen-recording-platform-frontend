@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import AppLayout from "@/components/AppLayout";
-import { plansApi, subscriptionApi } from "@/lib/api";
+import { plansApi } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -9,10 +9,8 @@ import { Button } from "@/components/ui/button";
 import { Check, Loader2, Zap } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { isFreePlan } from "@/lib/plans";
-import { toastApiSuccess } from "@/lib/appToast";
 import {
   getCurrentWorkspaceSubscription,
-  isPaidSubscription,
   workspaceSubscriptionPlanId,
 } from "@/lib/workspaceSubscription";
 import { usePaidToFreeSubscribe } from "@/hooks/usePaidToFreeSubscribe";
@@ -20,10 +18,9 @@ import { PaidToFreeDialogs } from "@/components/PaidToFreeDialogs";
 
 export default function PlansPage() {
   const { toast } = useToast();
-  const { user, selectedWorkspaceId, refreshUser } = useAuth();
+  const { user, selectedWorkspaceId } = useAuth();
   const [plans, setPlans] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [freeCancelLoading, setFreeCancelLoading] = useState(false);
 
   const selectedWorkspace = useMemo(() => {
     if (!user || !selectedWorkspaceId) return null;
@@ -114,28 +111,6 @@ export default function PlansPage() {
       });
       return;
     }
-
-    if (currentWorkspaceSubscription?.id && isPaidSubscription(currentWorkspaceSubscription)) {
-      setFreeCancelLoading(true);
-      try {
-        const res = await subscriptionApi.update(Number(currentWorkspaceSubscription.id));
-        toastApiSuccess(res, {
-          title: "Subscription updated",
-          fallbackDescription: "Your paid subscription was cancelled and switched to free.",
-        });
-        await refreshUser();
-      } catch (err: any) {
-        toast({
-          title: "Could not cancel subscription",
-          description: err?.message || "Please try again.",
-          variant: "destructive",
-        });
-      } finally {
-        setFreeCancelLoading(false);
-      }
-      return;
-    }
-
     requestFreeSubscribe(plan);
   };
 
@@ -202,10 +177,10 @@ export default function PlansPage() {
                           type="button"
                           className={`w-full ${isPopular ? "gradient-primary" : ""}`}
                           variant={isPopular ? "default" : "outline"}
-                          disabled={busyPlanId === plan.id || freeCancelLoading}
+                          disabled={busyPlanId === plan.id}
                           onClick={() => handleFreePlanSelect(plan)}
                         >
-                          {busyPlanId === plan.id || freeCancelLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Subscribe"}
+                          {busyPlanId === plan.id ? <Loader2 className="h-4 w-4 animate-spin" /> : "Subscribe"}
                         </Button>
                       )
                     ) : (

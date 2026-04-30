@@ -101,7 +101,7 @@ export function PaidToFreeDialogs({
           </DialogHeader>
           <DialogFooter>
             <Button className="gradient-primary" onClick={() => void onPeriodAcknowledge()}>
-              Continue
+              Close
             </Button>
           </DialogFooter>
         </DialogContent>

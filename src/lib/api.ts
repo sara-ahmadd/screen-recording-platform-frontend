@@ -552,6 +552,19 @@ export const subscriptionApi = {
     apiFetch("/subscription", { method: "POST", body: JSON.stringify(data) }),
   update: (id: number) =>
     apiFetch(`/subscription/update/${id}`, { method: "PATCH" }),
+  downgrade: (
+    id: number,
+    data: {
+      type: "null";
+      planId: string;
+      workspaceId: string;
+      subscriptionId: string;
+    },
+  ) =>
+    apiFetch(`/subscription/downgrade/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    }),
   details: (id: number) => apiFetch(`/subscription/details/${id}`),
   paymobStatus: (id: number) => apiFetch(`/subscription/paymob/status/${id}`),
   upgrade: (

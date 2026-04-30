@@ -41,6 +41,8 @@ export default function Index() {
   const [plans, setPlans] = useState<any[]>([]);
   const [plansLoading, setPlansLoading] = useState(true);
   const [googleReady, setGoogleReady] = useState(false);
+  const [showGoogleFallback, setShowGoogleFallback] = useState(false);
+  const oneTapRetryTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [successDialogOpen, setSuccessDialogOpen] = useState(false);
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
   const [workspaceRequiredDialogOpen, setWorkspaceRequiredDialogOpen] = useState(false);
@@ -147,6 +149,11 @@ export default function Index() {
     const googleApi = (window as any)?.google?.accounts?.id;
     if (loading || user?.email) {
       googleApi?.cancel?.();
+      if (oneTapRetryTimeoutRef.current) {
+        clearTimeout(oneTapRetryTimeoutRef.current);
+        oneTapRetryTimeoutRef.current = null;
+      }
+      setShowGoogleFallback(false);
       return;
     }
     const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID as string | undefined;
@@ -157,6 +164,8 @@ export default function Index() {
       auto_select: false,
       cancel_on_tap_outside: true,
       context: "signin",
+      itp_support: true,
+      use_fedcm_for_prompt: true,
       callback: async (response: { credential?: string }) => {
         const idToken = response?.credential;
         if (!idToken) return;
@@ -198,8 +207,42 @@ export default function Index() {
         }
       },
     });
-
-    googleApi.prompt();
+    let retries = 0;
+    const promptOneTap = () => {
+      googleApi.prompt((notification: any) => {
+        const displayed = notification?.isDisplayed?.() === true;
+        if (displayed) {
+          setShowGoogleFallback(false);
+          return;
+        }
+        const skipped = notification?.isSkippedMoment?.() === true;
+        const notDisplayed = notification?.isNotDisplayed?.() === true;
+        if (!skipped && !notDisplayed) return;
+        setShowGoogleFallback(true);
+        const fallbackNode = document.getElementById("google-one-tap-fallback");
+        if (fallbackNode) {
+          fallbackNode.innerHTML = "";
+          googleApi.renderButton(fallbackNode, {
+            type: "standard",
+            theme: "outline",
+            size: "large",
+            text: "continue_with",
+            shape: "pill",
+          });
+        }
+        if (retries < 2) {
+          retries += 1;
+          oneTapRetryTimeoutRef.current = setTimeout(promptOneTap, 1200);
+        }
+      });
+    };
+    promptOneTap();
+    return () => {
+      if (oneTapRetryTimeoutRef.current) {
+        clearTimeout(oneTapRetryTimeoutRef.current);
+        oneTapRetryTimeoutRef.current = null;
+      }
+    };
   }, [googleReady, lastAuthError, loading, navigate, refreshUser, toast, user?.email]);
 
   return (
@@ -288,6 +331,11 @@ export default function Index() {
             </>
           )}
         </div>
+        {!user && showGoogleFallback && (
+          <div className="mt-4 flex justify-center">
+            <div id="google-one-tap-fallback" />
+          </div>
+        )}
         <p className="mt-6 text-sm text-muted-foreground max-w-3xl mx-auto">
           theRec is the official website for recording your screen, uploading videos, and collaborating with your workspace team.
           To use core features, we request account/profile information and recording metadata only to authenticate users,

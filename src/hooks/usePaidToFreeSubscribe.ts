@@ -6,7 +6,6 @@ import { toastApiSuccess } from "@/lib/appToast";
 import {
   getCurrentWorkspaceSubscription,
   isPaidSubscription,
-  messageFromSubscriptionUpdateResponse,
   subscriptionDisplayName,
 } from "@/lib/workspaceSubscription";
 
@@ -14,7 +13,11 @@ function formatPeriodEnd(value?: string | null) {
   if (!value) return null;
   const dt = new Date(value);
   if (Number.isNaN(dt.getTime())) return null;
-  return dt.toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" });
+  return dt.toLocaleDateString(undefined, {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
 }
 
 export function usePaidToFreeSubscribe() {
@@ -26,11 +29,17 @@ export function usePaidToFreeSubscribe() {
   const [pendingPlan, setPendingPlan] = useState<any | null>(null);
   const [paidPlanLabel, setPaidPlanLabel] = useState("");
   const [periodEndLabel, setPeriodEndLabel] = useState<string | null>(null);
-  const [cancelSuccessMessage, setCancelSuccessMessage] = useState<string | null>(null);
+  const [cancelSuccessMessage, setCancelSuccessMessage] = useState<
+    string | null
+  >(null);
 
   const selectedWorkspace = useMemo(() => {
     if (!user || !selectedWorkspaceId) return null;
-    return (user.workspaces || []).find((ws: any) => String(ws.id) === selectedWorkspaceId) || null;
+    return (
+      (user.workspaces || []).find(
+        (ws: any) => String(ws.id) === selectedWorkspaceId,
+      ) || null
+    );
   }, [user, selectedWorkspaceId]);
 
   const runCreateFree = useCallback(
@@ -41,16 +50,20 @@ export function usePaidToFreeSubscribe() {
         planId: String(plan.id),
         workspaceId: selectedWorkspaceId,
       });
-      const sessionUrl = res?.session_url || res?.sessionUrl || res?.url || res?.checkoutUrl;
+      const sessionUrl =
+        res?.session_url || res?.sessionUrl || res?.url || res?.checkoutUrl;
       if (sessionUrl) {
         const opened = window.open(sessionUrl, "_blank", "noopener,noreferrer");
         if (!opened) window.location.href = sessionUrl;
         return;
       }
-      toastApiSuccess(res, { title: "Subscribed", fallbackDescription: "You are now on the free plan." });
+      toastApiSuccess(res, {
+        title: "Subscribed",
+        fallbackDescription: "You are now on the free plan.",
+      });
       await refreshUser();
     },
-    [selectedWorkspaceId, toast, refreshUser]
+    [selectedWorkspaceId, toast, refreshUser],
   );
 
   const handlePeriodDialogContinue = useCallback(async () => {
@@ -60,14 +73,7 @@ export function usePaidToFreeSubscribe() {
     setPeriodEndLabel(null);
     setCancelSuccessMessage(null);
     if (!plan) return;
-    setBusyPlanId(plan.id);
-    try {
-      await runCreateFree(plan);
-    } catch (err: any) {
-      toast({ title: "Subscription failed", description: err?.message, variant: "destructive" });
-    } finally {
-      setBusyPlanId(null);
-    }
+    setConfirmOpen(false);
   }, [pendingPlan, runCreateFree, toast]);
 
   const handleConfirmDowngrade = useCallback(async () => {
@@ -83,40 +89,48 @@ export function usePaidToFreeSubscribe() {
       return;
     }
 
-    const wasPaid = isPaidSubscription(sub);
-    const periodEnd = formatPeriodEnd(sub.currentPeriodEnd);
-
     setBusyPlanId(pendingPlan.id);
     try {
-      const updateRes = await subscriptionApi.update(Number(sub.id));
+      const downgradePayload = {
+        type: "null" as const,
+        planId: String(pendingPlan.id),
+        workspaceId: String(selectedWorkspaceId),
+        subscriptionId: String(sub.id),
+      };
+      const updateRes = await subscriptionApi.downgrade(
+        Number(sub.id),
+        downgradePayload,
+      );
       await refreshUser();
+      toastApiSuccess(updateRes, {
+        title: "Subscription updated",
+        fallbackDescription:
+          "Your subscription was downgraded to the free plan.",
+      });
       setConfirmOpen(false);
-      if (wasPaid) {
-        setPeriodEndLabel(periodEnd);
-        setCancelSuccessMessage(messageFromSubscriptionUpdateResponse(updateRes));
-        setPeriodDialogOpen(true);
-      } else {
-        const plan = pendingPlan;
-        setPendingPlan(null);
-        await runCreateFree(plan);
-      }
+      setPendingPlan(null);
+      setPeriodEndLabel(null);
+      setCancelSuccessMessage(null);
+      setPeriodDialogOpen(false);
     } catch (err: any) {
       toast({
-        title: "Could not cancel subscription",
+        title: "Could not downgrade subscription",
         description: err?.message || "Please try again.",
         variant: "destructive",
       });
     } finally {
       setBusyPlanId(null);
     }
-  }, [pendingPlan, selectedWorkspaceId, selectedWorkspace, toast, refreshUser, runCreateFree]);
+  }, [pendingPlan, selectedWorkspaceId, selectedWorkspace, toast, refreshUser]);
 
   const requestFreeSubscribe = useCallback(
     (plan: any) => {
       if (!user || !selectedWorkspaceId || !plan?.id) {
         toast({
           title: "Workspace required",
-          description: user ? "Please select a workspace first." : "Please sign in to subscribe.",
+          description: user
+            ? "Please select a workspace first."
+            : "Please sign in to subscribe.",
           variant: "destructive",
         });
         return;
@@ -143,13 +157,17 @@ export function usePaidToFreeSubscribe() {
         try {
           await runCreateFree(plan);
         } catch (err: any) {
-          toast({ title: "Subscription failed", description: err.message, variant: "destructive" });
+          toast({
+            title: "Subscription failed",
+            description: err.message,
+            variant: "destructive",
+          });
         } finally {
           setBusyPlanId(null);
         }
       })();
     },
-    [user, selectedWorkspaceId, selectedWorkspace, toast, runCreateFree]
+    [user, selectedWorkspaceId, selectedWorkspace, toast, runCreateFree],
   );
 
   const cancelDowngradeConfirm = useCallback(() => {
