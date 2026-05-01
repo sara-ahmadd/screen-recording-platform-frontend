@@ -27,6 +27,7 @@ const superAdminNavItems = [
   { href: "/super-admin/promocodes", icon: Shield, label: "All Promocodes" },
   { href: "/super-admin/analytics", icon: Shield, label: "Analytics Overview" },
   { href: "/super-admin/analytics-visuals", icon: Shield, label: "Analytics Visuals" },
+  { href: "/super-admin/subscriptions", icon: Shield, label: "Subscriptions" },
   { href: "/super-admin/feedback", icon: Shield, label: "All Feedback" },
 ];
 

@@ -16,7 +16,10 @@ import { toastApiSuccess } from "@/lib/appToast";
 import { useConfirmDialog } from "@/contexts/ConfirmDialogContext";
 import { Play, Download, Link2, Trash2, Droplets, Edit2, Loader2, ArrowLeft, RotateCcw, SearchX, LayoutDashboard } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { getCurrentWorkspaceSubscription, isPaidSubscription } from "@/lib/workspaceSubscription";
+import {
+  getCurrentWorkspaceSubscription,
+  hasSubscriptionPlanFeature,
+} from "@/lib/workspaceSubscription";
 import { resumeScreenRecordingFromServer } from "@/lib/resumeScreenUpload";
 import { trackClientEvent } from "@/lib/analyticsClient";
 
@@ -47,9 +50,27 @@ export default function RecordingDetailPage() {
     return user.workspaces.find((w: any) => String(w.id) === selectedWorkspaceId) ?? null;
   }, [selectedWorkspaceId, user?.workspaces]);
 
+  const currentWorkspaceSubscription = useMemo(() => {
+    return getCurrentWorkspaceSubscription(selectedWorkspace);
+  }, [selectedWorkspace]);
+
+  const canDownloadVideo = useMemo(() => {
+    return hasSubscriptionPlanFeature(
+      currentWorkspaceSubscription,
+      "canDownloadVideos",
+    );
+  }, [currentWorkspaceSubscription]);
+
+  const canRemoveWatermark = useMemo(() => {
+    return hasSubscriptionPlanFeature(
+      currentWorkspaceSubscription,
+      "canRemoveWaterMark",
+    );
+  }, [currentWorkspaceSubscription]);
+
   const isFreePlanWorkspace = useMemo(() => {
     const sub = getCurrentWorkspaceSubscription(selectedWorkspace);
-    return !isPaidSubscription(sub);
+    return String(sub?.plan?.name || "").toLowerCase() === "free";
   }, [selectedWorkspace]);
 
   const normalizeRecording = useCallback((rec: any) => {
@@ -399,7 +420,13 @@ export default function RecordingDetailPage() {
                 src={recording.videoUrl}
                 controls
                 controlsList="nodownload"
+                disablePictureInPicture
                 onContextMenu={(e) => e.preventDefault()}
+                onKeyDown={(e) => {
+                  if ((e.ctrlKey || e.metaKey) && ["s", "u", "p"].includes(e.key.toLowerCase())) {
+                    e.preventDefault();
+                  }
+                }}
                 className="w-full h-full"
               />
             ) : (
@@ -486,7 +513,7 @@ export default function RecordingDetailPage() {
                   Resume Upload
                 </Button>
               )}
-              {isFreePlanWorkspace ? (
+              {!canDownloadVideo ? (
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <span className="inline-flex" tabIndex={0}>
@@ -496,7 +523,7 @@ export default function RecordingDetailPage() {
                     </span>
                   </TooltipTrigger>
                   <TooltipContent side="top" className="z-[100] max-w-[260px] whitespace-normal text-center">
-                    Upgrade your plan to download this video.
+                    Your current plan does not allow video downloads.
                   </TooltipContent>
                 </Tooltip>
               ) : (
@@ -518,7 +545,7 @@ export default function RecordingDetailPage() {
                   </TooltipContent>
                 )}
               </Tooltip>
-              {isFreePlanWorkspace ? (
+              {!canRemoveWatermark ? (
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <span className="inline-flex" tabIndex={0}>
@@ -528,7 +555,7 @@ export default function RecordingDetailPage() {
                     </span>
                   </TooltipTrigger>
                   <TooltipContent side="top" className="z-[100] max-w-[260px] whitespace-normal text-center">
-                    Upgrade your plan to remove the watermark from this video.
+                    Your current plan does not allow watermark removal.
                   </TooltipContent>
                 </Tooltip>
               ) : (

@@ -18,7 +18,7 @@
     "/assets/logo-Bbe7nbNw.png"
   ],
   "\u0000/Users/saraahmad/Documents/screen-recorder-frontend-lovable/node_modules/react-dom/client.js?commonjs-exports": [
-    "/assets/client-Buw0EqCp.js"
+    "/assets/client-D1gqtM6B.js"
   ],
   "\u0000/Users/saraahmad/Documents/screen-recorder-frontend-lovable/node_modules/react-dom/index.js?commonjs-module": [
     "/assets/logo-Bbe7nbNw.png"
@@ -1848,7 +1848,7 @@
     "/assets/logo-Bbe7nbNw.png"
   ],
   "node_modules/react-dom/client.js": [
-    "/assets/client-Buw0EqCp.js"
+    "/assets/client-D1gqtM6B.js"
   ],
   "node_modules/react-dom/index.js": [
     "/assets/logo-Bbe7nbNw.png"
@@ -2601,6 +2601,9 @@
     "/assets/logo-Bbe7nbNw.png"
   ],
   "src/pages/admin/SuperAdminRecordings.tsx": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
+  "src/pages/admin/SuperAdminSubscriptions.tsx": [
     "/assets/logo-Bbe7nbNw.png"
   ],
   "src/pages/admin/SuperAdminUsers.tsx": [

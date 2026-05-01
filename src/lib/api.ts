@@ -973,4 +973,28 @@ export const superAdminApi = {
       return apiFetch(`/feedback/all?${sp}`);
     },
   },
+  subscriptions: {
+    list: (
+      params: {
+        page?: number;
+        limit?: number;
+        order?: "DESC" | "ASC";
+        status?: "active" | "canceled" | "past_due" | "pending";
+        type?: "monthly" | "yearly" | "none";
+        dateFrom?: string;
+        dateTo?: string;
+      } = {},
+    ) => {
+      const sp = new URLSearchParams();
+      if (params.page) sp.set("page", String(params.page));
+      if (params.limit) sp.set("limit", String(params.limit));
+      if (params.order) sp.set("order", params.order);
+      if (params.status) sp.set("status", params.status);
+      if (params.type) sp.set("type", params.type);
+      if (params.dateFrom) sp.set("dateFrom", params.dateFrom);
+      if (params.dateTo) sp.set("dateTo", params.dateTo);
+      const query = sp.toString();
+      return apiFetch(`/super-admin/subscriptions${query ? `?${query}` : ""}`);
+    },
+  },
 };

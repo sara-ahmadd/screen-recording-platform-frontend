@@ -134,6 +134,14 @@ export function isPaidSubscription(sub: any | null): boolean {
   return false;
 }
 
+export function hasSubscriptionPlanFeature(
+  sub: any | null,
+  feature: "canDownloadVideos" | "canRemoveWaterMark" | "canSharePublicLink",
+): boolean {
+  if (!sub || !sub.plan) return false;
+  return Boolean(sub.plan?.[feature]);
+}
+
 export function subscriptionDisplayName(sub: any): string {
   const raw = sub?.plan?.name;
   if (raw && String(raw).trim()) return String(raw);
