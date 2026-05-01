@@ -139,8 +139,18 @@ export function WorkspaceActiveSubscriptionDetails({
                     <p className="mt-1 text-sm font-medium">{formatDate(currentSubscription.currentPeriodEnd)}</p>
                   </div>
                   <div className="rounded-md border border-border p-3">
+                    <p className="text-xs uppercase tracking-wide text-muted-foreground">Next billing date</p>
+                    <p className="mt-1 text-sm font-medium">{formatDate(currentSubscription.nextBillingDate)}</p>
+                  </div>
+                  <div className="rounded-md border border-border p-3">
                     <p className="text-xs uppercase tracking-wide text-muted-foreground">Auto renewal</p>
-                    <p className="mt-1 text-sm font-medium">{currentSubscription.stripeSubscriptionId ? "On" : "Off"}</p>
+                    <p className="mt-1 text-sm font-medium">
+                      {typeof currentSubscription.autoRenewal === "boolean"
+                        ? currentSubscription.autoRenewal
+                          ? "On"
+                          : "Off"
+                        : "Off"}
+                    </p>
                   </div>
                   <div className="rounded-md border border-border p-3">
                     <p className="text-xs uppercase tracking-wide text-muted-foreground">Plan limits</p>

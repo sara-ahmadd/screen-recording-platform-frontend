@@ -18,7 +18,7 @@
     "/assets/logo-Bbe7nbNw.png"
   ],
   "\u0000/Users/saraahmad/Documents/screen-recorder-frontend-lovable/node_modules/react-dom/client.js?commonjs-exports": [
-    "/assets/client-BdFavBuf.js"
+    "/assets/client-Buw0EqCp.js"
   ],
   "\u0000/Users/saraahmad/Documents/screen-recorder-frontend-lovable/node_modules/react-dom/index.js?commonjs-module": [
     "/assets/logo-Bbe7nbNw.png"
@@ -54,6 +54,9 @@
     "/assets/logo-Bbe7nbNw.png"
   ],
   "\u0000vite/preload-helper.js": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
+  "../../../../@vite-plugin-pwa/virtual:pwa-register": [
     "/assets/logo-Bbe7nbNw.png"
   ],
   "index.html": [
@@ -1845,7 +1848,7 @@
     "/assets/logo-Bbe7nbNw.png"
   ],
   "node_modules/react-dom/client.js": [
-    "/assets/client-BdFavBuf.js"
+    "/assets/client-Buw0EqCp.js"
   ],
   "node_modules/react-dom/index.js": [
     "/assets/logo-Bbe7nbNw.png"
@@ -2302,6 +2305,9 @@
   ],
   "node_modules/vite-react-ssg/node_modules/react-helmet-async/lib/index.module.js": [
     "/assets/logo-Bbe7nbNw.png"
+  ],
+  "node_modules/workbox-window/build/workbox-window.prod.es5.mjs": [
+    "/assets/workbox-window.prod.es5-vqzQaGvo.js"
   ],
   "node_modules/zod/v3/ZodError.js": [
     "/assets/logo-Bbe7nbNw.png"

@@ -254,6 +254,10 @@ export default function BillingPage() {
                         <p className="mt-1 text-sm font-medium">{formatDate(currentSubscription.currentPeriodEnd)}</p>
                       </div>
                       <div className="rounded-md border border-border p-3">
+                        <p className="text-xs uppercase tracking-wide text-muted-foreground">Next billing date</p>
+                        <p className="mt-1 text-sm font-medium">{formatDate(currentSubscription.nextBillingDate)}</p>
+                      </div>
+                      <div className="rounded-md border border-border p-3">
                         <p className="text-xs uppercase tracking-wide text-muted-foreground">Auto renewal</p>
                         <p className="mt-1 text-sm font-medium">
                           {typeof currentSubscription.autoRenewal === "boolean"
@@ -264,6 +268,11 @@ export default function BillingPage() {
                               ? "On"
                               : "Off"}
                         </p>
+                        {currentSubscription.cancelAtPeriodEnd ? (
+                          <p className="mt-1 text-xs text-muted-foreground">
+                            Cancellation requested. Access remains until period end.
+                          </p>
+                        ) : null}
                       </div>
                       <div className="rounded-md border border-border p-3">
                         <p className="text-xs uppercase tracking-wide text-muted-foreground">Plan limits</p>

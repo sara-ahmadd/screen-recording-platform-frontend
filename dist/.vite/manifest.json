@@ -1,6 +1,6 @@
 {
-  "_client-BdFavBuf.js": {
-    "file": "assets/client-BdFavBuf.js",
+  "_client-Buw0EqCp.js": {
+    "file": "assets/client-Buw0EqCp.js",
     "name": "client",
     "isDynamicEntry": true,
     "imports": [
@@ -8,19 +8,26 @@
     ]
   },
   "index.html": {
-    "file": "assets/app-D0N4UgHL.js",
+    "file": "assets/app-BcbpPuDa.js",
     "name": "app",
     "src": "index.html",
     "isEntry": true,
     "dynamicImports": [
-      "_client-BdFavBuf.js"
+      "_client-Buw0EqCp.js",
+      "node_modules/workbox-window/build/workbox-window.prod.es5.mjs"
     ],
     "css": [
-      "assets/app-bfUGgTGK.css"
+      "assets/app-BKBYCgZU.css"
     ],
     "assets": [
       "assets/logo-Bbe7nbNw.png"
     ]
+  },
+  "node_modules/workbox-window/build/workbox-window.prod.es5.mjs": {
+    "file": "assets/workbox-window.prod.es5-vqzQaGvo.js",
+    "name": "workbox-window.prod.es5",
+    "src": "node_modules/workbox-window/build/workbox-window.prod.es5.mjs",
+    "isDynamicEntry": true
   },
   "src/assets/logo.png": {
     "file": "assets/logo-Bbe7nbNw.png",

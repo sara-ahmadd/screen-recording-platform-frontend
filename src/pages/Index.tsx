@@ -300,12 +300,14 @@ export default function Index() {
           <Zap className="h-3.5 w-3.5 mr-1" /> Screen Recording Made Simple
         </Badge>
         <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-6 leading-tight">
-          Record, Share &<br />
-          <span className="gradient-text">Collaborate</span> Instantly
-        </h1>
-        <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-10">
-          Capture your screen, add context, and share with your team — all in one beautiful platform. No downloads required.
-        </p>
+  Say it once.<br />
+  <span className="gradient-text">Share it forever.</span>
+</h1>
+
+<p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-10">
+  Record your screen, explain ideas faster, and replace endless meetings with simple video messages. 
+  Built for teams who move fast.
+</p>
         <div className="flex items-center justify-center gap-4">
           {user ? (
             <>
@@ -331,6 +333,9 @@ export default function Index() {
             </>
           )}
         </div>
+        <p className="mt-4 text-sm text-muted-foreground">
+  No download required • Works in your browser • Free plan available
+</p>
         {!user && showGoogleFallback && (
           <div className="mt-4 flex justify-center">
             <div id="google-one-tap-fallback" />
@@ -356,10 +361,22 @@ export default function Index() {
       <section className="max-w-6xl mx-auto px-6 py-20">
         <div className="grid md:grid-cols-3 gap-8">
           {[
-            { icon: Upload, title: "Easy Upload", desc: "Drag & drop your recordings with multipart upload for reliability." },
-            { icon: Users, title: "Team Workspaces", desc: "Invite teammates, manage roles, and collaborate on recordings." },
-            { icon: Shield, title: "Secure Sharing", desc: "Share via public links or keep recordings private to your team." },
-          ].map((f) => (
+  {
+    icon: Zap,
+    title: "Record in seconds",
+    desc: "Start recording instantly with no setup or downloads."
+  },
+  {
+    icon: Users,
+    title: "Explain instead of typing",
+    desc: "Send video messages that save hours of meetings and long texts."
+  },
+  {
+    icon: Shield,
+    title: "Control who sees what",
+    desc: "Share privately with your team or generate secure public links."
+  }
+].map((f) => (
             <div key={f.title} className="glass rounded-2xl p-8 text-center hover:border-primary/30 hover:-translate-y-1 transition-all duration-300">
               <div className="gradient-primary rounded-2xl p-4 w-fit mx-auto mb-4">
                 <f.icon className="h-6 w-6 text-primary-foreground" />
@@ -373,50 +390,63 @@ export default function Index() {
       </Reveal>
 
       {/* Google verification info */}
-      <Reveal from="left">
-        <section className="max-w-6xl mx-auto px-6 py-8 md:py-12">
-          <div className="glass rounded-2xl p-6 md:p-8">
-            <h2 className="text-2xl md:text-3xl font-bold">Site information and data use transparency</h2>
-            <p className="text-muted-foreground mt-3">
-              This public homepage is accessible without login and describes exactly what theRec does and why user data is requested.
-            </p>
-            <div className="mt-5 grid md:grid-cols-2 gap-4 text-sm">
-              <div className="rounded-xl border border-border p-4 bg-background/60">
-                <p className="font-semibold mb-1">What theRec does</p>
-                <p className="text-muted-foreground">
-                  Record your screen, upload videos, organize content in workspaces, and share recordings privately or publicly with your team.
-                </p>
-              </div>
-              <div className="rounded-xl border border-border p-4 bg-background/60">
-                <p className="font-semibold mb-1">Why we request user data</p>
-                <p className="text-muted-foreground">
-                  We use profile and workspace data for sign-in, account security, team collaboration, subscription handling, and notification delivery.
-                </p>
-              </div>
-              <div className="rounded-xl border border-border p-4 bg-background/60">
-                <p className="font-semibold mb-1">Recorded content handling</p>
-                <p className="text-muted-foreground">
-                  Recording files and metadata are processed to generate playable videos, thumbnails, and sharing options selected by the user.
-                </p>
-              </div>
-              <div className="rounded-xl border border-border p-4 bg-background/60">
-                <p className="font-semibold mb-1">Policy and legal links</p>
-                <p className="text-muted-foreground">
-                  Please review our{" "}
-                  <Link to="/privacy-policy" className="underline underline-offset-4 hover:text-foreground">
-                    Privacy Policy
-                  </Link>{" "}
-                  and{" "}
-                  <Link to="/terms-and-conditions" className="underline underline-offset-4 hover:text-foreground">
-                    Terms & Conditions
-                  </Link>
-                  .
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
-      </Reveal>
+<Reveal from="left">
+  <section className="max-w-6xl mx-auto px-6 py-8 md:py-12">
+    <div className="glass rounded-2xl p-6 md:p-8">
+      <h2 className="text-2xl md:text-3xl font-bold">
+        Transparency & Data Usage
+      </h2>
+
+      <p className="text-muted-foreground mt-3 max-w-3xl">
+        theRec is designed with a strong focus on transparency, security, and responsible data handling. 
+        This page outlines how our platform works and how user data is used to deliver core functionality.
+      </p>
+
+      <div className="mt-6 grid md:grid-cols-2 gap-4 text-sm">
+        
+        <div className="rounded-xl border border-border p-4 bg-background/60">
+          <p className="font-semibold mb-1">Platform Overview</p>
+          <p className="text-muted-foreground">
+            theRec enables users to record their screen, upload video content, and manage recordings within collaborative workspaces. 
+            Content can be shared securely via private access or public links.
+          </p>
+        </div>
+
+        <div className="rounded-xl border border-border p-4 bg-background/60">
+          <p className="font-semibold mb-1">Data We Collect</p>
+          <p className="text-muted-foreground">
+            We collect essential account and workspace data to enable authentication, team collaboration, subscription management, 
+            and service reliability. No unnecessary personal data is collected.
+          </p>
+        </div>
+
+        <div className="rounded-xl border border-border p-4 bg-background/60">
+          <p className="font-semibold mb-1">Content Processing</p>
+          <p className="text-muted-foreground">
+            Uploaded recordings are securely processed to generate playable formats, thumbnails, and metadata. 
+            This processing is required to deliver streaming, sharing, and organization features.
+          </p>
+        </div>
+
+        <div className="rounded-xl border border-border p-4 bg-background/60">
+          <p className="font-semibold mb-1">Privacy & Compliance</p>
+          <p className="text-muted-foreground">
+            We are committed to protecting user data and complying with applicable privacy standards. 
+            For full details, please review our{" "}
+            <Link to="/privacy-policy" className="underline underline-offset-4 hover:text-foreground">
+              Privacy Policy
+            </Link>{" "}
+            and{" "}
+            <Link to="/terms-and-conditions" className="underline underline-offset-4 hover:text-foreground">
+              Terms & Conditions
+            </Link>.
+          </p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+</Reveal>
 
       {/* How it works */}
       <Reveal from="left">
@@ -440,7 +470,14 @@ export default function Index() {
         </div>
       </section>
       </Reveal>
-
+      <section className="max-w-6xl mx-auto px-6 py-16 text-center">
+  <h2 className="text-3xl md:text-4xl font-bold mb-6">
+    Stop wasting time in meetings
+  </h2>
+  <p className="text-muted-foreground max-w-2xl mx-auto">
+    theRec helps teams communicate visually. Record once, share instantly, and let others watch on their time.
+  </p>
+</section>
       {/* Plans */}
       {(plansLoading || plans.length > 0) && (
         <Reveal from="right">
@@ -604,20 +641,40 @@ export default function Index() {
           <h2 className="text-3xl md:text-4xl font-bold">Frequently asked questions</h2>
         </div>
         <div className="space-y-4">
-          {[
-            {
-              q: "Do teammates need an account to view videos?",
-              a: "Public links can be viewed without an account, while private workspace content requires access.",
-            },
-            {
-              q: "Can I control video visibility?",
-              a: "Yes. You can keep videos private or generate public links depending on your workflow.",
-            },
-            {
-              q: "Is there a team workspace model?",
-              a: "Yes. Invite members, manage roles, and collaborate under shared workspace settings.",
-            },
-          ].map((item) => (
+        {[
+  {
+    q: "Do viewers need an account to watch my videos?",
+    a: "No. Anyone with a public link can watch your video instantly—no sign-up required. You can also restrict access to your team only when needed.",
+  },
+  {
+    q: "How is this different from a normal screen recorder?",
+    a: "theRec is built for communication, not just recording. You can record, instantly share via link, and collaborate with your team—all in one place.",
+  },
+  {
+    q: "Can I control who sees my recordings?",
+    a: "Yes. You can keep videos private, share them with your workspace, or generate secure public links depending on your needs.",
+  },
+  {
+    q: "Do I need to install anything?",
+    a: "No installation required. theRec works directly in your browser, so you can start recording in seconds.",
+  },
+  {
+    q: "How fast are recordings processed?",
+    a: "Your videos are processed automatically in the background, so they’re ready to share within moments after recording.",
+  },
+  {
+    q: "Can I use it with my team?",
+    a: "Absolutely. Create workspaces, invite teammates, assign roles, and collaborate on recordings بسهولة.",
+  },
+  {
+    q: "Is there a free plan?",
+    a: "Yes. You can start for free with core features, then upgrade anytime as your needs grow.",
+  },
+  {
+    q: "Are my recordings secure?",
+    a: "Yes. Your data is securely stored, and you have full control over privacy and access permissions.",
+  },
+].map((item) => (
             <div key={item.q} className="glass rounded-xl p-5 hover:-translate-y-0.5 transition-transform duration-300">
               <h3 className="font-semibold">{item.q}</h3>
               <p className="text-sm text-muted-foreground mt-2">{item.a}</p>
@@ -646,7 +703,12 @@ export default function Index() {
             </>
           ) : (
             <>
-              <h2 className="text-3xl md:text-4xl font-bold">Start recording in seconds</h2>
+            <h2 className="text-3xl md:text-4xl font-bold">
+  Replace your next meeting with a video
+</h2>
+<p className="text-muted-foreground mt-3">
+  Start recording for free. No credit card required.
+</p>
               <p className="text-muted-foreground mt-3">Create your first workspace and share your first video today.</p>
               <div className="mt-6 flex items-center justify-center gap-3">
                 <Link to="/register">

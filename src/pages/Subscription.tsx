@@ -19,6 +19,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 
 type SubscriptionType = "monthly" | "yearly";
 
@@ -36,6 +38,7 @@ export default function SubscriptionPage() {
   const [type, setType] = useState<SubscriptionType>("monthly");
   const [billingDialogOpen, setBillingDialogOpen] = useState(false);
   const [promoCode, setPromoCode] = useState("");
+  const [recurringConsent, setRecurringConsent] = useState(false);
   const [promoError, setPromoError] = useState<string | null>(null);
   const [pendingCheckout, setPendingCheckout] = useState<{
     checkoutUrl: string;
@@ -130,6 +133,7 @@ export default function SubscriptionPage() {
         planId: String(plan.id),
         ...(currentSubscriptionId &&{subscriptionId: String(currentSubscriptionId)}),
         workspaceId: selectedWorkspaceId,
+        recurringConsent: isFreePlan ? true : recurringConsent,
         ...(paymentData?.country ? { country: paymentData.country } : {}),
         ...(paymentData?.billingData ? { billingData: paymentData.billingData } : {}),
         ...(promoCodeTrimmed ? { promoCode: promoCodeTrimmed } : {}),
@@ -222,6 +226,15 @@ export default function SubscriptionPage() {
   const handleConfirmSubscription = async () => {
     if (!selectedWorkspaceId || !plan) return;
     const isFreePlan = Number(plan?.monthlyPrice || 0) === 0 && Number(plan?.yearlyPrice || 0) === 0;
+    if (!isFreePlan && !recurringConsent) {
+      toast({
+        title: "Consent required",
+        description:
+          "Please agree to automatic recurring payments before continuing.",
+        variant: "destructive",
+      });
+      return;
+    }
 
     if (isFreePlan) {
       await submitSubscription();
@@ -368,10 +381,37 @@ export default function SubscriptionPage() {
                   </div>
                 )}
 
+                {!(Number(plan.monthlyPrice || 0) === 0 && Number(plan.yearlyPrice || 0) === 0) && (
+                  <div className="rounded-md border border-border p-3">
+                    <div className="flex items-start gap-2">
+                      <Checkbox
+                        id="recurring-consent"
+                        checked={recurringConsent}
+                        onCheckedChange={(checked) =>
+                          setRecurringConsent(Boolean(checked))
+                        }
+                      />
+                      <Label
+                        htmlFor="recurring-consent"
+                        className="text-sm font-normal leading-5"
+                      >
+                        I agree to automatic recurring payments for this subscription.
+                      </Label>
+                    </div>
+                  </div>
+                )}
+
                 <Button
                   className="w-full gradient-primary"
                   onClick={handleConfirmSubscription}
-                  disabled={!selectedWorkspaceId || submitting || isSamePlanAndCycle}
+                  disabled={
+                    !selectedWorkspaceId ||
+                    submitting ||
+                    isSamePlanAndCycle ||
+                    (!(Number(plan.monthlyPrice || 0) === 0 &&
+                      Number(plan.yearlyPrice || 0) === 0) &&
+                      !recurringConsent)
+                  }
                 >
                   {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : actionLabel}
                 </Button>

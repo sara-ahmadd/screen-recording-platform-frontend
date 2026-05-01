@@ -532,6 +532,7 @@ export const subscriptionApi = {
     type: "monthly" | "yearly" | "null";
     planId: string;
     workspaceId: string;
+    recurringConsent?: boolean;
     country?: string;
     billingData?: {
       first_name?: string;
@@ -603,6 +604,7 @@ export const paymentsApi = {
     planId: string;
     workspaceId: string;
     type?: "monthly" | "yearly";
+    recurringConsent?: boolean;
     country?: string;
     promoCode?: string;
     billingData?: {
