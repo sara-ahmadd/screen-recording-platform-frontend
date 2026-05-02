@@ -7,6 +7,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import SeoManager from "@/components/SeoManager";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { VideoCountWarningProvider } from "@/contexts/VideoCountWarningContext";
 import { ConfirmDialogProvider } from "@/contexts/ConfirmDialogContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import Index from "./pages/Index";
@@ -60,7 +61,9 @@ const RootLayout = () => (
         <SeoManager />
         <ConfirmDialogProvider>
           <AuthProvider>
-            <Outlet />
+            <VideoCountWarningProvider>
+              <Outlet />
+            </VideoCountWarningProvider>
           </AuthProvider>
         </ConfirmDialogProvider>
       </TooltipProvider>

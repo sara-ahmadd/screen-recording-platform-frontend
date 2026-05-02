@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useBlocker, useNavigate } from "react-router-dom";
 import { getSelectedWorkspaceId, recordingsApi } from "@/lib/api";
 import AppLayout from "@/components/AppLayout";
@@ -44,6 +44,34 @@ type CameraPreviewPosition = { left: number; top: number };
 const CHUNK_TIMESLICE_MS = 1000;
 const TARGET_UPLOAD_CHUNK_SIZE = 5 * 1024 * 1024;
 const PROCESSING_ESTIMATE_SECONDS = 120;
+
+/** Thrown after fatal upload cleanup so `stopRecording` can skip a second shutdown pass. */
+class UploadStoppedError extends Error {
+  constructor() {
+    super("upload_stopped");
+    this.name = "UploadStoppedError";
+  }
+}
+
+async function readHttpErrorMessage(res: Response): Promise<string> {
+  try {
+    const text = await res.text();
+    if (text) {
+      try {
+        const j = JSON.parse(text) as Record<string, unknown>;
+        const m = j.message ?? j.error ?? j.detail ?? j.msg;
+        if (typeof m === "string" && m.trim()) return m.trim();
+      } catch {
+        const t = text.trim();
+        if (t) return t.length > 600 ? `${t.slice(0, 600)}…` : t;
+      }
+    }
+  } catch {
+    // ignore
+  }
+  if (res.statusText) return `${res.status} ${res.statusText}`;
+  return `HTTP ${res.status}`;
+}
 
 export default function RecordScreenCopy() {
   const navigate = useNavigate();
@@ -128,6 +156,9 @@ export default function RecordScreenCopy() {
   const controlsPipWindowRef = useRef<Window | null>(null);
   const nativeCameraPipActiveRef = useRef(false);
   const cameraPreviewContainerRef = useRef<HTMLDivElement | null>(null);
+  const recordingStopLockRef = useRef(false);
+  const emergencyCleanupRunningRef = useRef(false);
+  const runEmergencyCleanupBodyRef = useRef<(err: unknown) => Promise<void>>(async () => {});
 
   const formattedTime = useMemo(() => {
     const m = Math.floor(elapsed / 60);
@@ -527,7 +558,7 @@ export default function RecordScreenCopy() {
   );
 
   const processUploadQueue = useCallback(
-    async (contentType: string) => {
+    async (contentType: string, opts?: { propagate?: boolean }) => {
       const session = uploadSessionRef.current;
       if (!session || session.uploading) return;
       session.uploading = true;
@@ -547,7 +578,10 @@ export default function RecordScreenCopy() {
             body: chunk,
             headers: { "Content-Type": contentType },
           });
-          if (!putRes.ok) throw new Error(`Failed to upload part ${partNumber}`);
+          if (!putRes.ok) {
+            const detail = await readHttpErrorMessage(putRes);
+            throw new Error(detail || `Failed to upload part ${partNumber} (${putRes.status})`);
+          }
           const eTag = (putRes.headers.get("ETag") || `part-${partNumber}`).replace(/"/g, "");
           session.uploadedParts.push({ partNumber, eTag });
           session.nextPart = partNumber + 1;
@@ -556,6 +590,9 @@ export default function RecordScreenCopy() {
           session.resolveDrain();
           session.resolveDrain = undefined;
         }
+      } catch (e) {
+        await runEmergencyCleanupBodyRef.current(e);
+        if (opts?.propagate) throw new UploadStoppedError();
       } finally {
         session.uploading = false;
       }
@@ -573,7 +610,7 @@ export default function RecordScreenCopy() {
       session.resolveDrain = resolve;
     });
 
-  const processCameraUploadQueue = useCallback(async () => {
+  const processCameraUploadQueue = useCallback(async (opts?: { propagate?: boolean }) => {
     const session = cameraUploadSessionRef.current;
     if (!session || session.uploading) return;
     session.uploading = true;
@@ -593,7 +630,10 @@ export default function RecordScreenCopy() {
           body: chunk,
           headers: { "Content-Type": session.contentType },
         });
-        if (!putRes.ok) throw new Error(`Failed to upload camera part ${partNumber}`);
+        if (!putRes.ok) {
+          const detail = await readHttpErrorMessage(putRes);
+          throw new Error(detail || `Failed to upload camera part ${partNumber} (${putRes.status})`);
+        }
         const eTag = (putRes.headers.get("ETag") || `camera-part-${partNumber}`).replace(/"/g, "");
         session.uploadedParts.push({ partNumber, eTag });
         session.nextPart = partNumber + 1;
@@ -602,6 +642,9 @@ export default function RecordScreenCopy() {
         session.resolveDrain();
         session.resolveDrain = undefined;
       }
+    } catch (e) {
+      await runEmergencyCleanupBodyRef.current(e);
+      if (opts?.propagate) throw new UploadStoppedError();
     } finally {
       session.uploading = false;
     }
@@ -726,6 +769,93 @@ export default function RecordScreenCopy() {
     },
     [],
   );
+
+  const runEmergencyCleanupBody = useCallback(
+    async (err: unknown) => {
+      if (emergencyCleanupRunningRef.current) return;
+      emergencyCleanupRunningRef.current = true;
+      const message =
+        err instanceof Error
+          ? err.message
+          : typeof err === "string"
+            ? err
+            : String(err ?? "Something went wrong while recording.");
+
+      try {
+        setState((prev) => (prev === "idle" ? prev : "stopping"));
+
+        if (timerRef.current) {
+          clearInterval(timerRef.current);
+          timerRef.current = null;
+        }
+
+        closeDetachedControlsWindow();
+        void exitNativeCameraPictureInPicture();
+
+        const mainSession = uploadSessionRef.current;
+        const camSession = cameraUploadSessionRef.current;
+        const recordingId = mainSession?.recordingId ?? null;
+        const mainUploadId = mainSession?.uploadId ?? null;
+
+        const recorder = recorderRef.current;
+        const cameraRecorder = cameraRecorderRef.current;
+
+        const waitRecorderStop = (rec: MediaRecorder | null) =>
+          new Promise<void>((resolve) => {
+            if (!rec || rec.state === "inactive") {
+              resolve();
+              return;
+            }
+            rec.addEventListener("stop", () => resolve(), { once: true });
+            try {
+              rec.stop();
+            } catch {
+              resolve();
+            }
+          });
+
+        await Promise.all([waitRecorderStop(recorder), waitRecorderStop(cameraRecorder)]);
+
+        if (mainSession) mainSession.doneCollecting = true;
+        if (camSession) camSession.doneCollecting = true;
+
+        await abortMainUploadIfNeeded(recordingId, mainUploadId);
+        await abortCameraUploadIfNeeded();
+
+        recorderRef.current = null;
+        cameraRecorderRef.current = null;
+        uploadSessionRef.current = null;
+        cameraUploadSessionRef.current = null;
+
+        if (recordingId) {
+          await safeDeleteDraft(recordingId);
+        }
+
+        stopAllStreams();
+        setElapsed(0);
+        setState("idle");
+        toast({
+          title: "Recording stopped due to an error",
+          description: message,
+          variant: "destructive",
+        });
+      } finally {
+        emergencyCleanupRunningRef.current = false;
+      }
+    },
+    [
+      abortCameraUploadIfNeeded,
+      abortMainUploadIfNeeded,
+      closeDetachedControlsWindow,
+      exitNativeCameraPictureInPicture,
+      safeDeleteDraft,
+      toast,
+    ],
+  );
+
+  useLayoutEffect(() => {
+    runEmergencyCleanupBodyRef.current = runEmergencyCleanupBody;
+  }, [runEmergencyCleanupBody]);
 
   const finalizeUpload = useCallback(
     async (recordingId: number, uploadId: string, uploadedParts: UploadedPart[]) => {
@@ -1001,6 +1131,12 @@ export default function RecordScreenCopy() {
           cameraSession.bufferedBytes += event.data.size;
           flushBufferedCameraChunkToQueue();
         };
+        cameraRecorder.addEventListener("error", (ev) => {
+          const e = ev as ErrorEvent;
+          const msg =
+            (e.error instanceof Error && e.error.message) || e.message || "Camera recording failed.";
+          void runEmergencyCleanupBodyRef.current(new Error(msg));
+        });
         cameraRecorderRef.current = cameraRecorder;
         cameraRecorder.start(CHUNK_TIMESLICE_MS);
       } else {
@@ -1014,6 +1150,12 @@ export default function RecordScreenCopy() {
         session.bufferedBytes += event.data.size;
         flushBufferedChunkToQueue(recordingMimeType);
       };
+      recorder.addEventListener("error", (ev) => {
+        const e = ev as ErrorEvent;
+        const msg =
+          (e.error instanceof Error && e.error.message) || e.message || "Screen recording failed.";
+        void runEmergencyCleanupBodyRef.current(new Error(msg));
+      });
       recorder.start(CHUNK_TIMESLICE_MS);
       setState("recording");
       setElapsed(0);
@@ -1051,6 +1193,8 @@ export default function RecordScreenCopy() {
 
   const stopRecording = async () => {
     if (state !== "recording" && state !== "paused") return;
+    if (recordingStopLockRef.current || emergencyCleanupRunningRef.current) return;
+    recordingStopLockRef.current = true;
     setState("stopping");
     if (timerRef.current) {
       clearInterval(timerRef.current);
@@ -1061,6 +1205,7 @@ export default function RecordScreenCopy() {
     const cameraRecorder = cameraRecorderRef.current;
     const cameraSession = cameraUploadSessionRef.current;
     if (!session || !recorder) {
+      recordingStopLockRef.current = false;
       setState("idle");
       stopAllStreams();
       return;
@@ -1085,34 +1230,32 @@ export default function RecordScreenCopy() {
       if (cameraSession) cameraSession.doneCollecting = true;
       flushBufferedChunkToQueue(recordingMimeType, true);
       flushBufferedCameraChunkToQueue(true);
-      await processUploadQueue(recordingMimeType);
-      await processCameraUploadQueue();
+      await processUploadQueue(recordingMimeType, { propagate: true });
+      await processCameraUploadQueue({ propagate: true });
       await waitForUploadDrain();
       await waitForCameraUploadDrain();
       if (session.uploadedParts.length === 0) {
         throw new Error("No media data was captured.");
       }
       await finalizeUpload(session.recordingId, session.uploadId, session.uploadedParts);
-    } catch (err: any) {
-      toast({
-        title: "Upload interrupted",
-        description:
-          err?.message ||
-          "Chunks already in the cloud can be finished below or from another device. Anything not uploaded is lost.",
-        variant: "destructive",
-      });
-      setState("idle");
-      stopAllStreams();
+    } catch (err: unknown) {
+      if (err instanceof UploadStoppedError) {
+        // Fatal upload path already ran emergency cleanup + toast.
+      } else {
+        await runEmergencyCleanupBody(err);
+      }
     } finally {
       recorderRef.current = null;
       cameraRecorderRef.current = null;
       uploadSessionRef.current = null;
       cameraUploadSessionRef.current = null;
+      recordingStopLockRef.current = false;
     }
   };
 
   const restartRecording = async () => {
     if (state !== "recording" && state !== "paused") return;
+    if (recordingStopLockRef.current || emergencyCleanupRunningRef.current) return;
     const mainSession = uploadSessionRef.current;
     const currentRecordingId = mainSession?.recordingId;
     const mainUploadId = mainSession?.uploadId;

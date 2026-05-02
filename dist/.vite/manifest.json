@@ -1,6 +1,6 @@
 {
-  "_client-D1gqtM6B.js": {
-    "file": "assets/client-D1gqtM6B.js",
+  "_client-ChvZ_fgp.js": {
+    "file": "assets/client-ChvZ_fgp.js",
     "name": "client",
     "isDynamicEntry": true,
     "imports": [
@@ -8,16 +8,16 @@
     ]
   },
   "index.html": {
-    "file": "assets/app-D4hL4A1o.js",
+    "file": "assets/app-1egBI0UE.js",
     "name": "app",
     "src": "index.html",
     "isEntry": true,
     "dynamicImports": [
-      "_client-D1gqtM6B.js",
+      "_client-ChvZ_fgp.js",
       "node_modules/workbox-window/build/workbox-window.prod.es5.mjs"
     ],
     "css": [
-      "assets/app-BWTIBe_I.css"
+      "assets/app-BCExlLLx.css"
     ],
     "assets": [
       "assets/logo-Bbe7nbNw.png"

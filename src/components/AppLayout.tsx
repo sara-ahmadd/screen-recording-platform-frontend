@@ -1,7 +1,21 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { LayoutDashboard, Upload, Users, CreditCard, Bell, LogOut, Video, PanelLeftClose, PanelLeftOpen, Shield, MessageSquare } from "lucide-react";
+import {
+  AlertTriangle,
+  Bell,
+  CreditCard,
+  LayoutDashboard,
+  LogOut,
+  MessageSquare,
+  PanelLeftClose,
+  PanelLeftOpen,
+  Shield,
+  Upload,
+  Users,
+  Video,
+  X,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useAvatarSrc } from "@/hooks/useAvatarSrc";
@@ -9,6 +23,7 @@ import { useConfirmDialog } from "@/contexts/ConfirmDialogContext";
 import Logo from "@/components/Logo";
 import ThemeToggle from "@/components/ThemeToggle";
 import NotificationsBell from "@/components/NotificationsBell";
+import { useVideoCountWarning } from "@/contexts/VideoCountWarningContext";
 
 const baseNavItems = [
   { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
@@ -33,6 +48,7 @@ const superAdminNavItems = [
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const { user, logout } = useAuth();
+  const videoCountWarning = useVideoCountWarning();
   const isSuperAdmin = String(user?.role || "").toLowerCase() === "superadmin";
   const navItems = user
     ? [
@@ -177,6 +193,32 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             </div>
           </div>
         </header>
+        {user && videoCountWarning.banner && (
+          <div
+            role="alert"
+            className="z-20 border-b border-amber-300/80 bg-amber-50 px-4 py-3 text-amber-950 shadow-sm dark:border-amber-700/60 dark:bg-amber-950/50 dark:text-amber-50 md:px-6"
+          >
+            <div className="mx-auto flex max-w-5xl items-start gap-3">
+              <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-amber-600 dark:text-amber-400" aria-hidden />
+              <div className="min-w-0 flex-1 space-y-1">
+                <p className="font-semibold leading-tight">{videoCountWarning.banner.title}</p>
+                {videoCountWarning.banner.message ? (
+                  <p className="text-sm text-amber-900/90 dark:text-amber-100/90">{videoCountWarning.banner.message}</p>
+                ) : null}
+              </div>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="shrink-0 text-amber-900 hover:bg-amber-200/80 dark:text-amber-100 dark:hover:bg-amber-900/60"
+                onClick={videoCountWarning.dismiss}
+                aria-label="Dismiss warning"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        )}
         <main className="flex-1">{children}</main>
       </div>
     </div>
