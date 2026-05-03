@@ -17,28 +17,25 @@ import {
 import { Bell, CheckCheck, Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
-
-interface NotificationItem {
-  id: number;
-  title?: string;
-  message?: string;
-  description?: string;
-  body?: string;
-  read?: boolean;
-  isRead?: boolean;
-  createdAt?: string;
-}
+import {
+  getNotificationActionUrl,
+  isSubscriptionRenewal3dsRequired,
+  normalizeInboxNotification,
+  normalizeNotificationsApiList,
+  sortNotificationsImportantFirst,
+  type InboxNotification,
+} from "@/lib/inboxNotification";
 
 const DROPDOWN_LIMIT = 10;
 const PLAN_LIMIT_KEYWORD = "exceeds the plan limit";
 const PROCESSING_FAILED_TITLE = "video processing failed";
 
-function normalizeNotifications(response: any): NotificationItem[] {
-  if (Array.isArray(response?.notifications)) return response.notifications;
-  if (Array.isArray(response?.data?.notifications)) return response.data.notifications;
-  if (Array.isArray(response?.data)) return response.data;
-  if (Array.isArray(response)) return response;
-  return [];
+function normalizeNotificationsResponse(response: unknown): InboxNotification[] {
+  const raw = normalizeNotificationsApiList(response);
+  const mapped = raw
+    .map((row) => normalizeInboxNotification(row))
+    .filter((n) => n.id > 0);
+  return sortNotificationsImportantFirst(mapped);
 }
 
 function parseUnreadCount(response: any): number {
@@ -108,6 +105,7 @@ const NOTIFICATION_REFRESH_EVENTS = new Set([
   "storage_limit",
   "subscription_downgraded",
   "subscription_upgraded",
+  "subscription_renewal_3ds_required",
 ]);
 
 type NotificationsBellProps = {
@@ -118,7 +116,7 @@ export default function NotificationsBell({ className }: NotificationsBellProps)
   const { user } = useAuth();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
-  const [notifications, setNotifications] = useState<NotificationItem[]>([]);
+  const [notifications, setNotifications] = useState<InboxNotification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const planLimitDeleteInFlight = useRef<Set<number>>(new Set());
   const isLoggedIn = Boolean(user);
@@ -145,7 +143,7 @@ export default function NotificationsBell({ className }: NotificationsBellProps)
     setLoading(true);
     try {
       const res = await notificationsApi.getAll({ page: 1, limit: DROPDOWN_LIMIT });
-      const next = normalizeNotifications(res);
+      const next = normalizeNotificationsResponse(res);
       setNotifications(next);
     } catch (err: any) {
       if (!String(err?.message || "").toLowerCase().includes("401")) {
@@ -168,7 +166,7 @@ export default function NotificationsBell({ className }: NotificationsBellProps)
   useEffect(() => {
     const unsubscribe = subscribeNotificationsUpdated((detail) => {
       if (detail?.notifications) {
-        setNotifications(detail.notifications);
+        setNotifications(normalizeNotificationsResponse({ notifications: detail.notifications }));
         setLoading(false);
       }
       if (typeof detail?.unreadCount === "number") {
@@ -303,21 +301,47 @@ export default function NotificationsBell({ className }: NotificationsBellProps)
           ) : (
             notifications.map((n) => {
               const isUnread = (n.read ?? n.isRead) === false;
+              const bodyText = n.message || n.description || n.body || "";
+              const actionUrl = getNotificationActionUrl(n);
+              const renewal3ds = isSubscriptionRenewal3dsRequired(n);
               return (
                 <button
                   key={n.id}
                   type="button"
                   onClick={() => handleReadOne(n.id, isUnread)}
-                  className={`w-full text-left rounded-md border p-3 transition-colors ${
-                    isUnread ? "bg-primary/5 border-primary/30" : "bg-background border-border"
-                  }`}
-                >
-                  <p className={`text-sm ${isUnread ? "font-semibold" : "font-medium"}`}>{n.title || "Notification"}</p>
-                  {(n.message || n.description || n.body) && (
-                    <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
-                      {n.message || n.description || n.body}
-                    </p>
+                  className={cn(
+                    "w-full text-left rounded-md border p-3 transition-colors",
+                    isUnread ? "bg-primary/5 border-primary/30" : "bg-background border-border",
+                    n.important && "border-l-4 border-l-amber-500",
                   )}
+                >
+                  <div className="flex flex-wrap items-center gap-2">
+                    {n.important ? (
+                      <Badge variant="secondary" className="text-[10px] font-semibold">
+                        Important
+                      </Badge>
+                    ) : null}
+                    {renewal3ds ? (
+                      <span className="text-[10px] font-medium uppercase tracking-wide text-amber-700 dark:text-amber-400">
+                        Billing · renewal 3DS
+                      </span>
+                    ) : null}
+                  </div>
+                  <p className={`text-sm mt-1 ${isUnread ? "font-semibold" : "font-medium"}`}>{n.title || "Notification"}</p>
+                  {bodyText ? (
+                    <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{bodyText}</p>
+                  ) : null}
+                  {actionUrl ? (
+                    <a
+                      href={actionUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex mt-2 text-xs font-semibold text-primary underline underline-offset-2 hover:text-primary/90"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      Complete payment
+                    </a>
+                  ) : null}
                   {n.createdAt && (
                     <p className="text-[11px] text-muted-foreground mt-2">{new Date(n.createdAt).toLocaleString()}</p>
                   )}

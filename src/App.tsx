@@ -8,6 +8,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import SeoManager from "@/components/SeoManager";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { VideoCountWarningProvider } from "@/contexts/VideoCountWarningContext";
+import { SubscriptionRenewal3dsProvider } from "@/contexts/SubscriptionRenewal3dsContext";
 import { ConfirmDialogProvider } from "@/contexts/ConfirmDialogContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import Index from "./pages/Index";
@@ -62,7 +63,9 @@ const RootLayout = () => (
         <ConfirmDialogProvider>
           <AuthProvider>
             <VideoCountWarningProvider>
-              <Outlet />
+              <SubscriptionRenewal3dsProvider>
+                <Outlet />
+              </SubscriptionRenewal3dsProvider>
             </VideoCountWarningProvider>
           </AuthProvider>
         </ConfirmDialogProvider>

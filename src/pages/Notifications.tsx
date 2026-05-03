@@ -11,6 +11,16 @@ import { toastApiSuccess } from "@/lib/appToast";
 import { useConfirmDialog } from "@/contexts/ConfirmDialogContext";
 import { ArrowUpDown, Bell, Check, ChevronLeft, ChevronRight, Loader2, Trash2 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { cn } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
+import {
+  getNotificationActionUrl,
+  isSubscriptionRenewal3dsRequired,
+  normalizeInboxNotification,
+  normalizeNotificationsApiList,
+  sortNotificationsImportantFirst,
+  type InboxNotification,
+} from "@/lib/inboxNotification";
 
 const NOTIFICATION_REFRESH_EVENTS = new Set([
   "notification",
@@ -29,23 +39,24 @@ const NOTIFICATION_REFRESH_EVENTS = new Set([
   "storage_limit",
   "subscription_downgraded",
   "subscription_upgraded",
+  "subscription_renewal_3ds_required",
 ]);
 
 const PAGE_SIZE = 10;
 
-function normalizeNotifications(response: any): any[] {
-  if (Array.isArray(response?.data)) return response.data;
-  if (Array.isArray(response?.notifications)) return response.notifications;
-  if (Array.isArray(response?.data?.notifications)) return response.data.notifications;
-  if (Array.isArray(response)) return response;
-  return [];
+function normalizePageNotifications(response: unknown): InboxNotification[] {
+  const raw = normalizeNotificationsApiList(response);
+  const mapped = raw
+    .map((row) => normalizeInboxNotification(row))
+    .filter((n) => n.id > 0);
+  return sortNotificationsImportantFirst(mapped);
 }
 
 export default function NotificationsPage() {
   const { toast } = useToast();
   const { user } = useAuth();
   const confirm = useConfirmDialog();
-  const [notifications, setNotifications] = useState<any[]>([]);
+  const [notifications, setNotifications] = useState<InboxNotification[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -57,7 +68,7 @@ export default function NotificationsPage() {
     setLoading(true);
     try {
       const res = await notificationsApi.getAll({ page: currentPage, limit: PAGE_SIZE, order });
-      const next = normalizeNotifications(res);
+      const next = normalizePageNotifications(res);
       const total =
         Number(
           res?.totalPages ??
@@ -209,34 +220,67 @@ export default function NotificationsPage() {
                   <TableHeader>
                     <TableRow>
                       <TableHead>Status</TableHead>
+                      <TableHead>Priority</TableHead>
                       <TableHead>Notification</TableHead>
                       <TableHead>Date</TableHead>
                       <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {notifications.map((n: any) => {
+                    {notifications.map((n) => {
                       const isUnread = (n.read ?? n.isRead) === false;
+                      const actionUrl = getNotificationActionUrl(n);
+                      const renewal3ds = isSubscriptionRenewal3dsRequired(n);
+                      const bodyText = n.message || n.description || n.body || "";
                       return (
-                        <TableRow key={n.id} className={isUnread ? "bg-primary/5" : ""}>
+                        <TableRow
+                          key={n.id}
+                          className={cn(
+                            isUnread ? "bg-primary/5" : "",
+                            n.important ? "border-l-4 border-l-amber-500" : "",
+                          )}
+                        >
                           <TableCell>
                             <span className={`inline-flex items-center rounded-full px-2 py-1 text-xs ${isUnread ? "bg-primary/15 text-primary" : "bg-muted text-muted-foreground"}`}>
                               {isUnread ? "Unread" : "Read"}
                             </span>
                           </TableCell>
                           <TableCell>
+                            <div className="flex flex-col gap-1">
+                              {n.important ? (
+                                <Badge variant="secondary" className="w-fit text-[10px]">
+                                  Important
+                                </Badge>
+                              ) : (
+                                <span className="text-xs text-muted-foreground">—</span>
+                              )}
+                              {renewal3ds ? (
+                                <span className="text-[11px] font-medium text-amber-800 dark:text-amber-300">
+                                  Subscription renewal · 3DS (Paymob)
+                                </span>
+                              ) : null}
+                            </div>
+                          </TableCell>
+                          <TableCell>
                             <p className={isUnread ? "font-semibold text-sm" : "font-medium text-sm"}>{n.title || "Notification"}</p>
-                            {(n.message || n.description || n.body) && (
+                            {bodyText ? (
                               <p className="text-sm text-muted-foreground mt-1 leading-relaxed break-words">
-                                {n.message || n.description || n.body}
+                                {bodyText}
                               </p>
-                            )}
+                            ) : null}
                           </TableCell>
                           <TableCell className="text-xs text-muted-foreground">
                             {n.createdAt ? new Date(n.createdAt).toLocaleString() : "-"}
                           </TableCell>
                           <TableCell>
-                            <div className="flex items-center justify-end gap-2">
+                            <div className="flex flex-wrap items-center justify-end gap-2">
+                              {actionUrl ? (
+                                <Button variant="default" size="sm" asChild className="shrink-0">
+                                  <a href={actionUrl} target="_blank" rel="noopener noreferrer">
+                                    Complete payment
+                                  </a>
+                                </Button>
+                              ) : null}
                               <Button
                                 variant="ghost"
                                 size="icon"

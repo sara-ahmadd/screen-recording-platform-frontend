@@ -23,9 +23,20 @@ import {
 } from "@/components/ui/dialog";
 import { Eye, Loader2, Pencil, Plus, Trash2 } from "lucide-react";
 
+type BillingProviderChoice = "stripe" | "paymob";
+
+const defaultPlanBillingProvider = (): BillingProviderChoice => {
+  const v = String(
+    import.meta.env.VITE_DEFAULT_PLAN_BILLING ?? "paymob",
+  ).toLowerCase();
+  return v === "stripe" ? "stripe" : "paymob";
+};
+
 type PlanForm = {
   name: string;
   description: string;
+  billingProvider: BillingProviderChoice;
+  defaultBillingCycle: "" | "monthly" | "yearly";
   monthlyPrice: number;
   yearlyPrice: number;
   maxVideosPerMonth: number;
@@ -38,9 +49,11 @@ type PlanForm = {
   teamAccess: boolean;
 };
 
-const emptyForm: PlanForm = {
+const emptyForm = (): PlanForm => ({
   name: "",
   description: "",
+  billingProvider: defaultPlanBillingProvider(),
+  defaultBillingCycle: "",
   monthlyPrice: 0,
   yearlyPrice: 0,
   maxVideosPerMonth: 0,
@@ -51,7 +64,7 @@ const emptyForm: PlanForm = {
   canRemoveWaterMark: false,
   canSharePublicLink: false,
   teamAccess: false,
-};
+});
 
 export default function SuperAdminPlansPage() {
   const { toast } = useToast();
@@ -60,7 +73,7 @@ export default function SuperAdminPlansPage() {
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingPlanId, setEditingPlanId] = useState<number | null>(null);
-  const [form, setForm] = useState<PlanForm>(emptyForm);
+  const [form, setForm] = useState<PlanForm>(emptyForm());
   const [originalEditForm, setOriginalEditForm] = useState<PlanForm | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [detailsOpen, setDetailsOpen] = useState(false);
@@ -86,7 +99,7 @@ export default function SuperAdminPlansPage() {
 
   const openCreateDialog = () => {
     setEditingPlanId(null);
-    setForm(emptyForm);
+    setForm(emptyForm());
     setOriginalEditForm(null);
     setLogoFile(null);
     setLogoPreview("");
@@ -95,9 +108,17 @@ export default function SuperAdminPlansPage() {
 
   const openEditDialog = (plan: any) => {
     setEditingPlanId(Number(plan?.id));
+    const bpRaw = String(plan?.billingProvider ?? "").toLowerCase();
+    const billingProvider: BillingProviderChoice =
+      bpRaw === "stripe" ? "stripe" : bpRaw === "paymob" ? "paymob" : defaultPlanBillingProvider();
+    const dbc = String(plan?.defaultBillingCycle ?? "").toLowerCase();
+    const defaultBillingCycle =
+      dbc === "monthly" || dbc === "yearly" ? (dbc as "monthly" | "yearly") : "";
     const nextForm: PlanForm = {
       name: String(plan?.name || ""),
       description: String(plan?.description || ""),
+      billingProvider,
+      defaultBillingCycle,
       monthlyPrice: Number(plan?.monthlyPrice || 0),
       yearlyPrice: Number(plan?.yearlyPrice || 0),
       maxVideosPerMonth: Number(plan?.maxVideosPerMonth || 0),
@@ -123,6 +144,8 @@ export default function SuperAdminPlansPage() {
       const normalizedForm: PlanForm = {
         name: form.name.trim(),
         description: form.description.trim(),
+        billingProvider: form.billingProvider,
+        defaultBillingCycle: form.defaultBillingCycle,
         monthlyPrice: Number(form.monthlyPrice || 0),
         yearlyPrice: Number(form.yearlyPrice || 0),
         maxVideosPerMonth: Number(form.maxVideosPerMonth || 0),
@@ -140,6 +163,10 @@ export default function SuperAdminPlansPage() {
         payload.append("description", normalizedForm.description);
         payload.append("monthlyPrice", String(normalizedForm.monthlyPrice));
         payload.append("yearlyPrice", String(normalizedForm.yearlyPrice));
+        payload.append("billingProvider", normalizedForm.billingProvider);
+        if (normalizedForm.defaultBillingCycle) {
+          payload.append("defaultBillingCycle", normalizedForm.defaultBillingCycle);
+        }
         payload.append("maxVideosPerMonth", String(normalizedForm.maxVideosPerMonth));
         payload.append("maxVideoDuration", String(normalizedForm.maxVideoDuration));
         payload.append("maxStorageGB", String(normalizedForm.maxStorageGB));
@@ -156,6 +183,8 @@ export default function SuperAdminPlansPage() {
           ? {
               name: originalEditForm.name.trim(),
               description: originalEditForm.description.trim(),
+              billingProvider: originalEditForm.billingProvider,
+              defaultBillingCycle: originalEditForm.defaultBillingCycle,
               monthlyPrice: Number(originalEditForm.monthlyPrice || 0),
               yearlyPrice: Number(originalEditForm.yearlyPrice || 0),
               maxVideosPerMonth: Number(originalEditForm.maxVideosPerMonth || 0),
@@ -167,7 +196,7 @@ export default function SuperAdminPlansPage() {
               canSharePublicLink: Boolean(originalEditForm.canSharePublicLink),
               teamAccess: Boolean(originalEditForm.teamAccess),
             }
-          : emptyForm;
+          : emptyForm();
 
         let hasChanges = false;
         (Object.keys(normalizedForm) as (keyof PlanForm)[]).forEach((key) => {
@@ -246,6 +275,7 @@ export default function SuperAdminPlansPage() {
             <TableHeader>
               <TableRow>
                 <TableHead>Name</TableHead>
+                <TableHead>Billing</TableHead>
                 <TableHead>Monthly</TableHead>
                 <TableHead>Yearly</TableHead>
                 <TableHead>Limits</TableHead>
@@ -256,13 +286,13 @@ export default function SuperAdminPlansPage() {
             <TableBody>
               {loading ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="py-10 text-center">
+                  <TableCell colSpan={7} className="py-10 text-center">
                     <Loader2 className="h-5 w-5 animate-spin text-primary mx-auto" />
                   </TableCell>
                 </TableRow>
               ) : rows.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="py-10 text-center text-muted-foreground">
+                  <TableCell colSpan={7} className="py-10 text-center text-muted-foreground">
                     No plans found.
                   </TableCell>
                 </TableRow>
@@ -270,6 +300,9 @@ export default function SuperAdminPlansPage() {
                 rows.map((plan: any) => (
                   <TableRow key={plan.id}>
                     <TableCell className="capitalize font-medium">{plan.name || `Plan ${plan.id}`}</TableCell>
+                    <TableCell className="text-xs text-muted-foreground capitalize">
+                      {plan.billingProvider || "—"}
+                    </TableCell>
                     <TableCell>${Number(plan.monthlyPrice || 0)}</TableCell>
                     <TableCell>${Number(plan.yearlyPrice || 0)}</TableCell>
                     <TableCell className="text-xs text-muted-foreground">
@@ -317,11 +350,52 @@ export default function SuperAdminPlansPage() {
           <DialogHeader>
             <DialogTitle>{editingPlanId == null ? "Create New Plan" : "Update Plan"}</DialogTitle>
             <DialogDescription>
-              Fill plan pricing, limits, and feature flags. Price IDs are generated in backend automatically.
+              Choose Stripe or Paymob for paid plans. The backend creates prices or Paymob subscription plans automatically. Paymob amounts use USD list prices and are converted to EGP for Paymob.
             </DialogDescription>
           </DialogHeader>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div className="space-y-2 md:col-span-2">
+              <label className="text-sm font-medium">Payment provider (paid plans)</label>
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  type="button"
+                  variant={form.billingProvider === "stripe" ? "default" : "outline"}
+                  className={form.billingProvider === "stripe" ? "gradient-primary" : ""}
+                  onClick={() => setForm((p) => ({ ...p, billingProvider: "stripe" }))}
+                >
+                  Stripe
+                </Button>
+                <Button
+                  type="button"
+                  variant={form.billingProvider === "paymob" ? "default" : "outline"}
+                  className={form.billingProvider === "paymob" ? "gradient-primary" : ""}
+                  onClick={() => setForm((p) => ({ ...p, billingProvider: "paymob" }))}
+                >
+                  Paymob
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                This controls how checkout and renewals run for subscribers on this plan.
+              </p>
+            </div>
+            <div className="space-y-1 md:col-span-2">
+              <label className="text-sm font-medium">Default billing cycle (optional)</label>
+              <select
+                value={form.defaultBillingCycle}
+                onChange={(e) =>
+                  setForm((p) => ({
+                    ...p,
+                    defaultBillingCycle: e.target.value as PlanForm["defaultBillingCycle"],
+                  }))
+                }
+                className="w-full max-w-md rounded-md border border-input bg-background px-3 py-2 text-sm"
+              >
+                <option value="">No default</option>
+                <option value="monthly">Monthly</option>
+                <option value="yearly">Yearly</option>
+              </select>
+            </div>
             <div className="space-y-1">
               <label className="text-sm font-medium">Plan name</label>
               <Input value={form.name} onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))} />
@@ -357,12 +431,18 @@ export default function SuperAdminPlansPage() {
               )}
             </div>
             <div className="space-y-1">
-              <label className="text-sm font-medium">Monthly price</label>
+              <label className="text-sm font-medium">Monthly price (USD)</label>
               <Input type="number" value={form.monthlyPrice} onChange={(e) => setNum("monthlyPrice", e.target.value)} />
+              {form.billingProvider === "paymob" && (
+                <p className="text-xs text-muted-foreground">Converted to EGP for Paymob plan amounts.</p>
+              )}
             </div>
             <div className="space-y-1">
-              <label className="text-sm font-medium">Yearly price</label>
+              <label className="text-sm font-medium">Yearly price (USD)</label>
               <Input type="number" value={form.yearlyPrice} onChange={(e) => setNum("yearlyPrice", e.target.value)} />
+              {form.billingProvider === "paymob" && (
+                <p className="text-xs text-muted-foreground">Converted to EGP for Paymob plan amounts.</p>
+              )}
             </div>
             <div className="space-y-1">
               <label className="text-sm font-medium">Max videos/month</label>
