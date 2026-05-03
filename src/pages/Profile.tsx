@@ -12,7 +12,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Loader2, UserCircle2 } from "lucide-react";
+import { Eraser, Loader2, UserCircle2 } from "lucide-react";
+import { clearBrowserSiteData } from "@/lib/clearSiteData";
 import { useAvatarSrc } from "@/hooks/useAvatarSrc";
 
 export default function ProfilePage() {
@@ -33,6 +34,7 @@ export default function ProfilePage() {
   const [avatarPreviewOpen, setAvatarPreviewOpen] = useState(false);
   const [avatarLoadFailed, setAvatarLoadFailed] = useState(false);
   const [deletingAccount, setDeletingAccount] = useState(false);
+  const [clearingSiteData, setClearingSiteData] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -147,6 +149,35 @@ export default function ProfilePage() {
       toast({ title: "Email verification failed", description: err.message, variant: "destructive" });
     } finally {
       setVerifyingEmail(false);
+    }
+  };
+
+  const handleClearSiteData = async () => {
+    if (clearingSiteData) return;
+    const confirmed = await confirm({
+      title: "Clear site data and cache?",
+      description:
+        "This removes the offline shell, cached assets, local and session storage, and cookies that this page can see. You will be signed out and must log in again. Server-only (HttpOnly) session cookies may remain until they expire—use this after signing out if something still looks stuck.",
+      confirmText: "Clear and sign out",
+      cancelText: "Cancel",
+    });
+    if (!confirmed) return;
+    setClearingSiteData(true);
+    try {
+      try {
+        await logout();
+      } catch {
+        // still clear local data if the network request fails
+      }
+      await clearBrowserSiteData();
+      window.location.assign("/login");
+    } catch (err: any) {
+      toast({
+        title: "Could not finish clearing",
+        description: err?.message || "Try again or use your browser’s clear-site-data option.",
+        variant: "destructive",
+      });
+      setClearingSiteData(false);
     }
   };
 
@@ -267,6 +298,32 @@ export default function ProfilePage() {
               </div>
               </div>
             </form>
+          </CardContent>
+        </Card>
+
+        <Card className="glass mt-6">
+          <CardHeader>
+            <CardTitle>Cache &amp; site data</CardTitle>
+            <CardDescription>
+              Clear downloaded bundles, the service worker, IndexedDB, storage, and cookies readable by this site—without
+              opening browser settings. You will be signed out.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button
+              type="button"
+              variant="outline"
+              className="gap-2"
+              onClick={() => void handleClearSiteData()}
+              disabled={clearingSiteData}
+            >
+              {clearingSiteData ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Eraser className="h-4 w-4" />
+              )}
+              Clear cache and site data
+            </Button>
           </CardContent>
         </Card>
 
