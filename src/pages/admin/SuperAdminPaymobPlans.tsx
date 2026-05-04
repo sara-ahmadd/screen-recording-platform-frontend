@@ -63,6 +63,8 @@ export default function SuperAdminPaymobPlansPage() {
   const [integration, setIntegration] = useState("");
   const [deductions, setDeductions] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [integritySummary, setIntegritySummary] = useState<string>("");
+  const [integrityLoading, setIntegrityLoading] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -171,6 +173,64 @@ export default function SuperAdminPaymobPlansPage() {
     }
   };
 
+  const handleAuditIncomplete = async () => {
+    setIntegrityLoading(true);
+    try {
+      const res = await superAdminApi.paymobSubscriptions.incomplete();
+      const count = Number((res as any)?.count ?? (res as any)?.data?.count ?? 0);
+      setIntegritySummary(`Incomplete Paymob subscriptions: ${count}`);
+      toast({
+        title: "Integrity audit complete",
+        description: `${count} paymob subscriptions without paymobSubscriptionV2Id.`,
+      });
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Audit failed";
+      toast({ title: "Audit failed", description: message, variant: "destructive" });
+    } finally {
+      setIntegrityLoading(false);
+    }
+  };
+
+  const handleRepairIncomplete = async (mode: "relink" | "mark_invalid") => {
+    const ok = await confirm({
+      title:
+        mode === "relink"
+          ? "Relink incomplete Paymob subscriptions?"
+          : "Mark unresolved subscriptions invalid?",
+      description:
+        mode === "relink"
+          ? "Attempts to resolve and persist paymobSubscriptionV2Id for existing paymob subscriptions."
+          : "Marks unresolved subscriptions as failed and disables auto-renewal.",
+      confirmText: mode === "relink" ? "Run relink" : "Mark invalid",
+      cancelText: "Cancel",
+    });
+    if (!ok) return;
+
+    setIntegrityLoading(true);
+    try {
+      const res = await superAdminApi.paymobSubscriptions.repair(mode);
+      const payload = (res as any)?.data ?? res;
+      const relinked = Number(payload?.relinked ?? 0);
+      const unresolved = Number(payload?.unresolved ?? 0);
+      const markedInvalid = Number(payload?.markedInvalid ?? 0);
+      setIntegritySummary(
+        `Repair result → relinked: ${relinked}, unresolved: ${unresolved}, markedInvalid: ${markedInvalid}`,
+      );
+      toast({
+        title: "Repair completed",
+        description:
+          mode === "relink"
+            ? `Relinked ${relinked}, unresolved ${unresolved}.`
+            : `Marked invalid ${markedInvalid}.`,
+      });
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Repair failed";
+      toast({ title: "Repair failed", description: message, variant: "destructive" });
+    } finally {
+      setIntegrityLoading(false);
+    }
+  };
+
   return (
     <AppLayout>
       <div className="mx-auto flex h-[90vh] max-h-[90vh] min-h-0 w-full max-w-7xl flex-col gap-4 overflow-hidden p-6 md:p-8">
@@ -185,6 +245,32 @@ export default function SuperAdminPaymobPlansPage() {
             {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
             Refresh
           </Button>
+        </div>
+
+        <div className="shrink-0 rounded-xl border border-border/80 bg-card/60 p-4">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h2 className="text-sm font-semibold">Data integrity tools</h2>
+              <p className="text-xs text-muted-foreground">
+                Audit and repair subscriptions where `paymobSubscriptionV2Id` is missing.
+              </p>
+              {integritySummary ? (
+                <p className="mt-1 text-xs text-foreground">{integritySummary}</p>
+              ) : null}
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Button variant="outline" size="sm" onClick={() => void handleAuditIncomplete()} disabled={integrityLoading}>
+                {integrityLoading ? <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" /> : null}
+                Audit incomplete
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => void handleRepairIncomplete("relink")} disabled={integrityLoading}>
+                Relink missing IDs
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => void handleRepairIncomplete("mark_invalid")} disabled={integrityLoading}>
+                Mark unresolved invalid
+              </Button>
+            </div>
+          </div>
         </div>
 
         <div className="min-h-0 flex-1 overflow-hidden rounded-xl border border-border/80 bg-gradient-to-b from-card/80 to-card/40 shadow-sm">

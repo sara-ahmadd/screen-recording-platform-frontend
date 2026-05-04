@@ -934,6 +934,14 @@ export const superAdminApi = {
         body: JSON.stringify({}),
       }),
   },
+  paymobSubscriptions: {
+    incomplete: () => apiFetch("/subscription/paymob/incomplete"),
+    repair: (mode: "relink" | "mark_invalid" = "relink") =>
+      apiFetch(`/subscription/paymob/repair?mode=${encodeURIComponent(mode)}`, {
+        method: "POST",
+        body: JSON.stringify({}),
+      }),
+  },
   promocodes: {
     list: () => apiFetch("/promocode/all"),
     details: (promoId: number) => apiFetch(`/promocode/details/${promoId}`),
