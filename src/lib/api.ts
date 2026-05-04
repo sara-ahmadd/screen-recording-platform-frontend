@@ -108,7 +108,8 @@ export async function apiFetch<T = any>(
     path !== "/accept-invite" &&
     !path.startsWith("/workspace/accept-invite") &&
     path !== "/analytics/events" &&
-    !path.startsWith("/feedback")
+    !path.startsWith("/feedback") &&
+    !path.includes("/subscription/paymob/repair?")
   ) {
     try {
       const parsed = JSON.parse(String(requestBody));
