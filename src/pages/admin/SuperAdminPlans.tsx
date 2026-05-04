@@ -262,15 +262,15 @@ export default function SuperAdminPlansPage() {
 
   return (
     <AppLayout>
-      <div className="p-6 md:p-8 max-w-7xl mx-auto space-y-4">
-        <div className="flex items-center justify-between gap-3">
+      <div className="mx-auto flex h-[90vh] max-h-[90vh] min-h-0 w-full max-w-7xl flex-col gap-4 overflow-hidden p-6 md:p-8">
+        <div className="flex shrink-0 flex-wrap items-center justify-between gap-3">
           <h1 className="text-3xl font-bold">All Plans</h1>
           <Button className="gradient-primary" onClick={openCreateDialog}>
             <Plus className="h-4 w-4 mr-2" /> Create New Plan
           </Button>
         </div>
 
-        <div className="rounded-xl border border-border/80 bg-card/40 overflow-hidden">
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain rounded-xl border border-border/80 bg-card/40">
           <Table>
             <TableHeader>
               <TableRow>
@@ -346,14 +346,17 @@ export default function SuperAdminPlansPage() {
       </div>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>{editingPlanId == null ? "Create New Plan" : "Update Plan"}</DialogTitle>
-            <DialogDescription>
-              Choose Stripe or Paymob for paid plans. The backend creates prices or Paymob subscription plans automatically. Paymob amounts use USD list prices and are converted to EGP for Paymob.
-            </DialogDescription>
-          </DialogHeader>
+        <DialogContent className="flex max-h-[90vh] max-w-2xl flex-col gap-0 overflow-hidden p-0">
+          <div className="shrink-0 border-b border-border/60 px-6 pb-3 pt-6 pr-12">
+            <DialogHeader>
+              <DialogTitle>{editingPlanId == null ? "Create New Plan" : "Update Plan"}</DialogTitle>
+              <DialogDescription>
+                Choose Stripe or Paymob for paid plans. The backend creates prices or Paymob subscription plans automatically. Paymob amounts use USD list prices and are converted to EGP for Paymob.
+              </DialogDescription>
+            </DialogHeader>
+          </div>
 
+          <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-6 py-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div className="space-y-2 md:col-span-2">
               <label className="text-sm font-medium">Payment provider (paid plans)</label>
@@ -492,8 +495,9 @@ export default function SuperAdminPlansPage() {
               Team access
             </label>
           </div>
+          </div>
 
-          <div className="flex justify-end gap-2">
+          <div className="flex shrink-0 justify-end gap-2 border-t border-border/60 bg-background px-6 py-4">
             <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancel</Button>
             <Button className="gradient-primary" onClick={() => void handleSave()} disabled={submitting}>
               {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : editingPlanId == null ? "Create Plan" : "Update Plan"}
@@ -503,25 +507,31 @@ export default function SuperAdminPlansPage() {
       </Dialog>
 
       <Dialog open={detailsOpen} onOpenChange={setDetailsOpen}>
-        <DialogContent className="max-w-3xl">
-          <DialogHeader>
-            <DialogTitle>
-              Plan Details {detailsPlan?.id != null ? `#${detailsPlan.id}` : ""}
-            </DialogTitle>
-            <DialogDescription>Detailed information for the selected plan.</DialogDescription>
-          </DialogHeader>
+        <DialogContent className="flex max-h-[90vh] max-w-3xl flex-col gap-0 overflow-hidden p-0">
+          <div className="shrink-0 border-b border-border/60 px-6 pb-3 pt-6 pr-12">
+            <DialogHeader>
+              <DialogTitle>
+                Plan Details {detailsPlan?.id != null ? `#${detailsPlan.id}` : ""}
+              </DialogTitle>
+              <DialogDescription>Detailed information for the selected plan.</DialogDescription>
+            </DialogHeader>
+          </div>
           {!detailsPlan ? (
-            <p className="text-sm text-muted-foreground">No plan data available.</p>
+            <div className="px-6 py-4">
+              <p className="text-sm text-muted-foreground">No plan data available.</p>
+            </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-[60vh] overflow-y-auto pr-1">
-              {Object.entries(detailsPlan).map(([key, value]) => (
-                <div key={key} className="rounded-md border border-border p-3 bg-card/40">
-                  <p className="text-xs uppercase tracking-wide text-muted-foreground">{prettifyLabel(key)}</p>
-                  <p className="mt-1 text-sm break-words">
-                    {value == null ? "—" : typeof value === "object" ? JSON.stringify(value) : String(value)}
-                  </p>
-                </div>
-              ))}
+            <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-6 py-4">
+              <div className="grid grid-cols-1 gap-3 md:grid-cols-2 md:pr-1">
+                {Object.entries(detailsPlan).map(([key, value]) => (
+                  <div key={key} className="rounded-md border border-border bg-card/40 p-3">
+                    <p className="text-xs uppercase tracking-wide text-muted-foreground">{prettifyLabel(key)}</p>
+                    <p className="mt-1 break-words text-sm">
+                      {value == null ? "—" : typeof value === "object" ? JSON.stringify(value) : String(value)}
+                    </p>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
         </DialogContent>
