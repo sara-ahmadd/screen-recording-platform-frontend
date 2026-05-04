@@ -18,7 +18,7 @@
     "/assets/logo-Bbe7nbNw.png"
   ],
   "\u0000/Users/saraahmad/Documents/screen-recorder-frontend-lovable/node_modules/react-dom/client.js?commonjs-exports": [
-    "/assets/client-ChvZ_fgp.js"
+    "/assets/client-hnFtTLT7.js"
   ],
   "\u0000/Users/saraahmad/Documents/screen-recorder-frontend-lovable/node_modules/react-dom/index.js?commonjs-module": [
     "/assets/logo-Bbe7nbNw.png"
@@ -1679,6 +1679,12 @@
   "node_modules/lucide-react/dist/esm/icons/circle-check.js": [
     "/assets/logo-Bbe7nbNw.png"
   ],
+  "node_modules/lucide-react/dist/esm/icons/circle-pause.js": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
+  "node_modules/lucide-react/dist/esm/icons/circle-play.js": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
   "node_modules/lucide-react/dist/esm/icons/circle-user-round.js": [
     "/assets/logo-Bbe7nbNw.png"
   ],
@@ -1698,6 +1704,9 @@
     "/assets/logo-Bbe7nbNw.png"
   ],
   "node_modules/lucide-react/dist/esm/icons/ellipsis-vertical.js": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
+  "node_modules/lucide-react/dist/esm/icons/eraser.js": [
     "/assets/logo-Bbe7nbNw.png"
   ],
   "node_modules/lucide-react/dist/esm/icons/eye-off.js": [
@@ -1820,6 +1829,9 @@
   "node_modules/lucide-react/dist/esm/icons/volume-x.js": [
     "/assets/logo-Bbe7nbNw.png"
   ],
+  "node_modules/lucide-react/dist/esm/icons/wrench.js": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
   "node_modules/lucide-react/dist/esm/icons/x.js": [
     "/assets/logo-Bbe7nbNw.png"
   ],
@@ -1848,7 +1860,7 @@
     "/assets/logo-Bbe7nbNw.png"
   ],
   "node_modules/react-dom/client.js": [
-    "/assets/client-ChvZ_fgp.js"
+    "/assets/client-hnFtTLT7.js"
   ],
   "node_modules/react-dom/index.js": [
     "/assets/logo-Bbe7nbNw.png"
@@ -2447,6 +2459,9 @@
   "src/contexts/ConfirmDialogContext.tsx": [
     "/assets/logo-Bbe7nbNw.png"
   ],
+  "src/contexts/SubscriptionRenewal3dsContext.tsx": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
   "src/contexts/VideoCountWarningContext.tsx": [
     "/assets/logo-Bbe7nbNw.png"
   ],
@@ -2472,6 +2487,12 @@
     "/assets/logo-Bbe7nbNw.png"
   ],
   "src/lib/appToast.ts": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
+  "src/lib/clearSiteData.ts": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
+  "src/lib/inboxNotification.ts": [
     "/assets/logo-Bbe7nbNw.png"
   ],
   "src/lib/inviteFlow.ts": [
@@ -2595,6 +2616,9 @@
     "/assets/logo-Bbe7nbNw.png"
   ],
   "src/pages/admin/SuperAdminFeedback.tsx": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
+  "src/pages/admin/SuperAdminPaymobPlans.tsx": [
     "/assets/logo-Bbe7nbNw.png"
   ],
   "src/pages/admin/SuperAdminPlans.tsx": [

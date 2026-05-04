@@ -27,7 +27,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Loader2 } from "lucide-react";
+import { Loader2, Wrench } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 type StatusFilter = "all" | "active" | "canceled" | "past_due" | "pending";
 type TypeFilter = "all" | "monthly" | "yearly" | "none";
@@ -39,6 +45,13 @@ function formatDate(value?: string | null) {
   const d = new Date(value);
   if (Number.isNaN(d.getTime())) return "—";
   return d.toLocaleDateString();
+}
+
+function formatDateTime(value?: string | null) {
+  if (!value) return "—";
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return "—";
+  return d.toLocaleString();
 }
 
 export default function SuperAdminSubscriptionsPage() {
@@ -60,6 +73,15 @@ export default function SuperAdminSubscriptionsPage() {
     dateFrom: "",
     dateTo: "",
   });
+
+  const [detailOpen, setDetailOpen] = useState(false);
+  const [detailLoading, setDetailLoading] = useState(false);
+  const [detailRow, setDetailRow] = useState<any | null>(null);
+  const [detailPayload, setDetailPayload] = useState<{
+    subscription?: any;
+    nextPlanName?: string | null;
+    simulationAllowed?: boolean;
+  } | null>(null);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -124,6 +146,96 @@ export default function SuperAdminSubscriptionsPage() {
       })),
     [statsByStatus],
   );
+
+  const openDetail = async (row: any) => {
+    setDetailRow(row);
+    setDetailOpen(true);
+    setDetailLoading(true);
+    setDetailPayload(null);
+    try {
+      const res = await superAdminApi.subscriptions.adminDetails(Number(row.id));
+      setDetailPayload({
+        subscription: res?.subscription,
+        nextPlanName: res?.nextPlanName ?? null,
+        simulationAllowed: Boolean(res?.simulationAllowed),
+      });
+    } catch (err: any) {
+      toast({
+        title: "Could not load subscription",
+        description: err?.message || "Unexpected error",
+        variant: "destructive",
+      });
+      setDetailOpen(false);
+    } finally {
+      setDetailLoading(false);
+    }
+  };
+
+  const refreshDetail = async () => {
+    if (!detailRow?.id) return;
+    setDetailLoading(true);
+    try {
+      const res = await superAdminApi.subscriptions.adminDetails(
+        Number(detailRow.id),
+      );
+      setDetailPayload({
+        subscription: res?.subscription,
+        nextPlanName: res?.nextPlanName ?? null,
+        simulationAllowed: Boolean(res?.simulationAllowed),
+      });
+    } catch (err: any) {
+      toast({
+        title: "Refresh failed",
+        description: err?.message || "Unexpected error",
+        variant: "destructive",
+      });
+    } finally {
+      setDetailLoading(false);
+    }
+  };
+
+  const runSimulateRenewal = async () => {
+    if (!detailRow?.id) return;
+    try {
+      const res = await superAdminApi.subscriptions.simulateRenewal(
+        Number(detailRow.id),
+      );
+      toast({
+        title: res?.duplicate
+          ? "Replay skipped (idempotent)"
+          : "Renewal simulated successfully",
+        description: res?.message || "OK",
+      });
+      await refreshDetail();
+      setDetailRow((r: any) => ({ ...r, ...res?.subscription }));
+    } catch (err: any) {
+      toast({
+        title: "Simulation failed",
+        description: err?.message || "Unexpected error",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const runSimulateFailure = async () => {
+    if (!detailRow?.id) return;
+    try {
+      const res = await superAdminApi.subscriptions.simulateRenewalFailure(
+        Number(detailRow.id),
+      );
+      toast({
+        title: "Failure state applied",
+        description: res?.message || "OK",
+      });
+      await refreshDetail();
+    } catch (err: any) {
+      toast({
+        title: "Simulation failed",
+        description: err?.message || "Unexpected error",
+        variant: "destructive",
+      });
+    }
+  };
 
   const dateChartData = useMemo(
     () =>
@@ -256,12 +368,13 @@ export default function SuperAdminSubscriptionsPage() {
                         <TableHead>Type</TableHead>
                         <TableHead>Start Date</TableHead>
                         <TableHead>End Date</TableHead>
+                        <TableHead className="w-[100px]">Details</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {rows.length === 0 ? (
                         <TableRow>
-                          <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
+                          <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
                             No subscriptions found.
                           </TableCell>
                         </TableRow>
@@ -277,6 +390,16 @@ export default function SuperAdminSubscriptionsPage() {
                             </TableCell>
                             <TableCell>{formatDate(row.currentPeriodStart)}</TableCell>
                             <TableCell>{formatDate(row.currentPeriodEnd)}</TableCell>
+                            <TableCell>
+                              <Button
+                                type="button"
+                                size="sm"
+                                variant="outline"
+                                onClick={() => void openDetail(row)}
+                              >
+                                Open
+                              </Button>
+                            </TableCell>
                           </TableRow>
                         ))
                       )}
@@ -307,6 +430,114 @@ export default function SuperAdminSubscriptionsPage() {
             )}
           </CardContent>
         </Card>
+
+        <Dialog open={detailOpen} onOpenChange={setDetailOpen}>
+          <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>
+                Subscription #{detailRow?.id != null ? detailRow.id : "—"}
+              </DialogTitle>
+            </DialogHeader>
+            {detailLoading && !detailPayload ? (
+              <div className="py-8 flex justify-center">
+                <Loader2 className="h-6 w-6 animate-spin text-primary" />
+              </div>
+            ) : (
+              <div className="space-y-4 text-sm">
+                <div className="rounded-lg border border-border/80 p-3 space-y-1.5">
+                  <p className="font-medium">Billing period</p>
+                  <p>
+                    <span className="text-muted-foreground">Current plan: </span>
+                    {detailPayload?.subscription?.plan?.name ?? "—"}
+                  </p>
+                  <p>
+                    <span className="text-muted-foreground">Period start: </span>
+                    {formatDateTime(
+                      detailPayload?.subscription?.currentPeriodStart,
+                    )}
+                  </p>
+                  <p>
+                    <span className="text-muted-foreground">Period end: </span>
+                    {formatDateTime(
+                      detailPayload?.subscription?.currentPeriodEnd,
+                    )}
+                  </p>
+                  <p>
+                    <span className="text-muted-foreground">Next billing: </span>
+                    {formatDateTime(
+                      detailPayload?.subscription?.nextBillingDate,
+                    )}
+                  </p>
+                </div>
+
+                <div className="rounded-lg border border-border/80 p-3 space-y-1.5">
+                  <p className="font-medium">Retries &amp; errors</p>
+                  <p>
+                    <span className="text-muted-foreground">Last attempt: </span>
+                    {formatDateTime(
+                      detailPayload?.subscription?.lastBillingAttemptAt,
+                    )}
+                  </p>
+                  <p>
+                    <span className="text-muted-foreground">Retry count: </span>
+                    {detailPayload?.subscription?.billingRetryCount ?? 0}
+                  </p>
+                  <p>
+                    <span className="text-muted-foreground">Last error: </span>
+                    {detailPayload?.subscription?.lastBillingError || "—"}
+                  </p>
+                </div>
+
+                {Boolean(detailPayload?.subscription?.changeAtPeriodEnd) &&
+                detailPayload?.nextPlanName ? (
+                  <div className="rounded-lg border border-amber-500/40 bg-amber-500/10 p-3 text-amber-200">
+                    Scheduled downgrade to{" "}
+                    <strong>{detailPayload.nextPlanName}</strong> at{" "}
+                    {formatDateTime(
+                      detailPayload?.subscription?.currentPeriodEnd,
+                    )}
+                  </div>
+                ) : null}
+
+                <div className="rounded-lg border border-border/80 p-3 space-y-2">
+                  <p className="font-medium flex items-center gap-2">
+                    <Wrench className="h-4 w-4" />
+                    Testing أدوات (Admin Only)
+                  </p>
+                  {!detailPayload?.simulationAllowed ? (
+                    <p className="text-muted-foreground text-xs">
+                      Simulation is disabled (production requires{" "}
+                      <code className="text-xs bg-muted px-1 rounded">
+                        PAYMOB_RECURRING_SIMULATION_ENABLED=true
+                      </code>
+                      ).
+                    </p>
+                  ) : (
+                    <div className="flex flex-wrap gap-2">
+                      <Button
+                        type="button"
+                        size="sm"
+                        onClick={() => void runSimulateRenewal()}
+                        disabled={detailLoading}
+                      >
+                        Simulate renewal
+                      </Button>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="destructive"
+                        onClick={() => void runSimulateFailure()}
+                        disabled={detailLoading}
+                      >
+                        Simulate failure
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
       </div>
     </AppLayout>
   );

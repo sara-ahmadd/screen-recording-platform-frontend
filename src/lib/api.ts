@@ -103,6 +103,7 @@ export async function apiFetch<T = any>(
     !path.startsWith("/promocodes") &&
     !path.startsWith("/super-admin/plans") &&
     !path.startsWith("/super-admin/paymob") &&
+    !path.startsWith("/admin/") &&
     !/\/workspace\/\d+\/invite$/.test(path) &&
     !/\/workspace\/members\/\d+\/edit\/\d+$/.test(path) &&
     path !== "/accept-invite" &&
@@ -1031,5 +1032,20 @@ export const superAdminApi = {
       const query = sp.toString();
       return apiFetch(`/super-admin/subscriptions${query ? `?${query}` : ""}`);
     },
+    adminDetails: (subscriptionId: number) =>
+      apiFetch(`/admin/subscriptions/${subscriptionId}`),
+    simulateRenewal: (subscriptionId: number) =>
+      apiFetch(`/admin/subscriptions/${subscriptionId}/simulate-renewal`, {
+        method: "POST",
+        body: JSON.stringify({}),
+      }),
+    simulateRenewalFailure: (subscriptionId: number) =>
+      apiFetch(
+        `/admin/subscriptions/${subscriptionId}/simulate-renewal-failure`,
+        {
+          method: "POST",
+          body: JSON.stringify({}),
+        },
+      ),
   },
 };
