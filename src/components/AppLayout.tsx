@@ -39,6 +39,7 @@ const superAdminNavItems = [
   { href: "/super-admin/workspaces", icon: Shield, label: "All Workspaces" },
   { href: "/super-admin/users", icon: Shield, label: "All Users" },
   { href: "/super-admin/plans", icon: Shield, label: "All Plans" },
+  { href: "/super-admin/paymob-plans", icon: Shield, label: "Paymob plans" },
   { href: "/super-admin/promocodes", icon: Shield, label: "All Promocodes" },
   { href: "/super-admin/analytics", icon: Shield, label: "Analytics Overview" },
   { href: "/super-admin/analytics-visuals", icon: Shield, label: "Analytics Visuals" },

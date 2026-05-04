@@ -46,6 +46,7 @@ import SuperAdminAnalyticsPage from "./pages/admin/SuperAdminAnalytics";
 import SuperAdminFeedbackPage from "./pages/admin/SuperAdminFeedback";
 import SuperAdminAnalyticsVisualsPage from "./pages/admin/SuperAdminAnalyticsVisuals";
 import SuperAdminSubscriptionsPage from "./pages/admin/SuperAdminSubscriptions";
+import SuperAdminPaymobPlansPage from "./pages/admin/SuperAdminPaymobPlans";
 import NotFound from "./pages/NotFound";
 import RecordScreenCopy from "./pages/RecordScreenCopy";
 import PaymentSuccessPage from "./pages/PaymentSuccess";
@@ -147,6 +148,10 @@ export const routes: RouteRecord[] = [
       {
         path: "super-admin/subscriptions",
         element: <ProtectedRoute requireSuperAdmin><SuperAdminSubscriptionsPage /></ProtectedRoute>,
+      },
+      {
+        path: "super-admin/paymob-plans",
+        element: <ProtectedRoute requireSuperAdmin><SuperAdminPaymobPlansPage /></ProtectedRoute>,
       },
       { path: "*", element: <NotFound /> },
     ],

@@ -102,6 +102,7 @@ export async function apiFetch<T = any>(
     !path.startsWith("/promocode") &&
     !path.startsWith("/promocodes") &&
     !path.startsWith("/super-admin/plans") &&
+    !path.startsWith("/super-admin/paymob") &&
     !/\/workspace\/\d+\/invite$/.test(path) &&
     !/\/workspace\/members\/\d+\/edit\/\d+$/.test(path) &&
     path !== "/accept-invite" &&
@@ -905,6 +906,31 @@ export const superAdminApi = {
     delete: (id: number) =>
       apiFetch(`/plan/delete/${id}`, {
         method: "DELETE",
+        body: JSON.stringify({}),
+      }),
+  },
+  paymobSubscriptionPlans: {
+    list: () => apiFetch("/super-admin/paymob/subscription-plans"),
+    update: (
+      planId: string | number,
+      data: {
+        amountCents: number;
+        integration: number;
+        numberOfDeductions?: number | null;
+      },
+    ) =>
+      apiFetch(`/super-admin/paymob/subscription-plans/${planId}`, {
+        method: "PATCH",
+        body: JSON.stringify(data),
+      }),
+    suspend: (planId: string | number) =>
+      apiFetch(`/super-admin/paymob/subscription-plans/${planId}/suspend`, {
+        method: "POST",
+        body: JSON.stringify({}),
+      }),
+    resume: (planId: string | number) =>
+      apiFetch(`/super-admin/paymob/subscription-plans/${planId}/resume`, {
+        method: "POST",
         body: JSON.stringify({}),
       }),
   },
