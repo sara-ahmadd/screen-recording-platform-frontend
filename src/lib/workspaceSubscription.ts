@@ -15,7 +15,9 @@ function normalizeSubscriptions(raw: unknown): any[] {
   return out;
 }
 
-export function buildPlanNameByIdFromWorkspaces(workspaces: any[] | undefined): Map<number, string> {
+export function buildPlanNameByIdFromWorkspaces(
+  workspaces: any[] | undefined,
+): Map<number, string> {
   const map = new Map<number, string>();
   for (const ws of workspaces || []) {
     const subscriptions = normalizeSubscriptions(ws?.subscriptions);
@@ -38,23 +40,28 @@ export function isSubscriptionActiveForDisplay(sub: any | null): boolean {
   if (!sub) return false;
   const raw = sub.status;
   const s = raw == null || raw === "" ? "" : String(raw).toLowerCase();
-  if (s === "active" || s === "trialing" || s === "past_due") return true;
-  // Payment/checkout in progress — still the workspace's current subscription row.
-  if (s === "pending" || s === "incomplete" || s === "incomplete_expired") return true;
+  if (s === "active") return true;
+
   // Backends sometimes omit status on free-tier rows; still treat as current.
   if (!s && isFreePlan(sub.plan)) return true;
   return false;
 }
 
 function newestFirst(a: any, b: any) {
-  return new Date(b?.createdAt || 0).getTime() - new Date(a?.createdAt || 0).getTime();
+  return (
+    new Date(b?.createdAt || 0).getTime() -
+    new Date(a?.createdAt || 0).getTime()
+  );
 }
 
 /**
  * Members/detail API responses sometimes omit nested `plan` on subscriptions; `/auth/me` usually has it.
  * Merge so Billing and other UIs keep full plan fields when ids match.
  */
-export function mergeWorkspaceSubscriptionPayload(fromApi: any | null, fromProfile: any | null): any | null {
+export function mergeWorkspaceSubscriptionPayload(
+  fromApi: any | null,
+  fromProfile: any | null,
+): any | null {
   if (!fromProfile && !fromApi) return null;
   if (!fromApi) return fromProfile;
   if (!fromProfile) return fromApi;
@@ -78,7 +85,7 @@ export function mergeWorkspaceSubscriptionPayload(fromApi: any | null, fromProfi
           return {
             ...(rich || {}),
             ...s,
-            plan: hasUsefulPlan(s?.plan) ? s.plan : rich?.plan ?? s?.plan,
+            plan: hasUsefulPlan(s?.plan) ? s.plan : (rich?.plan ?? s?.plan),
           };
         })
       : profileSubs;
@@ -92,7 +99,9 @@ export function mergeWorkspaceSubscriptionPayload(fromApi: any | null, fromProfi
 }
 
 /** Matches Billing / workspace members resolution — only non-terminated subscriptions. */
-export function getCurrentWorkspaceSubscription(workspace: any | null): any | null {
+export function getCurrentWorkspaceSubscription(
+  workspace: any | null,
+): any | null {
   if (!workspace) return null;
   const subscriptions: any[] = normalizeSubscriptions(workspace.subscriptions);
 
@@ -101,17 +110,27 @@ export function getCurrentWorkspaceSubscription(workspace: any | null): any | nu
     return isSubscriptionActiveForDisplay(single) ? single : null;
   }
 
-  let activeSubscriptions = subscriptions.filter(isSubscriptionActiveForDisplay);
+  let activeSubscriptions = subscriptions.filter(
+    isSubscriptionActiveForDisplay,
+  );
   // If nothing "billable-active" yet, still show the row pointed to by workspace.subscriptionId (e.g. pending).
-  if (activeSubscriptions.length === 0 && workspace.subscriptionId && subscriptions.length > 0) {
-    const pinned = subscriptions.find((s) => Number(s?.id) === Number(workspace.subscriptionId));
+  if (
+    activeSubscriptions.length === 0 &&
+    workspace.subscriptionId &&
+    subscriptions.length > 0
+  ) {
+    const pinned = subscriptions.find(
+      (s) => Number(s?.id) === Number(workspace.subscriptionId),
+    );
     if (pinned) activeSubscriptions = [pinned];
   }
   if (activeSubscriptions.length === 0) return null;
 
   const workspaceSubscriptionId = workspace.subscriptionId;
   if (workspaceSubscriptionId) {
-    const byId = activeSubscriptions.find((s) => Number(s?.id) === Number(workspaceSubscriptionId));
+    const byId = activeSubscriptions.find(
+      (s) => Number(s?.id) === Number(workspaceSubscriptionId),
+    );
     if (byId) return byId;
   }
 
