@@ -3,7 +3,10 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import AppLayout from "@/components/AppLayout";
 import { useAuth } from "@/contexts/AuthContext";
 import { paymentsApi, plansApi, subscriptionApi } from "@/lib/api";
-import { getCurrentWorkspaceSubscription } from "@/lib/workspaceSubscription";
+import {
+  getCurrentWorkspaceSubscription,
+  isPaidSubscription,
+} from "@/lib/workspaceSubscription";
 import { buildAvatarSrc } from "@/hooks/useAvatarSrc";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -72,6 +75,23 @@ export default function SubscriptionPage() {
 
   const currentSubscriptionId = currentWorkspaceSubscription?.id;
   const currentSubscriptionType = String(currentWorkspaceSubscription?.type || "").toLowerCase();
+  const currentSubscriptionStatus = String(
+    currentWorkspaceSubscription?.status || "",
+  ).toLowerCase();
+  const checkoutSubscriptionId = useMemo(() => {
+    if (!currentWorkspaceSubscription) return null;
+    if (!isPaidSubscription(currentWorkspaceSubscription)) return null;
+    if (
+      currentSubscriptionStatus === "past_due" ||
+      currentSubscriptionStatus === "failed" ||
+      currentSubscriptionStatus === "canceled" ||
+      currentSubscriptionStatus === "cancelled"
+    ) {
+      return null;
+    }
+    const id = currentWorkspaceSubscription?.id;
+    return id != null ? String(id) : null;
+  }, [currentWorkspaceSubscription, currentSubscriptionStatus]);
 
   const getCyclePrice = (selectedPlan: any, cycle: SubscriptionType) =>
     Number(cycle === "yearly" ? selectedPlan?.yearlyPrice || 0 : selectedPlan?.monthlyPrice || 0);
@@ -131,7 +151,7 @@ export default function SubscriptionPage() {
       const payloadBase = {
         type: payloadType,
         planId: String(plan.id),
-        ...(currentSubscriptionId &&{subscriptionId: String(currentSubscriptionId)}),
+        ...(checkoutSubscriptionId ? { subscriptionId: checkoutSubscriptionId } : {}),
         workspaceId: selectedWorkspaceId,
         recurringConsent: isFreePlan ? true : recurringConsent,
         ...(paymentData?.country ? { country: paymentData.country } : {}),
@@ -144,9 +164,7 @@ export default function SubscriptionPage() {
         : await paymentsApi.createCheckoutSession({
             ...payloadBase,
             type,
-            ...(currentSubscriptionId != null
-              ? { subscriptionId: String(currentSubscriptionId) }
-              : {}),
+            ...(checkoutSubscriptionId ? { subscriptionId: checkoutSubscriptionId } : {}),
           } as any);
       const sessionUrl =
         subscriptionRes.session_url || subscriptionRes.sessionUrl || subscriptionRes.url || subscriptionRes.checkoutUrl;
