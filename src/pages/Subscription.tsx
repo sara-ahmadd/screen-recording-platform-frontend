@@ -3,10 +3,7 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import AppLayout from "@/components/AppLayout";
 import { useAuth } from "@/contexts/AuthContext";
 import { paymentsApi, plansApi, subscriptionApi } from "@/lib/api";
-import {
-  getCurrentWorkspaceSubscription,
-  isPaidSubscription,
-} from "@/lib/workspaceSubscription";
+import { getCurrentWorkspaceSubscription } from "@/lib/workspaceSubscription";
 import { buildAvatarSrc } from "@/hooks/useAvatarSrc";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -80,15 +77,7 @@ export default function SubscriptionPage() {
   ).toLowerCase();
   const checkoutSubscriptionId = useMemo(() => {
     if (!currentWorkspaceSubscription) return null;
-    if (!isPaidSubscription(currentWorkspaceSubscription)) return null;
-    if (
-      currentSubscriptionStatus === "past_due" ||
-      currentSubscriptionStatus === "failed" ||
-      currentSubscriptionStatus === "canceled" ||
-      currentSubscriptionStatus === "cancelled"
-    ) {
-      return null;
-    }
+    if (currentSubscriptionStatus !== "active") return null;
     const id = currentWorkspaceSubscription?.id;
     return id != null ? String(id) : null;
   }, [currentWorkspaceSubscription, currentSubscriptionStatus]);
