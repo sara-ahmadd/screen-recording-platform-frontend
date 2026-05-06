@@ -523,10 +523,18 @@ export default function Index() {
 
                   <div className="text-center">
                     <h3 className="font-semibold text-lg capitalize">{plan.name || "Plan"}</h3>
-                    <div className="mt-4">
-                      <span className="text-3xl font-bold">${plan.monthlyPrice || 0}</span>
-                      <span className="text-muted-foreground">/mo</span>
+                    <div className="mt-4 flex flex-col items-center">
+                    {/* Primary: EGP */}
+                    <div className="text-3xl font-bold">
+                      {plan.monthlyPriceEGP ?? 0} EGP
+                      <span className="text-muted-foreground text-base font-normal">/mo</span>
                     </div>
+
+                    {/* Secondary: USD */}
+                    <div className="text-sm text-muted-foreground mt-1">
+                      ${plan.monthlyPriceUSD ?? plan.monthlyPrice ?? 0} USD /mo
+                    </div>
+                  </div>
                     <p className="text-xs text-muted-foreground mt-1">
                       Up to {Number(plan.maxTeamMembers || 0)} members
                     </p>
