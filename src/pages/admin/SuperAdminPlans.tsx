@@ -27,7 +27,7 @@ type BillingProviderChoice = "stripe" | "paymob" | "geidea";
 
 const defaultPlanBillingProvider = (): BillingProviderChoice => {
   const v = String(
-    import.meta.env.VITE_DEFAULT_PLAN_BILLING ?? "paymob",
+    import.meta.env.VITE_DEFAULT_PLAN_BILLING ?? "geidea",
   ).toLowerCase();
   if (v === "stripe") return "stripe";
   if (v === "geidea") return "geidea";
@@ -86,6 +86,13 @@ export default function SuperAdminPlansPage() {
   const [detailsPlan, setDetailsPlan] = useState<any | null>(null);
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string>("");
+
+  const ensureNumericInput = (value: string): number | null => {
+    if (value.trim() === "") return null;
+    const n = Number(value);
+    if (!Number.isFinite(n)) return null;
+    return n;
+  };
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -175,6 +182,14 @@ export default function SuperAdminPlansPage() {
         canSharePublicLink: Boolean(form.canSharePublicLink),
         teamAccess: Boolean(form.teamAccess),
       };
+      if (normalizedForm.monthlyPrice < 0 || normalizedForm.yearlyPrice < 0) {
+        toast({
+          title: "Invalid price",
+          description: "monthlyPriceUSD and yearlyPriceUSD must be numbers >= 0.",
+          variant: "destructive",
+        });
+        return;
+      }
 
       if (editingPlanId == null) {
         payload.append("name", normalizedForm.name);
@@ -338,13 +353,13 @@ export default function SuperAdminPlansPage() {
                     <TableCell>
                       EGP {Number(plan.monthlyPriceEGP || 0).toLocaleString()}
                       <div className="text-xs text-muted-foreground">
-                        ≈ ${Number(plan.monthlyPriceUSD ?? plan.monthlyPrice || 0)}
+                        ≈ {Number(plan.monthlyPriceUSD ?? plan.monthlyPrice ?? 0)} USD
                       </div>
                     </TableCell>
                     <TableCell>
                       EGP {Number(plan.yearlyPriceEGP || 0).toLocaleString()}
                       <div className="text-xs text-muted-foreground">
-                        ≈ ${Number(plan.yearlyPriceUSD ?? plan.yearlyPrice || 0)}
+                        ≈ {Number(plan.yearlyPriceUSD ?? plan.yearlyPrice ?? 0)} USD
                       </div>
                     </TableCell>
                     <TableCell className="text-xs text-muted-foreground">
@@ -484,21 +499,39 @@ export default function SuperAdminPlansPage() {
               )}
             </div>
             <div className="space-y-1">
-              <label className="text-sm font-medium">Monthly price (USD)</label>
-              <Input type="number" value={form.monthlyPrice} onChange={(e) => setNum("monthlyPrice", e.target.value)} />
-              {form.billingProvider === "paymob" && (
+              <label className="text-sm font-medium">monthlyPriceUSD (required)</label>
+              <Input
+                type="number"
+                value={form.monthlyPrice}
+                required
+                onChange={(e) => {
+                  const numeric = ensureNumericInput(e.target.value);
+                  if (numeric == null) return;
+                  setNum("monthlyPrice", e.target.value);
+                }}
+              />
+              {(form.billingProvider === "paymob" || form.billingProvider === "geidea") && (
                 <p className="text-xs text-muted-foreground">Converted to EGP for Paymob plan amounts.</p>
               )}
             </div>
             <div className="space-y-1">
-              <label className="text-sm font-medium">Yearly price (USD)</label>
-              <Input type="number" value={form.yearlyPrice} onChange={(e) => setNum("yearlyPrice", e.target.value)} />
-              {form.billingProvider === "paymob" && (
+              <label className="text-sm font-medium">yearlyPriceUSD (required)</label>
+              <Input
+                type="number"
+                value={form.yearlyPrice}
+                required
+                onChange={(e) => {
+                  const numeric = ensureNumericInput(e.target.value);
+                  if (numeric == null) return;
+                  setNum("yearlyPrice", e.target.value);
+                }}
+              />
+              {(form.billingProvider === "paymob" || form.billingProvider === "geidea") && (
                 <p className="text-xs text-muted-foreground">Converted to EGP for Paymob plan amounts.</p>
               )}
             </div>
             <div className="space-y-1">
-              <label className="text-sm font-medium">Monthly price (EGP, optional override)</label>
+              <label className="text-sm font-medium">monthlyPriceEGP (optional override)</label>
               <Input
                 type="number"
                 value={form.monthlyPriceEGP ?? ""}
@@ -506,13 +539,15 @@ export default function SuperAdminPlansPage() {
                   setForm((p) => ({
                     ...p,
                     monthlyPriceEGP:
-                      e.target.value === "" ? undefined : Number(e.target.value || 0),
+                      e.target.value === ""
+                        ? undefined
+                        : (ensureNumericInput(e.target.value) ?? p.monthlyPriceEGP),
                   }))
                 }
               />
             </div>
             <div className="space-y-1">
-              <label className="text-sm font-medium">Yearly price (EGP, optional override)</label>
+              <label className="text-sm font-medium">yearlyPriceEGP (optional override)</label>
               <Input
                 type="number"
                 value={form.yearlyPriceEGP ?? ""}
@@ -520,7 +555,9 @@ export default function SuperAdminPlansPage() {
                   setForm((p) => ({
                     ...p,
                     yearlyPriceEGP:
-                      e.target.value === "" ? undefined : Number(e.target.value || 0),
+                      e.target.value === ""
+                        ? undefined
+                        : (ensureNumericInput(e.target.value) ?? p.yearlyPriceEGP),
                   }))
                 }
               />
