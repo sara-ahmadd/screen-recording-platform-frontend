@@ -378,14 +378,14 @@ export default function SubscriptionPage() {
                 ) : (
                   <div className="space-y-2">
                     <p className="text-sm font-medium">Billing cycle</p>
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 flex-col md:flex-row">
                       <Button
                         type="button"
                         variant={type === "monthly" ? "default" : "outline"}
                         className={type === "monthly" ? "gradient-primary" : ""}
                         onClick={() => setType("monthly")}
                       >
-                        Monthly (${plan.monthlyPrice || 0}/mo)
+                        Monthly (${plan.monthlyPriceEGP || 0} EGP ~ ${plan.monthlyPrice || 0} USD /mo)
                       </Button>
                       <Button
                         type="button"
@@ -393,7 +393,7 @@ export default function SubscriptionPage() {
                         className={type === "yearly" ? "gradient-primary" : ""}
                         onClick={() => setType("yearly")}
                       >
-                        Yearly (${plan.yearlyPrice || 0}/yr)
+                        Yearly (${plan.yearlyPriceEGP || 0} EGP ~ ${plan.yearlyPrice || 0} USD /yr)
                       </Button>
                     </div>
                   </div>
