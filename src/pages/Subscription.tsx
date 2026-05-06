@@ -40,12 +40,6 @@ export default function SubscriptionPage() {
   const [promoCode, setPromoCode] = useState("");
   const [recurringConsent, setRecurringConsent] = useState(false);
   const [promoError, setPromoError] = useState<string | null>(null);
-  const [pendingCheckout, setPendingCheckout] = useState<{
-    checkoutUrl: string;
-    checkoutAmountUsd:number;
-    providerAmount: number;
-    currency: string;
-  } | null>(null);
   const [successDetails, setSuccessDetails] = useState<{
     mainMessage: string;
     providerMessage: string;
@@ -165,15 +159,32 @@ export default function SubscriptionPage() {
         result?.checkoutCurrency ?? subscriptionRes?.provider_currency ?? "EGP",
       ).toUpperCase();
       if (sessionUrl) {
-        setPendingCheckout({
-          checkoutUrl: String(sessionUrl),
-          checkoutAmountUsd: Number.isFinite(
-            Number(result?.checkoutAmountUsd ?? subscriptionRes?.amount_usd ?? 0),
-          )
-            ? Number(result?.checkoutAmountUsd ?? subscriptionRes?.amount_usd ?? 0)
-            : 0,
-          providerAmount: Number.isFinite(amountProvider) ? amountProvider : 0,
-          currency,
+        navigate("/checkout/review", {
+          state: {
+            checkoutSessionId:
+              subscriptionRes?.checkoutSessionId ??
+              subscriptionRes?.subscriptionId ??
+              null,
+            redirectUrl: String(subscriptionRes?.redirectUrl || sessionUrl),
+            plan: subscriptionRes?.plan ?? {
+              name: String(plan?.name || "Subscription"),
+              monthlyPriceUSD: Number(plan?.monthlyPriceUSD ?? plan?.monthlyPrice ?? 0),
+              monthlyPriceEGP: Number(plan?.monthlyPriceEGP ?? 0),
+              yearlyPriceUSD: Number(plan?.yearlyPriceUSD ?? plan?.yearlyPrice ?? 0),
+              yearlyPriceEGP: Number(plan?.yearlyPriceEGP ?? 0),
+              billingCycle: type,
+            },
+            billingData:
+              subscriptionRes?.billingData ??
+              (paymentData
+                ? {
+                    name: `${String(paymentData.billingData.first_name || "").trim()} ${String(paymentData.billingData.last_name || "").trim()}`.trim(),
+                    email: String(paymentData.billingData.email || ""),
+                    phone: String(paymentData.billingData.phone_number || ""),
+                    address: String(paymentData.billingData.street || ""),
+                  }
+                : null),
+          },
         });
         if (promoCodeTrimmed) {
           trackClientEvent({
@@ -441,43 +452,6 @@ export default function SubscriptionPage() {
         }}
         onSubmit={handleBillingDataConfirm}
       />
-
-      <Dialog
-        open={Boolean(pendingCheckout)}
-        onOpenChange={(open) => {
-          if (!open) setPendingCheckout(null);
-        }}
-      >
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Confirm payment</DialogTitle>
-            <DialogDescription>
-            {pendingCheckout
-              ? `Payable amount: $${pendingCheckout?.checkoutAmountUsd?.toFixed(2)} ~ ${pendingCheckout?.providerAmount?.toFixed(2)} ${pendingCheckout.currency}`
-              : ""}
-          </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setPendingCheckout(null)}
-            >
-              Cancel
-            </Button>
-            <Button
-              type="button"
-              className="gradient-primary"
-              onClick={() => {
-                if (!pendingCheckout?.checkoutUrl) return;
-                window.location.href = pendingCheckout.checkoutUrl;
-              }}
-            >
-              Confirm
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
 
       <Dialog
         open={Boolean(successDetails)}

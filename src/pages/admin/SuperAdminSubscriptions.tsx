@@ -237,6 +237,35 @@ export default function SuperAdminSubscriptionsPage() {
     }
   };
 
+  const runRefund = async () => {
+    if (!detailRow?.id) return;
+    const amountRaw = window.prompt("Refund amount (leave empty for full):", "");
+    const reasonRaw = window.prompt("Refund reason (optional):", "admin_refund");
+    const amount =
+      amountRaw != null && amountRaw.trim() !== ""
+        ? Number(amountRaw)
+        : undefined;
+    try {
+      const res = await superAdminApi.subscriptions.refund(Number(detailRow.id), {
+        ...(amount != null && Number.isFinite(amount) && amount > 0
+          ? { amount }
+          : {}),
+        ...(reasonRaw && reasonRaw.trim() ? { reason: reasonRaw.trim() } : {}),
+      });
+      toast({
+        title: "Refund submitted",
+        description: res?.message || "OK",
+      });
+      await refreshDetail();
+    } catch (err: any) {
+      toast({
+        title: "Refund failed",
+        description: err?.message || "Unexpected error",
+        variant: "destructive",
+      });
+    }
+  };
+
   const dateChartData = useMemo(
     () =>
       (statsByDate || []).map((item: any) => ({
@@ -530,6 +559,15 @@ export default function SuperAdminSubscriptionsPage() {
                         disabled={detailLoading}
                       >
                         Simulate failure
+                      </Button>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        onClick={() => void runRefund()}
+                        disabled={detailLoading}
+                      >
+                        Refund payment
                       </Button>
                     </div>
                   )}

@@ -81,12 +81,22 @@ export default function PlansPage() {
   };
 
   const currentSubscriptionType = String(currentWorkspaceSubscription?.type || "").toLowerCase();
-  const getCyclePrice = (plan: any, cycle: "monthly" | "yearly") =>
-    Number(cycle === "yearly" ? plan?.yearlyPrice || 0 : plan?.monthlyPrice || 0);
+  const getCyclePriceUsd = (plan: any, cycle: "monthly" | "yearly") =>
+    Number(
+      cycle === "yearly"
+        ? plan?.yearlyPriceUSD ?? plan?.yearlyPrice ?? 0
+        : plan?.monthlyPriceUSD ?? plan?.monthlyPrice ?? 0,
+    );
+  const getCyclePriceEgp = (plan: any, cycle: "monthly" | "yearly") =>
+    Number(
+      cycle === "yearly"
+        ? plan?.yearlyPriceEGP ?? 0
+        : plan?.monthlyPriceEGP ?? 0,
+    );
 
   const currentCyclePrice =
     currentWorkspaceSubscription && (currentSubscriptionType === "monthly" || currentSubscriptionType === "yearly")
-      ? getCyclePrice(currentWorkspaceSubscription?.plan, currentSubscriptionType as "monthly" | "yearly")
+      ? getCyclePriceUsd(currentWorkspaceSubscription?.plan, currentSubscriptionType as "monthly" | "yearly")
       : 0;
 
   const getActionLabel = (plan: any, targetType: "monthly" | "yearly") => {
@@ -97,7 +107,7 @@ export default function PlansPage() {
       if (currentSubscriptionType === targetType) return "Current";
       return targetType === "yearly" ? "Upgrade to yearly" : "Downgrade to monthly";
     }
-    const targetPrice = getCyclePrice(plan, targetType);
+    const targetPrice = getCyclePriceUsd(plan, targetType);
     if (targetPrice > currentCyclePrice) return `Upgrade to ${targetType}`;
     if (targetPrice < currentCyclePrice) return `Downgrade to ${targetType}`;
     return `Switch to ${targetType}`;
@@ -146,15 +156,20 @@ export default function PlansPage() {
                   <CardHeader className="text-center pb-2">
                     <CardTitle className="text-lg capitalize">{plan.name}</CardTitle>
                     <div className="mt-4">
-                      <span className="text-3xl font-bold">${plan.monthlyPrice || 0}</span>
+                      <span className="text-3xl font-bold">
+                        EGP {getCyclePriceEgp(plan, "monthly").toLocaleString()}
+                      </span>
                       <span className="text-muted-foreground">/mo</span>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        ≈ ${getCyclePriceUsd(plan, "monthly").toLocaleString()} USD
+                      </p>
                     </div>
                     <p className="text-xs text-muted-foreground">
                       Up to {Number(plan.maxTeamMembers || 0)} members
                     </p>
                     {plan.yearlyPrice > 0 && (
                       <p className="text-xs text-muted-foreground">
-                        ${plan.yearlyPrice}/year (save {Math.round((1 - plan.yearlyPrice / (plan.monthlyPrice * 12)) * 100)}%)
+                        EGP {getCyclePriceEgp(plan, "yearly").toLocaleString()}/year (≈ ${getCyclePriceUsd(plan, "yearly").toLocaleString()} USD)
                       </p>
                     )}
                   </CardHeader>
@@ -198,7 +213,7 @@ export default function PlansPage() {
                             >
                               {isCurrentForCycle
                                 ? `Current (${cycle})`
-                                : `${actionLabel} ($${getCyclePrice(plan, cycle)}/${cycle === "yearly" ? "yr" : "mo"})`}
+                                : `${actionLabel} (EGP ${getCyclePriceEgp(plan, cycle).toLocaleString()} / ${cycle === "yearly" ? "yr" : "mo"})`}
                             </Button>
                           );
                           return (

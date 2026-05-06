@@ -1,6 +1,7 @@
 import PublicPageLayout from "@/components/PublicPageLayout";
 
 export default function PrivacyPolicyPage() {
+  const yearlyRefundDays = Number(import.meta.env.VITE_YEARLY_REFUND_WINDOW_DAYS || 7);
   return (
     <PublicPageLayout
       title="Privacy Policy"
@@ -51,6 +52,20 @@ export default function PrivacyPolicyPage() {
           <h2 className="text-lg font-semibold text-foreground mb-2">6. Contact</h2>
           <p>
             For privacy requests, contact us via the <a href="/contact" className="text-primary underline">Contact page</a>.
+          </p>
+        </section>
+
+        <section>
+          <h2 className="text-lg font-semibold text-foreground mb-2">7. Refund policy</h2>
+          <p>
+            Monthly subscriptions are non-refundable once a billing cycle starts. Yearly subscriptions may be
+            eligible for a limited refund request within {yearlyRefundDays} days from successful payment, subject to
+            account review and abuse checks.
+          </p>
+          <p className="mt-2">
+            Refunds are not available for services already consumed (including active usage, storage, exports, or team
+            access that has already been provisioned). Cancellation prevents the next renewal and applies at the next
+            billing cycle; it does not retroactively refund the current cycle.
           </p>
         </section>
       </div>

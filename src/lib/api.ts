@@ -1047,5 +1047,13 @@ export const superAdminApi = {
           body: JSON.stringify({}),
         },
       ),
+    refund: (
+      subscriptionId: number,
+      data: { amount?: number; reason?: string } = {},
+    ) =>
+      apiFetch(`/admin/subscriptions/${subscriptionId}/refund`, {
+        method: "POST",
+        body: JSON.stringify(data),
+      }),
   },
 };

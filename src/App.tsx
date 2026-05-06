@@ -51,6 +51,7 @@ import NotFound from "./pages/NotFound";
 import RecordScreenCopy from "./pages/RecordScreenCopy";
 import PaymentSuccessPage from "./pages/PaymentSuccess";
 import PaymentFailedPage from "./pages/PaymentFailed";
+import CheckoutReviewPage from "./pages/CheckoutReview";
 
 const queryClient = new QueryClient();
 
@@ -104,6 +105,7 @@ export const routes: RouteRecord[] = [
       { path: "billing", element: <ProtectedRoute><BillingPage /></ProtectedRoute> },
       { path: "plans", element: <ProtectedRoute><PlansPage /></ProtectedRoute> },
       { path: "subscription", element: <ProtectedRoute><SubscriptionPage /></ProtectedRoute> },
+      { path: "checkout/review", element: <ProtectedRoute><CheckoutReviewPage /></ProtectedRoute> },
       { path: "notifications", element: <ProtectedRoute><NotificationsPage /></ProtectedRoute> },
       { path: "feedback", element: <ProtectedRoute><FeedbackPage /></ProtectedRoute> },
       { path: "profile", element: <ProtectedRoute><ProfilePage /></ProtectedRoute> },

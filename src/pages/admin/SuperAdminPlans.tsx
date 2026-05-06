@@ -23,13 +23,15 @@ import {
 } from "@/components/ui/dialog";
 import { Eye, Loader2, Pencil, Plus, Trash2 } from "lucide-react";
 
-type BillingProviderChoice = "stripe" | "paymob";
+type BillingProviderChoice = "stripe" | "paymob" | "geidea";
 
 const defaultPlanBillingProvider = (): BillingProviderChoice => {
   const v = String(
     import.meta.env.VITE_DEFAULT_PLAN_BILLING ?? "paymob",
   ).toLowerCase();
-  return v === "stripe" ? "stripe" : "paymob";
+  if (v === "stripe") return "stripe";
+  if (v === "geidea") return "geidea";
+  return "paymob";
 };
 
 type PlanForm = {
@@ -39,6 +41,8 @@ type PlanForm = {
   defaultBillingCycle: "" | "monthly" | "yearly";
   monthlyPrice: number;
   yearlyPrice: number;
+  monthlyPriceEGP?: number;
+  yearlyPriceEGP?: number;
   maxVideosPerMonth: number;
   maxVideoDuration: number;
   maxStorageGB: number;
@@ -56,6 +60,8 @@ const emptyForm = (): PlanForm => ({
   defaultBillingCycle: "",
   monthlyPrice: 0,
   yearlyPrice: 0,
+  monthlyPriceEGP: undefined,
+  yearlyPriceEGP: undefined,
   maxVideosPerMonth: 0,
   maxVideoDuration: 0,
   maxStorageGB: 0,
@@ -110,7 +116,13 @@ export default function SuperAdminPlansPage() {
     setEditingPlanId(Number(plan?.id));
     const bpRaw = String(plan?.billingProvider ?? "").toLowerCase();
     const billingProvider: BillingProviderChoice =
-      bpRaw === "stripe" ? "stripe" : bpRaw === "paymob" ? "paymob" : defaultPlanBillingProvider();
+      bpRaw === "stripe"
+        ? "stripe"
+        : bpRaw === "geidea"
+          ? "geidea"
+          : bpRaw === "paymob"
+            ? "paymob"
+            : defaultPlanBillingProvider();
     const dbc = String(plan?.defaultBillingCycle ?? "").toLowerCase();
     const defaultBillingCycle =
       dbc === "monthly" || dbc === "yearly" ? (dbc as "monthly" | "yearly") : "";
@@ -121,6 +133,8 @@ export default function SuperAdminPlansPage() {
       defaultBillingCycle,
       monthlyPrice: Number(plan?.monthlyPrice || 0),
       yearlyPrice: Number(plan?.yearlyPrice || 0),
+      monthlyPriceEGP: Number(plan?.monthlyPriceEGP || 0),
+      yearlyPriceEGP: Number(plan?.yearlyPriceEGP || 0),
       maxVideosPerMonth: Number(plan?.maxVideosPerMonth || 0),
       maxVideoDuration: Number(plan?.maxVideoDuration || 0),
       maxStorageGB: Number(plan?.maxStorageGB || 0),
@@ -148,6 +162,10 @@ export default function SuperAdminPlansPage() {
         defaultBillingCycle: form.defaultBillingCycle,
         monthlyPrice: Number(form.monthlyPrice || 0),
         yearlyPrice: Number(form.yearlyPrice || 0),
+        monthlyPriceEGP:
+          form.monthlyPriceEGP != null ? Number(form.monthlyPriceEGP || 0) : undefined,
+        yearlyPriceEGP:
+          form.yearlyPriceEGP != null ? Number(form.yearlyPriceEGP || 0) : undefined,
         maxVideosPerMonth: Number(form.maxVideosPerMonth || 0),
         maxVideoDuration: Number(form.maxVideoDuration || 0),
         maxStorageGB: Number(form.maxStorageGB || 0),
@@ -163,6 +181,12 @@ export default function SuperAdminPlansPage() {
         payload.append("description", normalizedForm.description);
         payload.append("monthlyPrice", String(normalizedForm.monthlyPrice));
         payload.append("yearlyPrice", String(normalizedForm.yearlyPrice));
+        if (normalizedForm.monthlyPriceEGP != null) {
+          payload.append("monthlyPriceEGP", String(normalizedForm.monthlyPriceEGP));
+        }
+        if (normalizedForm.yearlyPriceEGP != null) {
+          payload.append("yearlyPriceEGP", String(normalizedForm.yearlyPriceEGP));
+        }
         payload.append("billingProvider", normalizedForm.billingProvider);
         if (normalizedForm.defaultBillingCycle) {
           payload.append("defaultBillingCycle", normalizedForm.defaultBillingCycle);
@@ -187,6 +211,14 @@ export default function SuperAdminPlansPage() {
               defaultBillingCycle: originalEditForm.defaultBillingCycle,
               monthlyPrice: Number(originalEditForm.monthlyPrice || 0),
               yearlyPrice: Number(originalEditForm.yearlyPrice || 0),
+              monthlyPriceEGP:
+                originalEditForm.monthlyPriceEGP != null
+                  ? Number(originalEditForm.monthlyPriceEGP || 0)
+                  : undefined,
+              yearlyPriceEGP:
+                originalEditForm.yearlyPriceEGP != null
+                  ? Number(originalEditForm.yearlyPriceEGP || 0)
+                  : undefined,
               maxVideosPerMonth: Number(originalEditForm.maxVideosPerMonth || 0),
               maxVideoDuration: Number(originalEditForm.maxVideoDuration || 0),
               maxStorageGB: Number(originalEditForm.maxStorageGB || 0),
@@ -303,8 +335,18 @@ export default function SuperAdminPlansPage() {
                     <TableCell className="text-xs text-muted-foreground capitalize">
                       {plan.billingProvider || "—"}
                     </TableCell>
-                    <TableCell>${Number(plan.monthlyPrice || 0)}</TableCell>
-                    <TableCell>${Number(plan.yearlyPrice || 0)}</TableCell>
+                    <TableCell>
+                      EGP {Number(plan.monthlyPriceEGP || 0).toLocaleString()}
+                      <div className="text-xs text-muted-foreground">
+                        ≈ ${Number(plan.monthlyPriceUSD ?? plan.monthlyPrice || 0)}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      EGP {Number(plan.yearlyPriceEGP || 0).toLocaleString()}
+                      <div className="text-xs text-muted-foreground">
+                        ≈ ${Number(plan.yearlyPriceUSD ?? plan.yearlyPrice || 0)}
+                      </div>
+                    </TableCell>
                     <TableCell className="text-xs text-muted-foreground">
                       {Number(plan.maxVideosPerMonth || 0)} videos/mo, {Number(plan.maxStorageGB || 0)} GB,{" "}
                       {Number(plan.maxTeamMembers || 0)} members
@@ -377,6 +419,14 @@ export default function SuperAdminPlansPage() {
                 >
                   Paymob
                 </Button>
+                <Button
+                  type="button"
+                  variant={form.billingProvider === "geidea" ? "default" : "outline"}
+                  className={form.billingProvider === "geidea" ? "gradient-primary" : ""}
+                  onClick={() => setForm((p) => ({ ...p, billingProvider: "geidea" }))}
+                >
+                  Geidea
+                </Button>
               </div>
               <p className="text-xs text-muted-foreground">
                 This controls how checkout and renewals run for subscribers on this plan.
@@ -446,6 +496,34 @@ export default function SuperAdminPlansPage() {
               {form.billingProvider === "paymob" && (
                 <p className="text-xs text-muted-foreground">Converted to EGP for Paymob plan amounts.</p>
               )}
+            </div>
+            <div className="space-y-1">
+              <label className="text-sm font-medium">Monthly price (EGP, optional override)</label>
+              <Input
+                type="number"
+                value={form.monthlyPriceEGP ?? ""}
+                onChange={(e) =>
+                  setForm((p) => ({
+                    ...p,
+                    monthlyPriceEGP:
+                      e.target.value === "" ? undefined : Number(e.target.value || 0),
+                  }))
+                }
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="text-sm font-medium">Yearly price (EGP, optional override)</label>
+              <Input
+                type="number"
+                value={form.yearlyPriceEGP ?? ""}
+                onChange={(e) =>
+                  setForm((p) => ({
+                    ...p,
+                    yearlyPriceEGP:
+                      e.target.value === "" ? undefined : Number(e.target.value || 0),
+                  }))
+                }
+              />
             </div>
             <div className="space-y-1">
               <label className="text-sm font-medium">Max videos/month</label>
