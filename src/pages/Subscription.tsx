@@ -158,7 +158,8 @@ export default function SubscriptionPage() {
       const currency = String(
         result?.checkoutCurrency ?? subscriptionRes?.provider_currency ?? "EGP",
       ).toUpperCase();
-      if (sessionUrl) {
+    
+      // if (sessionUrl) {
         navigate("/checkout/review", {
           state: {
             checkoutSessionId:
@@ -186,15 +187,15 @@ export default function SubscriptionPage() {
                 : null),
           },
         });
-        if (promoCodeTrimmed) {
-          trackClientEvent({
-            eventType: "click",
-            eventName: "promo_applied_success",
-            metadata: { code: promoCodeTrimmed, route: "/subscription" },
-          });
-        }
-        return true;
-      }
+      //   if (promoCodeTrimmed) {
+      //     trackClientEvent({
+      //       eventType: "click",
+      //       eventName: "promo_applied_success",
+      //       metadata: { code: promoCodeTrimmed, route: "/subscription" },
+      //     });
+      //   }
+      //   return true;
+      // }
 
       setSuccessDetails({
         mainMessage: String(
@@ -221,6 +222,10 @@ export default function SubscriptionPage() {
     } catch (err: any) {
       const errorMessage = String(err?.message || "Subscription failed");
       const attemptedPromoCode = paymentData?.promoCode?.trim() || "";
+      /**
+       * FIXEME: Need to fix this flow.
+       */
+      navigate("/checkout/review")
       if (attemptedPromoCode) {
         setPromoError(errorMessage);
         trackClientEvent({
