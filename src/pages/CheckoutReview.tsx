@@ -63,10 +63,17 @@ export default function CheckoutReviewPage() {
       merchantPublicKey: import.meta.env.VITE_GEIDEA_PUBLIC_KEY,
       environment: "sandbox", // switch to production when live
     });
- 
+    const actualSessionId = payload.checkoutSessionId;
+    console.log({actualSessionId})
+    const sessionId = payload?.checkoutSessionId;
+    if (typeof actualSessionId !== 'string') {
+      console.error("Session ID is still an object or missing!", actualSessionId);
+      return;
+    }
     geidea.startPayment({
-      sessionId: payload?.checkoutSessionId, // returned from backend
+      sessionId: sessionId?.toString(),
     });
+   
   };
   return (
     <AppLayout>
