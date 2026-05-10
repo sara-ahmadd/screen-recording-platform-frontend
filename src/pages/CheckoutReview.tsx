@@ -63,12 +63,8 @@ export default function CheckoutReviewPage() {
       merchantPublicKey: import.meta.env.VITE_GEIDEA_PUBLIC_KEY,
       environment: "sandbox", // switch to production when live
     });
-    const actualSessionId = payload.checkoutSessionId;
     const sessionId = payload?.checkoutSessionId;
-    if (typeof actualSessionId !== 'string') {
-      console.error("Session ID is still an object or missing!", actualSessionId);
-      return;
-    }
+   
     console.log(sessionId)
     geidea.startPayment(
      sessionId?.toString()
@@ -139,7 +135,7 @@ export default function CheckoutReviewPage() {
             <Button
               type="button"
               className="w-full h-11 gradient-primary text-base font-semibold"
-              disabled={!hasRedirect&&!payload.checkoutSessionId}
+              disabled={!hasRedirect&&!payload?.checkoutSessionId}
               onClick={() => {
                
                 handlePayment()
@@ -148,7 +144,7 @@ export default function CheckoutReviewPage() {
               <CreditCard className="h-4 w-4 mr-2" />
               Continue to Payment
             </Button>
-            {!hasRedirect&&!payload.checkoutSessionId ? (
+            {!hasRedirect&&!payload?.checkoutSessionId ? (
               <p className="text-xs text-destructive text-center">
                 Payment link is missing. Please retry checkout.
               </p>
