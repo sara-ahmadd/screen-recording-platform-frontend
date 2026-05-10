@@ -532,7 +532,7 @@ export default function Index() {
 
                     {/* Secondary: USD */}
                     <div className="text-sm text-muted-foreground mt-1">
-                    ≈  ${Number(plan.monthlyPriceUSD).toLocaleString() ?? plan.monthlyPrice ?? 0} USD /mo
+                    ≈  {Number(plan.monthlyPriceUSD).toLocaleString() ?? plan.monthlyPrice ?? 0} USD /mo
                     </div>
                   </div>
                     <p className="text-xs text-muted-foreground mt-1">
@@ -540,7 +540,7 @@ export default function Index() {
                     </p>
                     {plan.yearlyPrice > 0 && (
                       <p className="text-xs text-muted-foreground mt-1">
-                       (${Number(plan.yearlyPriceEGP).toLocaleString()} EGP ≈  ${plan.yearlyPrice}USD) /year  (save {Math.round((1 - plan.yearlyPrice / (plan.monthlyPrice * 12)) * 100)}%)
+                       ({Number(plan.yearlyPriceEGP).toLocaleString()} EGP ≈  ${plan.yearlyPrice}USD) /year  (save {Math.round((1 - plan.yearlyPrice / (plan.monthlyPrice * 12)) * 100)}%)
                       </p>
                     )}
                   </div>
