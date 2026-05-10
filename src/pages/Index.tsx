@@ -103,7 +103,7 @@ export default function Index() {
 
   useEffect(() => {
     const paymentStatus = searchParams.get("payment");
-    if (paymentStatus === "successful") {
+    if (paymentStatus === "success") {
       setSuccessDialogOpen(true);
       setCancelDialogOpen(false);
     } else if (paymentStatus === "cancelled") {

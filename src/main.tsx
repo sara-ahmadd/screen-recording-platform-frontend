@@ -7,6 +7,7 @@ if (typeof window !== "undefined") {
   registerSW({ immediate: true });
 }
 
+
 export const createRoot = ViteReactSSG({
   routes,
   basename: import.meta.env.BASE_URL,

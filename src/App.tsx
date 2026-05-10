@@ -52,6 +52,7 @@ import RecordScreenCopy from "./pages/RecordScreenCopy";
 import PaymentSuccessPage from "./pages/PaymentSuccess";
 import PaymentFailedPage from "./pages/PaymentFailed";
 import CheckoutReviewPage from "./pages/CheckoutReview";
+import ErrorPage from "./pages/ErrorPage";
 
 const queryClient = new QueryClient();
 
@@ -157,5 +158,6 @@ export const routes: RouteRecord[] = [
       },
       { path: "*", element: <NotFound /> },
     ],
+    errorElement: <ErrorPage />
   },
 ];
