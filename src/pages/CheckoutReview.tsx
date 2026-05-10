@@ -64,15 +64,15 @@ export default function CheckoutReviewPage() {
       environment: "sandbox", // switch to production when live
     });
     const actualSessionId = payload.checkoutSessionId;
-    console.log({actualSessionId})
     const sessionId = payload?.checkoutSessionId;
     if (typeof actualSessionId !== 'string') {
       console.error("Session ID is still an object or missing!", actualSessionId);
       return;
     }
-    geidea.startPayment({
-      sessionId: sessionId?.toString(),
-    });
+    console.log(sessionId)
+    geidea.startPayment(
+     sessionId?.toString()
+    );
    
   };
   return (
