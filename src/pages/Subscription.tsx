@@ -381,7 +381,7 @@ export default function SubscriptionPage() {
                 {Number(plan.monthlyPrice || 0) === 0 && Number(plan.yearlyPrice || 0) === 0 ? (
                   <p className="text-sm text-muted-foreground">Free plan — no billing cycle.</p>
                 ) : (
-                  <div className="space-y-2">
+                  <div className="space-y-1">
                     <p className="text-sm font-medium">Billing cycle</p>
                     <div className="flex gap-2 flex-col md:flex-row">
                       <Button
@@ -390,7 +390,7 @@ export default function SubscriptionPage() {
                         className={type === "monthly" ? "gradient-primary" : ""}
                         onClick={() => setType("monthly")}
                       >
-                        Monthly (${plan.monthlyPriceEGP || 0} EGP ~ ${plan.monthlyPrice || 0} USD /mo)
+                        Monthly({plan.monthlyPriceEGP || 0} EGP ~ {plan.monthlyPrice || 0} USD /mo)
                       </Button>
                       <Button
                         type="button"
@@ -398,7 +398,7 @@ export default function SubscriptionPage() {
                         className={type === "yearly" ? "gradient-primary" : ""}
                         onClick={() => setType("yearly")}
                       >
-                        Yearly (${plan.yearlyPriceEGP || 0} EGP ~ ${plan.yearlyPrice || 0} USD /yr)
+                        Yearly({plan.yearlyPriceEGP || 0} EGP ~ {plan.yearlyPrice || 0} USD /yr)
                       </Button>
                     </div>
                   </div>
