@@ -26,9 +26,6 @@ export default function ErrorPage() {
         <div className="relative z-10 flex min-h-screen flex-col items-center justify-center px-6 text-center">
           {/* 404 */}
           <div className="relative mb-4">
-            <h1 className="text-[140px] font-black leading-none tracking-tight drop-shadow-2xl md:text-[220px]">
-              404
-            </h1>
   
             {/* Glow Ring */}
             <div className="absolute inset-0 -z-10 rounded-full border border-white/10 blur-2xl" />
@@ -36,7 +33,7 @@ export default function ErrorPage() {
   
           {/* Title */}
           <h2 className="mb-4 text-3xl font-bold md:text-5xl">
-            Oops! Page not found
+            Oops! Somthing went wrong
           </h2>
   
           {/* Subtitle */}

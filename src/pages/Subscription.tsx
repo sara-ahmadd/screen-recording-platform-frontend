@@ -149,24 +149,26 @@ export default function SubscriptionPage() {
             type,
             ...(checkoutSubscriptionId ? { subscriptionId: checkoutSubscriptionId } : {}),
           } as any);
-      const sessionUrl =
-        subscriptionRes.session_url || subscriptionRes.sessionUrl || subscriptionRes.url || subscriptionRes.checkoutUrl;
+      const checkoutSessionId =
+        subscriptionRes.checkoutSessionId || subscriptionRes.checkoutUrl;
       const result = subscriptionRes?.result ?? {};
       const amountProvider = Number(
         result?.checkoutAmountProvider ?? subscriptionRes?.amount_provider ?? 0,
+      );
+      const amountUsd = Number(
+        result?.checkoutAmountUsd?? 0,
       );
       const currency = String(
         result?.checkoutCurrency ?? subscriptionRes?.provider_currency ?? "EGP",
       ).toUpperCase();
     
-      // if (sessionUrl) {
+      if (checkoutSessionId) {
         navigate("/checkout/review", {
           state: {
-            checkoutSessionId:
+            checkoutSessionId:checkoutSessionId??
               subscriptionRes?.checkoutSessionId ??
-              subscriptionRes?.subscriptionId ??
               null,
-            redirectUrl: String(subscriptionRes?.redirectUrl || sessionUrl),
+            redirectUrl: String(subscriptionRes?.redirectUrl || checkoutSessionId),
             plan: subscriptionRes?.plan ?? {
               name: String(plan?.name || "Subscription"),
               monthlyPriceUSD: Number(plan?.monthlyPriceUSD ?? plan?.monthlyPrice ?? 0),
@@ -175,6 +177,8 @@ export default function SubscriptionPage() {
               yearlyPriceEGP: Number(plan?.yearlyPriceEGP ?? 0),
               billingCycle: type,
             },
+            amountProvider,
+            amountUsd,
             billingData:
               subscriptionRes?.billingData ??
               (paymentData
@@ -187,15 +191,15 @@ export default function SubscriptionPage() {
                 : null),
           },
         });
-      //   if (promoCodeTrimmed) {
-      //     trackClientEvent({
-      //       eventType: "click",
-      //       eventName: "promo_applied_success",
-      //       metadata: { code: promoCodeTrimmed, route: "/subscription" },
-      //     });
-      //   }
-      //   return true;
-      // }
+        if (promoCodeTrimmed) {
+          trackClientEvent({
+            eventType: "click",
+            eventName: "promo_applied_success",
+            metadata: { code: promoCodeTrimmed, route: "/subscription" },
+          });
+        }
+        return true;
+      }
 
       setSuccessDetails({
         mainMessage: String(
@@ -222,10 +226,7 @@ export default function SubscriptionPage() {
     } catch (err: any) {
       const errorMessage = String(err?.message || "Subscription failed");
       const attemptedPromoCode = paymentData?.promoCode?.trim() || "";
-      /**
-       * FIXEME: Need to fix this flow.
-       */
-      navigate("/checkout/review")
+      
       if (attemptedPromoCode) {
         setPromoError(errorMessage);
         trackClientEvent({

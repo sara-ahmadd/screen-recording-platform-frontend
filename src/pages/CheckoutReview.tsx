@@ -17,6 +17,8 @@ type ReviewPayload = {
     monthlyPriceEGP?: number;
     yearlyPriceEGP?: number;
   };
+  amountProvider?:number,
+  amountUsd?:number,
   billingData?: {
     name?: string;
     email?: string;
@@ -103,10 +105,10 @@ export default function CheckoutReviewPage() {
                 Total due now
               </p>
               <p className="mt-2 text-3xl md:text-4xl font-bold">
-                EGP {egp.toLocaleString()} / {cycleLabel}
+                EGP {payload.amountProvider.toLocaleString()} / {cycleLabel}
               </p>
               <p className="mt-1 text-sm text-muted-foreground">
-                ≈ ${usd.toLocaleString()} USD
+                ≈ ${payload.amountUsd.toLocaleString()} USD
               </p>
             </div>
 
