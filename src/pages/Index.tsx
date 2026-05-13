@@ -102,12 +102,12 @@ export default function Index() {
   }, [toast]);
 
   useEffect(() => {
-    //detect : responseMessage=3DS+authentication+failed or responseMessage=Cancelled+by+User
-    const responseMessage = searchParams.get("responseMessage")?.toLowerCase();
-    if (!responseMessage.includes('failed')&&!responseMessage.includes('cancelled')) {
+    //detect : responseMessage=3DS+authentication+failed or responseMessage=Cancelled+by+User or responseMessage=Success
+    const responseMessage = searchParams.get("responseMessage")?.toLowerCase()??"";
+    if (responseMessage?.includes('success')) {
       setSuccessDialogOpen(true);
       setCancelDialogOpen(false);
-    } else if (responseMessage.includes('failed')||responseMessage.includes('cancelled')) {
+    } else if (!responseMessage?.includes('success')) {
       setCancelDialogOpen(true);
       setSuccessDialogOpen(false);
     }
