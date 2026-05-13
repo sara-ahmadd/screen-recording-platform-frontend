@@ -102,7 +102,7 @@ export default function Index() {
   }, [toast]);
 
   useEffect(() => {
-    //detect : responseMessage=3DS+authentication+failed
+    //detect : responseMessage=3DS+authentication+failed or responseMessage=Cancelled+by+User
     const responseMessage = searchParams.get("responseMessage")?.toLowerCase();
     if (!responseMessage.includes('failed')&&!responseMessage.includes('cancelled')) {
       setSuccessDialogOpen(true);
