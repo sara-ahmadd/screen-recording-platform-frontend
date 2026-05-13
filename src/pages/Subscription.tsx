@@ -325,7 +325,7 @@ export default function SubscriptionPage() {
             </CardContent>
           </Card>
         ) : (
-          <div className="grid gap-6 lg:grid-cols-2">
+          <div className="grid gap-6 grid-cols-1 xl:grid-cols-2">
             <Card className="glass">
               <CardHeader>
                 <CardTitle className="capitalize">{plan.name} Plan</CardTitle>

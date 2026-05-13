@@ -53,6 +53,11 @@ export default function CheckoutReviewPage() {
     script.src =  "https://www.merchant.geidea.net/hpp/geideaCheckout.min.js";
     script.async = true;
     document.body.appendChild(script);
+
+       const geidea = new (window as any).GeideaCheckout({
+      merchantPublicKey: import.meta.env.VITE_GEIDEA_PUBLIC_KEY,
+      environment: "sandbox", // switch to production when live
+    });
   }, []);
 
   const handlePayment = async () => {

@@ -102,11 +102,12 @@ export default function Index() {
   }, [toast]);
 
   useEffect(() => {
-    const paymentStatus = searchParams.get("payment");
-    if (paymentStatus === "success") {
+    //detect : responseMessage=3DS+authentication+failed
+    const responseMessage = searchParams.get("responseMessage");
+    if (!responseMessage.includes('failed')) {
       setSuccessDialogOpen(true);
       setCancelDialogOpen(false);
-    } else if (paymentStatus === "cancelled") {
+    } else if (responseMessage.includes('failed')) {
       setCancelDialogOpen(true);
       setSuccessDialogOpen(false);
     }
