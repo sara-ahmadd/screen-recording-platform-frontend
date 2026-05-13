@@ -103,11 +103,11 @@ export default function Index() {
 
   useEffect(() => {
     //detect : responseMessage=3DS+authentication+failed
-    const responseMessage = searchParams.get("responseMessage");
-    if (!responseMessage.includes('failed')) {
+    const responseMessage = searchParams.get("responseMessage")?.toLowerCase();
+    if (!responseMessage.includes('failed')&&!responseMessage.includes('cancelled')) {
       setSuccessDialogOpen(true);
       setCancelDialogOpen(false);
-    } else if (responseMessage.includes('failed')) {
+    } else if (responseMessage.includes('failed')||responseMessage.includes('cancelled')) {
       setCancelDialogOpen(true);
       setSuccessDialogOpen(false);
     }
