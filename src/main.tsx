@@ -3,9 +3,9 @@ import { registerSW } from "virtual:pwa-register";
 import { routes } from "./App.tsx";
 import "./index.css";
 
-if (typeof window !== "undefined") {
-  registerSW({ immediate: true });
-}
+// if (typeof window !== "undefined") {
+//   registerSW({ immediate: true });
+// }
 
 
 export const createRoot = ViteReactSSG({
