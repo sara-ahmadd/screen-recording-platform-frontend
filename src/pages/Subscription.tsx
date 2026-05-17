@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { Link, NavLink, useNavigate, useSearchParams } from "react-router-dom";
 import AppLayout from "@/components/AppLayout";
 import { useAuth } from "@/contexts/AuthContext";
 import { paymentsApi, plansApi, subscriptionApi } from "@/lib/api";
@@ -39,6 +39,7 @@ export default function SubscriptionPage() {
   const [billingDialogOpen, setBillingDialogOpen] = useState(false);
   const [promoCode, setPromoCode] = useState("");
   const [recurringConsent, setRecurringConsent] = useState(false);
+  const [termsAndConds, setTermsAndConds] = useState(false);
   const [promoError, setPromoError] = useState<string | null>(null);
   const [successDetails, setSuccessDetails] = useState<{
     mainMessage: string;
@@ -250,7 +251,7 @@ export default function SubscriptionPage() {
   const handleConfirmSubscription = async () => {
     if (!selectedWorkspaceId || !plan) return;
     const isFreePlan = Number(plan?.monthlyPrice || 0) === 0 && Number(plan?.yearlyPrice || 0) === 0;
-    if (!isFreePlan && !recurringConsent) {
+    if (!isFreePlan && !recurringConsent && !termsAndConds) {
       toast({
         title: "Consent required",
         description:
@@ -422,6 +423,21 @@ export default function SubscriptionPage() {
                         I agree to automatic recurring payments for this subscription.
                       </Label>
                     </div>
+                    <div className="flex items-start gap-2">
+                      <Checkbox
+                        id="terms-and-conditions"
+                        checked={termsAndConds}
+                        onCheckedChange={(checked) =>
+                          setTermsAndConds(Boolean(checked))
+                        }
+                      />
+                      <Label
+                        htmlFor="terms-and-conditions"
+                        className="text-sm font-normal leading-5"
+                      >
+                        I agree to <NavLink className={'text-blue-500 underline'} to='/terms-and-conditions'>Terms&Conditions</NavLink>.
+                      </Label>
+                    </div>
                   </div>
                 )}
 
@@ -434,7 +450,7 @@ export default function SubscriptionPage() {
                     isSamePlanAndCycle ||
                     (!(Number(plan.monthlyPrice || 0) === 0 &&
                       Number(plan.yearlyPrice || 0) === 0) &&
-                      !recurringConsent)
+                      (!recurringConsent || !termsAndConds))
                   }
                 >
                   {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : actionLabel}

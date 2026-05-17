@@ -350,7 +350,7 @@ useEffect(() => {
   return (
     <AppLayout>
       <div className="p-6 md:p-8 max-w-7xl mx-auto">
-        <h1 className="text-2xl font-bold mb-2">Upload Recording</h1>
+        <h1 className="text-2xl font-bold mb-2">Upload Existing Video</h1>
         <p className="text-muted-foreground mb-8">Upload your video directly to cloud storage.</p>
 
         <Card className="glass">

@@ -19,6 +19,9 @@ import Logo from "@/components/Logo";
 import { headerLinks } from "@/components/PublicPageLayout";
 import ThemeToggle from "@/components/ThemeToggle";
 import NotificationsBell from "@/components/NotificationsBell";
+import { Reveal } from "@/components/Reveal";
+import { Badge } from "@/components/Badge";
+import HowItWorksSection from "@/components/HowItWorks";
 
 export default function Index() {
   const { user, selectedWorkspaceId, refreshUser, lastAuthError, loading } = useAuth();
@@ -294,7 +297,7 @@ export default function Index() {
               <>
                 <ThemeToggle className="static h-9 w-9" />
                 <Link to="/login"><Button variant="ghost">Sign in</Button></Link>
-                <Link to="/register"><Button className="gradient-primary">Get Started</Button></Link>
+                <Link to="/register"><Button className="gradient-primary">SignUp</Button></Link>
               </>
             )}
           </div>
@@ -303,18 +306,17 @@ export default function Index() {
 
       {/* Hero */}
       <Reveal from="left">
-      <section className="max-w-6xl mx-auto px-6 py-24 md:py-20 text-center">
+      <section className="max-w-6xl mx-auto px-6 py-14 md:py-10 text-center">
         <Badge className="gradient-primary border-0 mb-6 text-sm px-4 py-1.5 text-primary-foreground">
           <Zap className="h-3.5 w-3.5 mr-1" /> Screen Recording Made Simple
         </Badge>
         <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-6 leading-tight">
-  Say it once.<br />
-  <span className="gradient-text">Share it forever.</span>
+  Record your screen,<br/> share videos instantly,<br />
+  <span className="gradient-text">and collaborate with your team.</span>
 </h1>
 
 <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-10">
-  Record your screen, explain ideas faster, and replace endless meetings with simple video messages. 
-  Built for teams who move fast.
+  theRec is a browser-based screen recording and video collaboration platform built for async communication, tutorials, product demos, and team collaboration.
 </p>
         <div className="flex items-center justify-center gap-4">
           {user ? (
@@ -330,13 +332,13 @@ export default function Index() {
             </>
           ) : (
             <>
-              <Link to="/register">
+              <Link to="/demo">
                 <Button size="lg" className="gradient-primary gap-2 text-base px-8">
-                  Start Recording <ArrowRight className="h-4 w-4" />
+                  Watch Demo <ArrowRight className="h-4 w-4" />
                 </Button>
               </Link>
-              <Link to="/login">
-                <Button size="lg" variant="outline" className="text-base px-8">Sign In</Button>
+              <Link to="/record">
+                <Button size="lg" variant="outline" className="text-base px-8">Start Recording free</Button>
               </Link>
             </>
           )}
@@ -364,136 +366,232 @@ export default function Index() {
   {/* Ad here */}
   {/* <!-- landing _top --> */}
       <Ad/>
-      {/* Features */}
-      <Reveal from="right">
-      <section className="max-w-6xl mx-auto px-6 py-20">
-        <div className="grid md:grid-cols-3 gap-8">
-          {[
-  {
-    icon: Zap,
-    title: "Record in seconds",
-    desc: "Start recording instantly with no setup or downloads."
-  },
-  {
-    icon: Users,
-    title: "Explain instead of typing",
-    desc: "Send video messages that save hours of meetings and long texts."
-  },
-  {
-    icon: Shield,
-    title: "Control who sees what",
-    desc: "Share privately with your team or generate secure public links."
-  }
-].map((f) => (
-            <div key={f.title} className="glass rounded-2xl p-8 text-center hover:border-primary/30 hover:-translate-y-1 transition-all duration-300">
-              <div className="gradient-primary rounded-2xl p-4 w-fit mx-auto mb-4">
-                <f.icon className="h-6 w-6 text-primary-foreground" />
+      
+     {/* Product Overview */}
+    <Reveal from="right">
+    <section className="max-w-6xl mx-auto px-6 py-24">
+      <div className="text-center mb-14">
+        <Badge className="gradient-primary border-0 mb-4 text-primary-foreground px-4 py-1.5">
+          Product Overview
+        </Badge>
+
+        <h2 className="text-3xl md:text-5xl font-bold tracking-tight">
+          Everything your team needs
+          <span className="gradient-text block mt-2">
+            to communicate with video
+          </span>
+        </h2>
+
+        <p className="text-muted-foreground max-w-2xl mx-auto mt-5 text-lg">
+          theRec helps teams record, explain, share, and collaborate asynchronously —
+          without meetings, complicated tools, or downloads.
+        </p>
+      </div>
+
+          <div className="grid lg:grid-cols-3 gap-6">
+            {[
+              {
+                icon: Zap,
+                title: "Instant Browser Recording",
+                desc: "Start recording immediately with no installation required. Capture your screen, tab, or window directly from your browser.",
+              },
+              {
+                icon: Upload,
+                title: "Upload Existing Videos",
+                desc: "Already have recordings? Upload and organize them inside your workspace in seconds.",
+              },
+              {
+                icon: Users,
+                title: "Async Team Collaboration",
+                desc: "Share visual updates instead of scheduling meetings. Keep communication faster and clearer.",
+              },
+              {
+                icon: Shield,
+                title: "Privacy & Access Control",
+                desc: "Keep recordings private, workspace-only, or publicly shareable with secure links.",
+              },
+              {
+                icon: Play,
+                title: "Fast Video Playback",
+                desc: "Videos are processed automatically for smooth streaming and instant viewing.",
+              },
+              {
+                icon: Check,
+                title: "Workspace Organization",
+                desc: "Manage recordings, teammates, permissions, and collaboration from one central place.",
+              },
+            ].map((item) => (
+              <div
+                key={item.title}
+                className="glass rounded-3xl p-7 hover:border-primary/30 hover:-translate-y-1 transition-all duration-300"
+              >
+                <div className="gradient-primary rounded-2xl p-4 w-fit mb-5">
+                  <item.icon className="h-6 w-6 text-primary-foreground" />
+                </div>
+
+                <h3 className="text-xl font-semibold mb-3">
+                  {item.title}
+                </h3>
+
+                <p className="text-muted-foreground leading-relaxed text-sm">
+                  {item.desc}
+                </p>
               </div>
-              <h3 className="font-semibold text-lg mb-2">{f.title}</h3>
-              <p className="text-sm text-muted-foreground">{f.desc}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-      </Reveal>
+            ))}
+          </div>
+    </section>
+    </Reveal>
 
       {/* Google verification info */}
+{/* Trust & Security */}
 <Reveal from="left">
-  <section className="max-w-6xl mx-auto px-6 py-8 md:py-12">
-    <div className="glass rounded-2xl p-6 md:p-8">
-      <h2 className="text-2xl md:text-3xl font-bold">
-        Transparency & Data Usage
+<section className="max-w-6xl mx-auto px-6 py-14">
+  <div className="glass rounded-3xl p-8 md:p-12 overflow-hidden relative">
+    
+    <div className="absolute inset-0 opacity-[0.03] bg-[radial-gradient(circle_at_top_right,var(--primary)_0%,transparent_40%)]" />
+
+    <div className="relative z-10">
+      <Badge className="gradient-primary border-0 mb-5 text-primary-foreground px-4 py-1.5">
+        Trust & Security
+      </Badge>
+
+      <div className="max-w-3xl">
+        <h2 className="text-3xl md:text-5xl font-bold tracking-tight">
+          Built with transparency,
+          <span className="gradient-text block mt-2">
+            privacy, and secure collaboration
+          </span>
+        </h2>
+
+        <p className="text-muted-foreground mt-5 text-lg leading-relaxed">
+          theRec is designed for modern teams that need secure video communication,
+          protected workspace collaboration, and reliable recording infrastructure.
+        </p>
+      </div>
+
+      <div className="grid md:grid-cols-2 gap-5 mt-12">
+
+        {[
+          {
+            title: "Secure Authentication",
+            desc: "Protected login, workspace access control, and secure account authentication across your organization.",
+          },
+          {
+            title: "Private Video Access",
+            desc: "Control who can access recordings using workspace permissions or secure shareable links.",
+          },
+          {
+            title: "Automated Video Processing",
+            desc: "Videos are automatically optimized for playback, streaming, thumbnails, and organization.",
+          },
+          {
+            title: "Minimal Data Collection",
+            desc: "We only collect essential account and recording data necessary to operate the platform.",
+          },
+        ].map((item) => (
+          <div
+            key={item.title}
+            className="rounded-2xl border border-border bg-background/50 p-6 hover:border-primary/30 transition-colors"
+          >
+            <h3 className="font-semibold text-lg mb-2">
+              {item.title}
+            </h3>
+
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              {item.desc}
+            </p>
+          </div>
+        ))}
+
+      </div>
+
+      <div className="mt-10 flex flex-wrap items-center gap-4 text-sm">
+        <Link
+          to="/privacy-policy"
+          className="underline underline-offset-4 hover:text-foreground"
+        >
+          Privacy Policy
+        </Link>
+
+        <Link
+          to="/terms-and-conditions"
+          className="underline underline-offset-4 hover:text-foreground"
+        >
+          Terms & Conditions
+        </Link>
+      </div>
+    </div>
+  </div>
+</section>
+</Reveal>
+
+     {/* How it works */}
+<HowItWorksSection/>
+
+
+{/* Async Communication CTA */}
+<Reveal from="left">
+<section className="max-w-6xl mx-auto px-6 py-16">
+  <div className="glass rounded-3xl p-10 md:p-14 text-center relative overflow-hidden">
+
+    <div className="absolute inset-0 opacity-[0.04] bg-[radial-gradient(circle_at_center,var(--primary)_0%,transparent_60%)]" />
+
+    <div className="relative z-10">
+      <Badge className="gradient-primary border-0 mb-5 text-primary-foreground px-4 py-1.5">
+        Async Communication
+      </Badge>
+
+      <h2 className="text-3xl md:text-5xl font-bold tracking-tight max-w-3xl mx-auto">
+        Replace long meetings
+        <span className="gradient-text block mt-2">
+          with quick video updates
+        </span>
       </h2>
 
-      <p className="text-muted-foreground mt-3 max-w-3xl">
-        theRec is designed with a strong focus on transparency, security, and responsible data handling. 
-        This page outlines how our platform works and how user data is used to deliver core functionality.
+      <p className="text-muted-foreground text-lg max-w-2xl mx-auto mt-6 leading-relaxed">
+        Share product demos, bug reports, tutorials, onboarding videos,
+        and team updates without interrupting everyone's schedule.
       </p>
 
-      <div className="mt-6 grid md:grid-cols-2 gap-4 text-sm">
-        
-        <div className="rounded-xl border border-border p-4 bg-background/60">
-          <p className="font-semibold mb-1">Platform Overview</p>
-          <p className="text-muted-foreground">
-            theRec enables users to record their screen, upload video content, and manage recordings within collaborative workspaces. 
-            Content can be shared securely via private access or public links.
-          </p>
-        </div>
+      <div className="mt-8 flex flex-wrap justify-center gap-3">
 
-        <div className="rounded-xl border border-border p-4 bg-background/60">
-          <p className="font-semibold mb-1">Data We Collect</p>
-          <p className="text-muted-foreground">
-            We collect essential account and workspace data to enable authentication, team collaboration, subscription management, 
-            and service reliability. No unnecessary personal data is collected.
-          </p>
-        </div>
-
-        <div className="rounded-xl border border-border p-4 bg-background/60">
-          <p className="font-semibold mb-1">Content Processing</p>
-          <p className="text-muted-foreground">
-            Uploaded recordings are securely processed to generate playable formats, thumbnails, and metadata. 
-            This processing is required to deliver streaming, sharing, and organization features.
-          </p>
-        </div>
-
-        <div className="rounded-xl border border-border p-4 bg-background/60">
-          <p className="font-semibold mb-1">Privacy & Compliance</p>
-          <p className="text-muted-foreground">
-            We are committed to protecting user data and complying with applicable privacy standards. 
-            For full details, please review our{" "}
-            <Link to="/privacy-policy" className="underline underline-offset-4 hover:text-foreground">
-              Privacy Policy
-            </Link>{" "}
-            and{" "}
-            <Link to="/terms-and-conditions" className="underline underline-offset-4 hover:text-foreground">
-              Terms & Conditions
-            </Link>.
-          </p>
-        </div>
+        {[
+          "Product demos",
+          "Bug reporting",
+          "Team updates",
+          "Client walkthroughs",
+          "Async onboarding",
+        ].map((item) => (
+          <div
+            key={item}
+            className="rounded-full border border-border bg-background/60 px-4 py-2 text-sm"
+          >
+            {item}
+          </div>
+        ))}
 
       </div>
     </div>
-  </section>
+  </div>
+</section>
 </Reveal>
 
-      {/* How it works */}
-      <Reveal from="left">
-      <section className="max-w-6xl mx-auto px-6 py-16">
-        <div className="text-center mb-10">
-          <h2 className="text-3xl md:text-4xl font-bold">How it works</h2>
-          <p className="text-muted-foreground mt-3">Create and share polished videos in minutes.</p>
-        </div>
-        <div className="grid md:grid-cols-3 gap-6">
-          {[
-            { step: "01", title: "Record or Upload", desc: "Capture your screen instantly or upload existing clips." },
-            { step: "02", title: "Auto Process", desc: "We process your videos and generate thumbnails automatically." },
-            { step: "03", title: "Share & Collaborate", desc: "Send secure links, manage visibility, and work together." },
-          ].map((item) => (
-            <div key={item.step} className="glass rounded-2xl p-6 hover:-translate-y-1 transition-transform duration-300">
-              <p className="text-sm text-primary font-semibold">{item.step}</p>
-              <h3 className="font-semibold text-lg mt-2">{item.title}</h3>
-              <p className="text-sm text-muted-foreground mt-2">{item.desc}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-      </Reveal>
-      <section className="max-w-6xl mx-auto px-6 py-16 text-center">
-  <h2 className="text-3xl md:text-4xl font-bold mb-6">
-    Stop wasting time in meetings
-  </h2>
-  <p className="text-muted-foreground max-w-2xl mx-auto">
-    theRec helps teams communicate visually. Record once, share instantly, and let others watch on their time.
-  </p>
-</section>
+
+
+
       {/* Plans */}
       {(plansLoading || plans.length > 0) && (
         <Reveal from="right">
           <section id="plans-section" className="max-w-6xl mx-auto px-6 py-16">
-            <div className="text-center mb-10">
-              <h2 className="text-3xl md:text-4xl font-bold">Simple plans for every team</h2>
-              <p className="text-muted-foreground mt-3">Start free, then scale with advanced collaboration and limits.</p>
-            </div>
+            <Badge className="gradient-primary border-0 mb-5 text-primary-foreground px-4 py-1.5">
+        Pricing
+      </Badge>
+            <h2 className="text-3xl md:text-5xl font-bold tracking-tight pb-5">
+  Flexible pricing for
+  <span className="gradient-text block mt-2">
+    individuals and teams
+  </span>
+</h2>
             {plansLoading ? (
               <div className="flex justify-center py-10"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>
             ) : (
@@ -517,7 +615,7 @@ export default function Index() {
                 return (
                   <div
                     key={plan.id || plan.name}
-                    className={`glass relative rounded-2xl p-6 transition-all duration-300 hover:-translate-y-1 ${
+                    className={`glass relative rounded-3xl p-8 transition-all duration-300 hover:-translate-y-2 hover:border-primary/30 ${
                       isPopular ? "border-primary ring-1 ring-primary/20" : ""
                     }`}
                   >
@@ -616,82 +714,124 @@ export default function Index() {
       )}
 {/* <!-- landing_bottom --> */}
     <Ad/>
-      {/* Testimonials */}
-      <Reveal from="left">
-      <section className="max-w-6xl mx-auto px-6 py-16">
-        <div className="text-center mb-10">
-          <h2 className="text-3xl md:text-4xl font-bold">Loved by modern teams</h2>
+     {/* Testimonials */}
+<Reveal from="left">
+<section className="max-w-6xl mx-auto px-6 py-24">
+
+  <div className="text-center mb-14">
+    <Badge className="gradient-primary border-0 mb-4 text-primary-foreground px-4 py-1.5">
+      Testimonials
+    </Badge>
+
+    <h2 className="text-3xl md:text-5xl font-bold tracking-tight">
+      Trusted by modern
+      <span className="gradient-text block mt-2">
+        remote-first teams
+      </span>
+    </h2>
+
+    <p className="text-muted-foreground mt-5 text-lg max-w-2xl mx-auto">
+      Teams use theRec to reduce meetings, explain faster,
+      and collaborate more efficiently with video.
+    </p>
+  </div>
+
+  <div className="grid md:grid-cols-3 gap-6">
+
+    {[
+      {
+        quote:
+          "theRec completely changed how our product team communicates updates asynchronously.",
+        name: "Aya O.",
+        role: "Product Manager",
+      },
+      {
+        quote:
+          "We replaced many internal meetings with quick recordings and saved hours every week.",
+        name: "Karim M.",
+        role: "Engineering Lead",
+      },
+      {
+        quote:
+          "Support explanations became much clearer after switching to video walkthroughs.",
+        name: "Lina S.",
+        role: "Customer Success",
+      },
+    ].map((item) => (
+      <div
+        key={item.name}
+        className="glass rounded-3xl p-8 hover:-translate-y-1 transition-all duration-300"
+      >
+        <div className="text-5xl leading-none text-primary/20 mb-5">
+          "
         </div>
-        <div className="grid md:grid-cols-3 gap-6">
-          {[
-            {
-              quote: "theRec helped us cut meeting time by half. We now share quick video updates instead.",
-              name: "Aya O.",
-              role: "Product Manager",
-            },
-            {
-              quote: "Upload and sharing are super fast. The team workspace features made collaboration much easier.",
-              name: "Karim M.",
-              role: "Engineering Lead",
-            },
-            {
-              quote: "Our support replies became clearer and customers understand fixes much faster with video.",
-              name: "Lina S.",
-              role: "Customer Success",
-            },
-          ].map((item) => (
-            <div key={item.name} className="glass rounded-2xl p-6 hover:-translate-y-1 transition-transform duration-300">
-              <p className="text-sm text-muted-foreground">"{item.quote}"</p>
-              <p className="mt-4 font-medium">{item.name}</p>
-              <p className="text-xs text-muted-foreground">{item.role}</p>
-            </div>
-          ))}
+
+        <p className="text-muted-foreground leading-relaxed">
+          {item.quote}
+        </p>
+
+        <div className="mt-8">
+          <p className="font-semibold">
+            {item.name}
+          </p>
+
+          <p className="text-sm text-muted-foreground">
+            {item.role}
+          </p>
         </div>
-      </section>
-      </Reveal>
+      </div>
+    ))}
+
+  </div>
+</section>
+</Reveal>
 
       {/* FAQ */}
       <Reveal from="right">
       <section className="max-w-4xl mx-auto px-6 py-16">
         <div className="text-center mb-10">
-          <h2 className="text-3xl md:text-4xl font-bold">Frequently asked questions</h2>
-        </div>
+<h2 className="text-3xl md:text-5xl font-bold tracking-tight">
+  Questions?
+  <span className="gradient-text block mt-2">
+    We’ve got answers
+  </span>
+</h2>        </div>
         <div className="space-y-4">
         {[
   {
-    q: "Do viewers need an account to watch my videos?",
-    a: "No. Anyone with a public link can watch your video instantly—no sign-up required. You can also restrict access to your team only when needed.",
+    q: "What is theRec used for?",
+    a: "theRec helps individuals and teams record their screen, explain ideas visually, share video updates, and collaborate asynchronously without unnecessary meetings.",
   },
   {
-    q: "How is this different from a normal screen recorder?",
-    a: "theRec is built for communication, not just recording. You can record, instantly share via link, and collaborate with your team—all in one place.",
+    q: "Do I need to install any software?",
+    a: "No. theRec works directly in your browser, so you can start recording instantly without downloading or installing anything.",
   },
   {
-    q: "Can I control who sees my recordings?",
-    a: "Yes. You can keep videos private, share them with your workspace, or generate secure public links depending on your needs.",
+    q: "Can I share recordings with people outside my workspace?",
+    a: "Yes. You can generate secure public links for external sharing or keep videos private inside your workspace.",
   },
   {
-    q: "Do I need to install anything?",
-    a: "No installation required. theRec works directly in your browser, so you can start recording in seconds.",
+    q: "Is theRec suitable for remote teams?",
+    a: "Absolutely. theRec is built for async communication, making it ideal for remote teams, distributed companies, product demos, onboarding, and team updates.",
   },
   {
-    q: "How fast are recordings processed?",
-    a: "Your videos are processed automatically in the background, so they’re ready to share within moments after recording.",
+    q: "How are videos processed after recording?",
+    a: "Videos are automatically processed in the background to generate optimized playback formats, thumbnails, and streaming-ready files.",
   },
   {
-    q: "Can I use it with my team?",
-    a: "Absolutely. Create workspaces, invite teammates, assign roles, and collaborate on recordings بسهولة.",
+    q: "Can I upload existing videos?",
+    a: "Yes. In addition to screen recording, you can upload existing video files and organize them inside your workspace.",
   },
   {
-    q: "Is there a free plan?",
-    a: "Yes. You can start for free with core features, then upgrade anytime as your needs grow.",
+    q: "Are recordings private and secure?",
+    a: "Yes. You control who can access recordings through workspace permissions and secure sharing settings.",
   },
   {
-    q: "Are my recordings secure?",
-    a: "Yes. Your data is securely stored, and you have full control over privacy and access permissions.",
+    q: "Is there a free plan available?",
+    a: "Yes. You can start with a free plan and upgrade anytime when your team needs more storage, collaboration, and advanced features.",
   },
 ].map((item) => (
-            <div key={item.q} className="glass rounded-xl p-5 hover:-translate-y-0.5 transition-transform duration-300">
+            <div key={item.q} className="glass rounded-2xl p-6 hover:-translate-y-0.5 transition-transform duration-300">
               <h3 className="font-semibold">{item.q}</h3>
               <p className="text-sm text-muted-foreground mt-2">{item.a}</p>
             </div>
@@ -700,45 +840,89 @@ export default function Index() {
       </section>
       </Reveal>
 
-      {/* Final CTA */}
-      <Reveal from="left">
-      <section className="max-w-6xl mx-auto px-6 pb-20">
-        <div className="glass rounded-3xl p-10 md:p-14 text-center hover:border-primary/30 transition-colors duration-300">
-          {user ? (
-            <>
-              <h2 className="text-3xl md:text-4xl font-bold">Welcome back, {user.user_name}</h2>
-              <p className="text-muted-foreground mt-3">Jump back into your workspace and continue creating.</p>
-              <div className="mt-6 flex items-center justify-center gap-3">
-                <Link to="/dashboard">
-                  <Button size="lg" className="gradient-primary">Open Dashboard</Button>
-                </Link>
-                <Link to="/workspaces">
-                  <Button size="lg" variant="outline">Manage Workspaces</Button>
-                </Link>
-              </div>
-            </>
-          ) : (
-            <>
-            <h2 className="text-3xl md:text-4xl font-bold">
-  Replace your next meeting with a video
-</h2>
-<p className="text-muted-foreground mt-3">
-  Start recording for free. No credit card required.
-</p>
-              <p className="text-muted-foreground mt-3">Create your first workspace and share your first video today.</p>
-              <div className="mt-6 flex items-center justify-center gap-3">
-                <Link to="/register">
-                  <Button size="lg" className="gradient-primary">Get Started Free</Button>
-                </Link>
-                <Link to="/login">
-                  <Button size="lg" variant="outline">Sign In</Button>
-                </Link>
-              </div>
-            </>
-          )}
-        </div>
-      </section>
-      </Reveal>
+     {/* Final CTA */}
+<Reveal from="left">
+<section className="max-w-6xl mx-auto px-6 pb-24">
+
+  <div className="glass rounded-[2rem] p-10 md:p-16 text-center relative overflow-hidden">
+
+    <div className="absolute inset-0 opacity-[0.04] bg-[radial-gradient(circle_at_center,var(--primary)_0%,transparent_60%)]" />
+
+    <div className="relative z-10">
+
+      {user ? (
+        <>
+          <Badge className="gradient-primary border-0 mb-5 text-primary-foreground px-4 py-1.5">
+            Welcome Back
+          </Badge>
+
+          <h2 className="text-3xl md:text-5xl font-bold tracking-tight">
+            Continue creating
+            <span className="gradient-text block mt-2">
+              and collaborating
+            </span>
+          </h2>
+
+          <p className="text-muted-foreground mt-6 text-lg">
+            Jump back into your workspace and manage your recordings.
+          </p>
+
+          <div className="mt-8 flex items-center justify-center gap-3">
+            <Link to="/dashboard">
+              <Button size="lg" className="gradient-primary">
+                Open Dashboard
+              </Button>
+            </Link>
+
+            <Link to="/workspaces">
+              <Button size="lg" variant="outline">
+                Manage Workspaces
+              </Button>
+            </Link>
+          </div>
+        </>
+      ) : (
+        <>
+          <Badge className="gradient-primary border-0 mb-5 text-primary-foreground px-4 py-1.5">
+            Start Free
+          </Badge>
+
+          <h2 className="text-3xl md:text-5xl font-bold tracking-tight">
+            Start recording
+            <span className="gradient-text block mt-2">
+              in less than a minute
+            </span>
+          </h2>
+
+          <p className="text-muted-foreground mt-6 text-lg max-w-2xl mx-auto">
+            Create your workspace, record your screen,
+            and collaborate with your team — directly from the browser.
+          </p>
+
+          <div className="mt-8 flex items-center justify-center gap-3">
+            <Link to="/register">
+              <Button size="lg" className="gradient-primary">
+                Get Started Free
+              </Button>
+            </Link>
+
+            <Link to="/login">
+              <Button size="lg" variant="outline">
+                Sign In
+              </Button>
+            </Link>
+          </div>
+
+          <p className="text-base text-muted-foreground mt-5">
+            No credit card required
+          </p>
+        </>
+      )}
+
+    </div>
+  </div>
+</section>
+</Reveal>
 
       {/* Footer */}
       <footer className="border-t border-border/50 py-8 mt-12">
@@ -861,40 +1045,4 @@ export default function Index() {
   );
 }
 
-function Badge({ children, className }: { children: React.ReactNode; className?: string }) {
-  return <span className={`inline-flex items-center rounded-full font-medium ${className}`}>{children}</span>;
-}
 
-function Reveal({ children, from = "left" }: { children: ReactNode; from?: "left" | "right" }) {
-  const ref = useRef<HTMLDivElement | null>(null);
-  const [visible, setVisible] = useState(false);
-
-  useEffect(() => {
-    const node = ref.current;
-    if (!node) return;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setVisible(true);
-          observer.disconnect();
-        }
-      },
-      { threshold: 0.15 }
-    );
-
-    observer.observe(node);
-    return () => observer.disconnect();
-  }, []);
-
-  const hiddenClass = from === "right" ? "translate-x-8" : "-translate-x-8";
-
-  return (
-    <div
-      ref={ref}
-      className={`transition-all duration-700 ease-out ${visible ? "opacity-100 translate-x-0" : `opacity-0 ${hiddenClass}`}`}
-    >
-      {children}
-    </div>
-  );
-}

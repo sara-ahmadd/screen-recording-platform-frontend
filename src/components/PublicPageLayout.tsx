@@ -2,17 +2,23 @@ import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import Logo from "./Logo";
+import ThemeToggle from "./ThemeToggle";
 
 type PublicPageLayoutProps = {
   title: string;
   subtitle: string;
+  footer?: boolean;
   children: ReactNode;
 };
 
 export const headerLinks = [
+  { href: "/blogs", label: "Blogs" },
+  { href: "/plans", label: "Pricing" },
   { href: "/contact", label: "Contact" },
   { href: "/about", label: "About" },
-  { href: "/blogs", label: "Blogs" },
+  { href: "/privacy-policy", label: "Security/Privacy" },
+  { href: "/how-it-works", label: "How it works" },
+  
 ];
 
 const footerLinks = [
@@ -21,15 +27,17 @@ const footerLinks = [
   { href: "/contact", label: "Contact" },
   { href: "/about", label: "About" },
   { href: "/blogs", label: "Blogs" },
+  { href: "/how-it-works", label: "How it works" },
 ];
 
 export default function PublicPageLayout({
   title,
   subtitle,
   children,
+  footer=true
 }: PublicPageLayoutProps) {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background relative">
       <nav className="border-b border-border/50 backdrop-blur-sm sticky top-0 z-50 bg-background/80">
         <div className="max-w-[95%] mx-auto px-6 h-16 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2">
@@ -47,6 +55,8 @@ export default function PublicPageLayout({
             ))}
           </div>
           <div className="flex items-center gap-2">
+                            <ThemeToggle className="sticky h-9 w-9" />
+            
             <Link to="/login">
               <Button variant="ghost">Sign in</Button>
             </Link>
@@ -78,7 +88,7 @@ export default function PublicPageLayout({
         <section className="glass rounded-2xl p-6 md:p-8">{children}</section>
       </main>
 
-      <footer className="border-t border-border/50 py-8">
+     {footer&& <footer className="border-t border-border/50 py-8">
         <div className="max-w-[95%] mx-auto px-6 flex flex-wrap items-center justify-between gap-4">
           <p className="text-sm text-muted-foreground">
             © {new Date().getFullYear()} theRec. All rights reserved.
@@ -95,7 +105,7 @@ export default function PublicPageLayout({
             ))}
           </div>
         </div>
-      </footer>
+      </footer>}
     </div>
   );
 }

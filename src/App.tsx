@@ -53,6 +53,8 @@ import PaymentSuccessPage from "./pages/PaymentSuccess";
 import PaymentFailedPage from "./pages/PaymentFailed";
 import CheckoutReviewPage from "./pages/CheckoutReview";
 import ErrorPage from "./pages/ErrorPage";
+import HowItWorksPage from "./pages/HowItWorks";
+import DemoPage from "./pages/Demo";
 
 const queryClient = new QueryClient();
 
@@ -94,7 +96,9 @@ export const routes: RouteRecord[] = [
       { path: "privacy-policy", element: <PrivacyPolicyPage /> },
       { path: "terms-and-conditions", element: <TermsAndConditionsPage /> },
       { path: "contact", element: <ContactPage /> },
+      { path: "demo", element: <DemoPage /> },
       { path: "about", element: <AboutPage /> },
+      { path: "how-it-works", element: <HowItWorksPage /> },
       { path: "blogs", element: <BlogsPage /> },
       { path: "select-workspace", element: <ProtectedRoute><SelectWorkspacePage /></ProtectedRoute> },
       { path: "dashboard", element: <ProtectedRoute><Dashboard /></ProtectedRoute> },
