@@ -75,6 +75,10 @@ export default function RegisterPage() {
             <p className="mt-4 text-center text-sm text-muted-foreground">
               Already have an account? <Link to="/login" className="text-primary hover:underline">Sign in</Link>
             </p>
+             <div className="mt-4 text-center text-sm text-muted-foreground   flex gap-4 justify-center border-t pt-3">
+              <Link to="/privacy-policy" className="text-primary underline ">Privacy Policy</Link>
+              <Link to="/terms-and-conditions" className="text-primary underline">Terms&conditions</Link>
+            </div>
           </CardContent>
         </Card>
       </div>
