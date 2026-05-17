@@ -303,7 +303,7 @@ export default function Index() {
 
       {/* Hero */}
       <Reveal from="left">
-      <section className="max-w-6xl mx-auto px-6 py-24 md:py-32 text-center">
+      <section className="max-w-6xl mx-auto px-6 py-24 md:py-20 text-center">
         <Badge className="gradient-primary border-0 mb-6 text-sm px-4 py-1.5 text-primary-foreground">
           <Zap className="h-3.5 w-3.5 mr-1" /> Screen Recording Made Simple
         </Badge>
