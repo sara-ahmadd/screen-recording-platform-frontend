@@ -99,7 +99,8 @@
     "sla": "Expected SLA Response",
     "slaDesc": "We read every engineer ticket manually. Our response rate hovers between standard operational timelines.",
     "slaValue": "Usually within 1–2 business days",
-    "directLine": "Direct Line",
+    "directLine": "Chat with us on WhatsApp",
+    "directLineDesc": "We are available on WhatsApp to answer your questions and help you with your workspace.",
     "location": "Location"
   },
   "about": {

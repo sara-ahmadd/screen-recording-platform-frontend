@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
 import PublicPageLayout from "@/components/PublicPageLayout";
-import { Mail, MessageSquare, Clock, Phone, MapPin, ArrowUpRight } from "lucide-react";
+import { Mail, MessageSquare, Clock, Phone, MapPin, ArrowUpRight, MessageSquareReplyIcon } from "lucide-react";
 
 export default function ContactPage() {
   const { t } = useTranslation("marketing");
@@ -62,16 +62,12 @@ export default function ContactPage() {
 
           <div className="glass rounded-2xl p-6 border border-border/50 flex items-center gap-4 sm:col-span-1">
             <div className="h-10 w-10 shrink-0 rounded-xl bg-violet-500/10 flex items-center justify-center">
-              <Phone className="h-5 w-5 text-violet-600 dark:text-violet-400" />
+              <MessageSquareReplyIcon className="h-5 w-5 text-violet-600 dark:text-violet-400" />
             </div>
             <div>
               <h4 className="font-bold text-sm text-foreground">{t("contact.directLine")}</h4>
-              <a
-                href={`tel:${phone.replace(/\s+/g, "")}`}
-                className="text-sm text-violet-600 dark:text-violet-400 font-medium hover:underline tracking-wide"
-              >
-                {phone}
-              </a>
+             
+              <a className="text-sm text-violet-600 dark:text-violet-400 font-medium hover:underline tracking-wide" href={`https://wa.me/${phone.replace(/\s+/g, "")}`} target="_blank"> {phone}</a>
             </div>
           </div>
 

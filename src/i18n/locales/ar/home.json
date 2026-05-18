@@ -50,7 +50,7 @@
     }
   },
   "overview": {
-    "badge": "نظرة على المنتج",
+    "badge": "نظرة على الموقع",
     "title": "كل ما يحتاجه فريقك",
     "titleHighlight": "للتواصل بالفيديو",
     "subtitle": "يساعد theRec الفرق على التسجيل والشرح والمشاركة والتعاون غير المتزامن — دون اجتماعات أو أدوات معقدة أو تنزيلات.",
@@ -111,10 +111,10 @@
     "subtitle": "أسعار مرنة لـ",
     "subtitleHighlight": "الأفراد والفرق",
     "membersUpTo": "حتى {{count}} عضو",
-    "yearlySave": "({{egp}} جنيه ≈ ${{usd}} دولار) /سنة (وفر {{percent}}%)",
+    "yearlySave": "({{egp}} جنيه مصري ≈ ${{usd}} دولار) /سنة (وفر {{percent}}%)",
     "planFallback": "خطة",
-    "perMonth": "شهريا",
-    "egp": "جنيه",
+    "perMonth": "شهريا ",
+    "egp": " جنيه مصري",
     "usdApprox": "≈ {{amount}} دولار /شهر",
     "badge": "الأسعار",
     "titleAccent": "للأفراد والفرق",

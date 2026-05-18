@@ -438,7 +438,7 @@ export default function Index() {
   </div>
 </section>
 </Reveal>
-     {/* Product Overview */}
+     {/* Site Overview */}
     <Reveal from="right">
     <section className="max-w-6xl mx-auto px-6 py-24">
       <div className="text-center mb-14">
@@ -599,8 +599,8 @@ export default function Index() {
                     <h3 className="font-semibold text-lg capitalize">{plan.name || t("home:pricing.planFallback")}</h3>
                     <div className="mt-4 flex flex-col items-center">
                     {/* Primary: EGP */}
-                    <div className="text-3xl font-bold">
-                      {Number(plan.monthlyPriceEGP).toLocaleString() ?? 0} {t("home:pricing.egp")}
+                    <div className="text-2xl font-bold">
+                      {Number(plan.monthlyPriceEGP).toLocaleString() ?? 0} {t("home:pricing.egp")}{" "}
                       <span className="text-muted-foreground text-base font-normal">{t("home:pricing.perMonth")}</span>
                     </div>
 
@@ -690,54 +690,7 @@ export default function Index() {
       )}
 {/* <!-- landing_bottom --> */}
     <Ad/>
-     {/* Testimonials */}
-<Reveal from="left">
-<section className="max-w-6xl mx-auto px-6 py-24">
 
-  <div className="text-center mb-14">
-    <Badge className="gradient-primary border-0 mb-4 text-primary-foreground px-4 py-1.5">
-      {t("home:testimonials.badge")}
-    </Badge>
-
-    <h2 className="text-3xl md:text-5xl font-bold tracking-tight">
-      {t("home:testimonials.title")}
-      <span className="gradient-text block mt-2">
-        {t("home:testimonials.titleHighlight")}
-      </span>
-    </h2>
-
-    <p className="text-muted-foreground mt-5 text-lg max-w-2xl mx-auto">
-      {t("home:testimonials.subtitle")}
-    </p>
-  </div>
-
-  <div className="grid md:grid-cols-3 gap-6">
-
-    {(
-      [
-        { quoteKey: "home:testimonials.quote1", nameKey: "home:testimonials.name1", roleKey: "home:testimonials.role1" },
-        { quoteKey: "home:testimonials.quote2", nameKey: "home:testimonials.name2", roleKey: "home:testimonials.role2" },
-        { quoteKey: "home:testimonials.quote3", nameKey: "home:testimonials.name3", roleKey: "home:testimonials.role3" },
-      ] as const
-    ).map((item) => (
-      <div
-        key={item.nameKey}
-        className="glass rounded-3xl p-8 hover:-translate-y-1 transition-all duration-300"
-      >
-        <div className="text-5xl leading-none text-primary/20 mb-5">"</div>
-
-        <p className="text-muted-foreground leading-relaxed">{t(item.quoteKey)}</p>
-
-        <div className="mt-8">
-          <p className="font-semibold">{t(item.nameKey)}</p>
-          <p className="text-sm text-muted-foreground">{t(item.roleKey)}</p>
-        </div>
-      </div>
-    ))}
-
-  </div>
-</section>
-</Reveal>
 
       {/* FAQ */}
       <Reveal from="right">

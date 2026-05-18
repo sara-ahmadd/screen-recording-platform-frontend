@@ -151,7 +151,7 @@
   "perMonthShort": "/شهر",
   "perYearShort": "/سنة",
   "membersUpTo": "حتى {{count}} أعضاء",
-  "yearlySave": "({{egp}} جنيه ≈ ${{usd}} دولار) /سنة (وفر {{percent}}%)",
+  "yearlySave": "({{egp}} جنيه مصري ≈ ${{usd}} دولار) /سنة (وفر {{percent}}%)",
   "storage": {
     "zero": "0 بايت",
     "b": "بايت",

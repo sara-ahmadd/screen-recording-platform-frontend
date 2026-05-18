@@ -123,7 +123,7 @@ const EN_ADDITIONS = {
       },
     },
     overview: {
-      badge: "Product Overview",
+      badge: "Site Overview",
       title: "Everything your team needs",
       titleAccent: "to communicate with video",
       description:
@@ -715,7 +715,7 @@ const AR_ADDITIONS = {
     perMonthShort: "/شهر",
     perYearShort: "/سنة",
     membersUpTo: "حتى {{count}} أعضاء",
-    yearlySave: "({{egp}} جنيه ≈ ${{usd}} دولار) /سنة (وفر {{percent}}%)",
+    yearlySave: "({{egp}} جنيه مصري ≈ ${{usd}} دولار) /سنة (وفر {{percent}}%)",
     signInRequiredFree: "يرجى تسجيل الدخول للاشتراك في الخطة المجانية.",
     googleNoToken: "لم يُرجع تسجيل Google رمز وصول.",
     googleSessionFailed: "تعذّر التحقق من جلسة Google.",
