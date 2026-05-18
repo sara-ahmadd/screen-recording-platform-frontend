@@ -353,9 +353,7 @@ export default function Index() {
         <p className="mt-4 text-muted-foreground">
           {t("home:hero.browserNote")}
         </p>
-        {/* <p className="text-base text-muted-foreground mt-5">
-          {t("home:cta.noCreditCard")}
-        </p> */}
+       
         {!user && showGoogleFallback && (
           <div className="mt-4 flex justify-center">
             <div id="google-one-tap-fallback" />
