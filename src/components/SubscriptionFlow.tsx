@@ -1,38 +1,20 @@
-// SubscriptionWorkflow.tsx
-
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { ZoomIn, X } from "lucide-react";
 
 const SubscriptionWorkflow: React.FC = () => {
+  const { t } = useTranslation("marketing");
   const [previewImage, setPreviewImage] = useState<string | null>(null);
 
-  const subscriptionSteps = [
-    {
-      id: "01",
-      title: "Current Subscription",
-      desc: "After logging into the platform, the user navigates to the Billing page from the dashboard sidebar. The current workspace subscription details, billing cycle, active plan, and subscription history are displayed here.",
-    },
-    {
-      id: "02",
-      title: "Choose a Plan",
-      desc: "The user can click “Change your plan” or upgrade to another plan. A pricing page is displayed with all available plans alongside monthly and yearly billing options for easy comparison.",
-    },
-    {
-      id: "03",
-      title: "Confirm Subscription",
-      desc: "After selecting a plan, the user is redirected to a confirmation page where recurring billing authorization and agreement to the terms and conditions must be accepted before continuing.",
-    },
-    {
-      id: "04",
-      title: "Enter Billing Information",
-      desc: "A billing popup or dialog appears requesting customer billing information such as name, email, country, city, address, and optional promo code before proceeding.",
-    },
-    {
-      id: "05",
-      title: "Final Review & Payment",
-      desc: "The final checkout review page displays the selected subscription plan, billing cycle, and payment summary. Clicking “Continue to Payment” redirects the user to Stripe Checkout where the payment is securely completed.",
-    },
-  ];
+  const subscriptionSteps = useMemo(
+    () =>
+      (["01", "02", "03", "04", "05"] as const).map((id) => ({
+        id,
+        title: t(`subscriptionFlow.steps.${id}.title`),
+        desc: t(`subscriptionFlow.steps.${id}.desc`),
+      })),
+    [t],
+  );
 
   return (
     <>
@@ -44,22 +26,22 @@ const SubscriptionWorkflow: React.FC = () => {
           <div className="text-center mb-20">
 
             <div className="inline-flex items-center rounded-full border border-violet-500/20 bg-violet-500/10 dark:bg-violet-500/15 px-5 py-2 text-sm font-semibold text-violet-700 dark:text-violet-300 mb-6 transition-all duration-300 backdrop-blur-sm">
-              Subscription workflow
+              {t("subscriptionFlow.badge")}
             </div>
 
             <h2 className="text-4xl md:text-5xl font-black tracking-tight leading-[1.05] text-foreground">
               <span className="inline-block transition-all duration-300">
-                Upgrade your workspace
+                {t("subscriptionFlow.headingPart1")}
               </span>
 
               <span className="text-[#6C47FF] dark:text-violet-400 inline-block transition-all duration-300">
-                {" "}in minutes
+                {" "}
+                {t("subscriptionFlow.headingPart2")}
               </span>
             </h2>
 
             <p className="max-w-3xl mx-auto text-[20px] text-muted-foreground mt-8 leading-relaxed font-medium transition-all duration-300 hover:bg-background/80 dark:hover:bg-white/[0.03] hover:backdrop-blur-xl hover:p-4 hover:rounded-2xl">
-              A seamless billing and subscription experience designed for teams,
-              creators, and businesses using theRec platform.
+              {t("subscriptionFlow.subtitle")}
             </p>
           </div>
 
@@ -73,7 +55,7 @@ const SubscriptionWorkflow: React.FC = () => {
 
             <img
               src="/assets/how-it-works/subscription-flow.png"
-              alt="Subscription workflow"
+              alt={t("subscriptionFlow.imageAlt")}
               className="w-full h-auto object-cover transition-all duration-500 group-hover:scale-[1.02]"
             />
 
@@ -134,7 +116,7 @@ const SubscriptionWorkflow: React.FC = () => {
           {/* Image */}
           <img
             src={previewImage}
-            alt="Preview"
+            alt={t("subscriptionFlow.preview")}
             className="max-w-[95vw] max-h-[92vh] object-contain rounded-3xl shadow-[0_20px_120px_rgba(0,0,0,0.5)] animate-in fade-in zoom-in duration-300"
           />
         </div>

@@ -1,3 +1,4 @@
+import "@/i18n/config";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { RouteRecord } from "vite-react-ssg";
 import { HelmetProvider } from "react-helmet-async";

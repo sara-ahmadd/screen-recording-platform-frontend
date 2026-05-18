@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useEffect, useMemo } from "react";
 import { useLocation } from "react-router-dom";
 import AppLayout from "@/components/AppLayout";
@@ -28,6 +29,7 @@ type ReviewPayload = {
 };
 
 export default function CheckoutReviewPage() {
+  const { t } = useTranslation(["billing", "common"]);
   const location = useLocation();
   const payload = (location.state as ReviewPayload) || null;
 
@@ -46,7 +48,7 @@ export default function CheckoutReviewPage() {
         : Number(payload?.plan?.monthlyPriceUSD || 0),
     [cycle, payload],
   );
-  const cycleLabel = cycle === "yearly" ? "year" : "month";
+  const cycleLabel = cycle === "yearly" ? t("perYear").replace("/", "") : t("monthShort");
   const hasRedirect = Boolean(String(payload?.redirectUrl ?? "").trim());
   useEffect(() => {
     const script = document.createElement("script");
@@ -86,28 +88,28 @@ export default function CheckoutReviewPage() {
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
                 <p className="text-xs uppercase tracking-wide text-muted-foreground">
-                  Confirm your subscription
+                  {t("confirmYourSubscription")}
                 </p>
-                <CardTitle className="mt-1 text-2xl">Checkout Review</CardTitle>
+                <CardTitle className="mt-1 text-2xl">{t("checkoutReview")}</CardTitle>
               </div>
               <Badge variant="secondary" className="capitalize">
-                {cycle} billing
+                {t("cycleBilling", { cycle })}
               </Badge>
             </div>
           </CardHeader>
           <CardContent className="space-y-5 p-5 md:p-6">
             <div className="rounded-xl border border-border/70 bg-card/40 p-4">
               <p className="text-sm text-muted-foreground mb-1">
-                You are about to subscribe to this plan
+                {t("aboutToSubscribe")}
               </p>
               <p className="text-xl font-semibold">
-                {payload?.plan?.name || "Subscription"} ({cycle})
+                {payload?.plan?.name || t("subscription")} ({cycle})
               </p>
             </div>
 
             <div className="rounded-xl border border-primary/30 bg-gradient-to-br from-primary/10 via-primary/5 to-card p-5 shadow-sm">
               <p className="text-xs uppercase tracking-wide text-muted-foreground">
-                Total due now
+                {t("totalDueNow")}
               </p>
               <p className="mt-2 text-3xl md:text-4xl font-bold">
                 EGP {payload.amountProvider.toLocaleString()} / {cycleLabel}
@@ -118,7 +120,7 @@ export default function CheckoutReviewPage() {
             </div>
 
             <div className="rounded-xl border border-border/70 p-4">
-              <p className="font-medium mb-3">Billing information</p>
+              <p className="font-medium mb-3">{t("billingInformation")}</p>
               <div className="grid gap-2 text-sm">
                 <p className="flex items-start gap-2">
                   <Mail className="h-4 w-4 mt-0.5 text-muted-foreground" />
@@ -149,11 +151,11 @@ export default function CheckoutReviewPage() {
               }}
             >
               <CreditCard className="h-4 w-4 mr-2" />
-              Continue to Payment
+              {t("continueToPayment")}
             </Button>
             {!hasRedirect&&!payload?.checkoutSessionId ? (
               <p className="text-xs text-destructive text-center">
-                Payment link is missing. Please retry checkout.
+                {t("paymentLinkMissing")}
               </p>
             ) : null}
           </CardContent>

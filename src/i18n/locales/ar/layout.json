@@ -1,0 +1,91 @@
+{
+  "nav": {
+    "dashboard": "لوحة التحكم",
+    "record": "تسجيل",
+    "upload": "رفع",
+    "workspaces": "مساحات العمل",
+    "billing": "الفوترة",
+    "feedback": "الملاحظات",
+    "notifications": "الإشعارات",
+    "allRecordings": "كل التسجيلات",
+    "allWorkspaces": "كل مساحات العمل",
+    "allUsers": "كل المستخدمين",
+    "allPlans": "كل الخطط",
+    "paymobPlans": "خطط Paymob",
+    "allPromocodes": "كل أكواد الخصم",
+    "analyticsOverview": "نظرة تحليلية",
+    "analyticsVisuals": "رسوم تحليلية",
+    "subscriptions": "الاشتراكات",
+    "allFeedback": "كل الملاحظات"
+  },
+  "sidebar": {
+    "hide": "إخفاء الشريط الجانبي",
+    "show": "إظهار الشريط الجانبي",
+    "closeOverlay": "إغلاق طبقة الشريط الجانبي",
+    "userAvatar": "صورة المستخدم"
+  },
+  "signOut": {
+    "title": "تسجيل الخروج؟",
+    "description": "ستحتاج لتسجيل الدخول مرة أخرى للمتابعة.",
+    "confirm": "تسجيل الخروج"
+  },
+  "warning": {
+    "dismiss": "إغلاق التحذير"
+  },
+  "notifications": {
+    "title": "الإشعارات",
+    "signInToView": "سجّل الدخول لعرض الإشعارات",
+    "empty": "لا إشعارات",
+    "important": "مهم",
+    "billingRenewal": "الفوترة · تجديد 3DS",
+    "fallbackTitle": "إشعار",
+    "completePayment": "إكمال الدفع",
+    "markAllRead": "تعليم الكل كمقروء",
+    "viewAll": "عرض الكل",
+    "loadFailed": "فشل تحميل الإشعارات",
+    "markReadFailed": "فشل التعليم كمقروء",
+    "updated": "تم تحديث الإشعارات",
+    "allMarkedRead": "تم تعليم كل الإشعارات كمقروءة.",
+    "actionFailed": "فشل",
+    "orderPrefix": "Order",
+    "newest": "Newest",
+    "oldest": "Oldest",
+    "markAllAsRead": "Mark all as read",
+    "noNotificationsYet": "No notifications yet",
+    "deleteConfirm": "Delete notification?",
+    "deleteDesc": "This notification will be removed permanently.",
+    "deleted": "Notification deleted",
+    "deletedDesc": "Notification deleted.",
+    "colStatus": "Status",
+    "colPriority": "Priority",
+    "colNotification": "Notification",
+    "colDate": "Date",
+    "colActions": "Actions",
+    "unread": "Unread",
+    "read": "Read",
+    "markAsRead": "Mark as read",
+    "pageOf": "Page {{page}} of {{total}}"
+  },
+  "theme": {
+    "switchToLight": "التبديل إلى الوضع الفاتح",
+    "switchToDark": "التبديل إلى الوضع الداكن",
+    "lightMode": "الوضع الفاتح",
+    "darkMode": "الوضع الداكن"
+  },
+  "renewal3ds": {
+    "headline": "أكمل الدفع للإبقاء على اشتراكك.",
+    "paymentRequired": "الدفع مطلوب",
+    "completePaymentSecure": "إكمال الدفع (نافذة آمنة)",
+    "continueInTab": "المتابعة في هذا التبويب",
+    "remindLater": "ذكّرني لاحقاً"
+  },
+  "paidToFree": {
+    "cancelTitle": "إلغاء الاشتراك الحالي؟",
+    "cancelDescription": "أنت على خطة {{plan}}. التحويل للمجاني سيلغي اشتراكك المدفوع.",
+    "keepPlan": "الإبقاء على الخطة الحالية",
+    "confirmSwitch": "نعم، إلغاء والتحويل للمجاني",
+    "cancelledTitle": "تم إلغاء الاشتراك",
+    "cancelledDescription": "تحتفظ بمزايا الخطة المدفوعة حتى {{date}}.",
+    "cancelledDescriptionEnd": "تحتفظ بمزايا الخطة المدفوعة حتى نهاية دورة الفوترة."
+  }
+}

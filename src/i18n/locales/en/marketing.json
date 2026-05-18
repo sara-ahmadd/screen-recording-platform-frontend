@@ -1,0 +1,251 @@
+{
+  "blogs": {
+    "title": "Blogs",
+    "subtitle": "Helpful articles for teams using a screen recording SaaS platform.",
+    "article1Title": "How Screen Recording Flow Works in theRec",
+    "article1Body": "A recording starts from capture or upload, then moves into multipart transfer, processing, thumbnail generation, and final shareable output. Understanding this flow helps teams debug delays and improve recording quality.",
+    "article1p1": "Capture or upload stage",
+    "article1p2": "Reliable multipart transfer",
+    "article1p3": "Processing and status updates",
+    "article1p4": "Ready state and sharing",
+    "article2Title": "Screen + Camera Track vs Single Source Recording",
+    "article2Body": "Use both screen and camera when context, personality, or demos benefit from face visibility. Use screen-only for focused walkthroughs and camera-only for quick announcements or feedback.",
+    "article2p1": "Screen + camera for explainers and onboarding",
+    "article2p2": "Screen-only for technical walkthroughs",
+    "article2p3": "Camera-only for async team updates",
+    "article2p4": "Choose based on audience and objective",
+    "article3Title": "Top Use Cases for a Screen Recording SaaS",
+    "article3Body": "Screen recording platforms help across engineering, product, design, support, and sales. Teams can reduce meetings and improve clarity by sending concise visual updates.",
+    "article3p1": "Bug reporting and QA reproduction",
+    "article3p2": "Feature demos and release updates",
+    "article3p3": "Customer support responses",
+    "article3p4": "Internal training and onboarding",
+    "article4Title": "Best Practices for High-Quality Recordings",
+    "article4Body": "Plan your message, keep recordings short, and control visual noise. Better source quality reduces processing issues and improves viewer retention.",
+    "article4p1": "Use a clear outline before recording",
+    "article4p2": "Keep videos task-focused and concise",
+    "article4p3": "Record in a quiet environment",
+    "article4p4": "Set correct visibility before sharing",
+    "article5Title": "Understanding Recording Statuses and Lifecycle",
+    "article5Body": "Each recording goes through multiple states from upload to final readiness. Knowing what each status means helps users and developers quickly identify issues and track progress.",
+    "article5p1": "Uploading: chunks are being transferred",
+    "article5p2": "Processing: transcoding and thumbnail generation",
+    "article5p3": "Ready: video is fully available",
+    "article5p4": "Failed: errors during upload or processing",
+    "article6Title": "How to Optimize Video Upload Performance",
+    "article6Body": "Efficient uploads improve user experience and reduce failure rates. Proper chunk sizing, retries, and network handling are critical for reliable large video transfers.",
+    "article6p1": "Use multipart uploads for large files",
+    "article6p2": "Choose optimal chunk sizes (e.g., 5MB+)",
+    "article6p3": "Implement retry logic for failed parts",
+    "article6p4": "Track progress and handle network interruptions",
+    "articles": {
+      "a1": {
+        "title": "How Screen Recording Flow Works in theRec",
+        "body": "A recording starts from capture or upload, then moves into multipart transfer, processing, thumbnail generation, and final shareable output. Understanding this flow helps teams debug delays and improve recording quality.",
+        "p1": "Capture or upload stage",
+        "p2": "Reliable multipart transfer",
+        "p3": "Processing and status updates",
+        "p4": "Ready state and sharing"
+      },
+      "a2": {
+        "title": "Screen + Camera Track vs Single Source Recording",
+        "body": "Use both screen and camera when context, personality, or demos benefit from face visibility. Use screen-only for focused walkthroughs and camera-only for quick announcements or feedback.",
+        "p1": "Screen + camera for explainers and onboarding",
+        "p2": "Screen-only for technical walkthroughs",
+        "p3": "Camera-only for async team updates",
+        "p4": "Choose based on audience and objective"
+      },
+      "a3": {
+        "title": "Top Use Cases for a Screen Recording SaaS",
+        "body": "Screen recording platforms help across engineering, product, design, support, and sales. Teams can reduce meetings and improve clarity by sending concise visual updates.",
+        "p1": "Bug reporting and QA reproduction",
+        "p2": "Feature demos and release updates",
+        "p3": "Customer support responses",
+        "p4": "Internal training and onboarding"
+      },
+      "a4": {
+        "title": "Best Practices for High-Quality Recordings",
+        "body": "Plan your message, keep recordings short, and control visual noise. Better source quality reduces processing issues and improves viewer retention.",
+        "p1": "Use a clear outline before recording",
+        "p2": "Keep videos task-focused and concise",
+        "p3": "Record in a quiet environment",
+        "p4": "Set correct visibility before sharing"
+      },
+      "a5": {
+        "title": "Understanding Recording Statuses and Lifecycle",
+        "body": "Each recording goes through multiple states from upload to final readiness. Knowing what each status means helps users and developers quickly identify issues and track progress.",
+        "p1": "Uploading: chunks are being transferred",
+        "p2": "Processing: transcoding and thumbnail generation",
+        "p3": "Ready: video is fully available",
+        "p4": "Failed: errors during upload or processing"
+      },
+      "a6": {
+        "title": "How to Optimize Video Upload Performance",
+        "body": "Efficient uploads improve user experience and reduce failure rates. Proper chunk sizing, retries, and network handling are critical for reliable large video transfers.",
+        "p1": "Use multipart uploads for large files",
+        "p2": "Choose optimal chunk sizes (e.g., 5MB+)",
+        "p3": "Implement retry logic for failed parts",
+        "p4": "Track progress and handle network interruptions"
+      }
+    }
+  },
+  "contact": {
+    "title": "Contact Our Team",
+    "subtitle": "Connect with engineering support and product specialists.",
+    "support": "Technical Support",
+    "supportDesc": "Reach out for active platform issues, workspace account lockouts, or video processing glitches.",
+    "general": "General Inquiries",
+    "generalDesc": "Drop us a line regarding bulk workspace upgrades, enterprise discussions, or media collaborations.",
+    "sla": "Expected SLA Response",
+    "slaDesc": "We read every engineer ticket manually. Our response rate hovers between standard operational timelines.",
+    "slaValue": "Usually within 1–2 business days",
+    "directLine": "Direct Line",
+    "location": "Location"
+  },
+  "about": {
+    "title": "About theRec.site",
+    "subtitle": "A modern screen recording platform for async team collaboration.",
+    "whyTitle": "Why theRec.site exists",
+    "whyBody": "Built out of frustration with bloated meeting culture.",
+    "intro1": "theRec.site started because I needed a screen recording platform that was instantly fast, highly reliable, and actually pleasant to use every single day.",
+    "intro2": "Most tools on the market have become overly complicated, locked behind steep paywalls, or tuned exclusively for giant corporate sales teams. I wanted a lightweight, frictionless alternative built for high-velocity builders, creators, and teams who just need to:",
+    "bullet1": "Launch records instantly right from the browser",
+    "bullet2": "Process and host high-def video automatically",
+    "bullet3": "Share instant-copy links with zero friction",
+    "bullet4": "Organize team communication in clean workspaces",
+    "intro3": "Instead of waiting for someone else to fix the broken UX of modern video sharing, I decided to build the solution myself.",
+    "transparent": "Radically transparent",
+    "transparentBody": "theRec.site isn't backed by aggressive venture capital or hidden corporate agendas. It is an independent platform focused purely on engineering a dependable, fast product for real people.",
+    "promise": "The promise: No hidden catch, no dark patterns.",
+    "uxTitle": "Obsessed with UX speed",
+    "uxBody": "Every feature is designed to cut down your time-to-share. By removing confusing sub-menus, optimizing cloud rendering, and refining the recorder layout, your asynchronous workflows become effortless.",
+    "uxNote": "Perfect for: Bug reports, tutorials, and rapid team updates.",
+    "card1Title": "Frictionless Workflows",
+    "card1Body": "Capture, render, and deploy your video links seamlessly with minimal clicks.",
+    "card2Title": "Async Collaboration",
+    "card2Body": "Shared workspaces engineered specifically to keep modern distributed teams aligned.",
+    "card3Title": "Continuous Iteration",
+    "card3Body": "Evolving aggressively based on actual community feedback and practical utility.",
+    "closingTitle": "A communication tool built with care.",
+    "closingBody": "No dynamic pricing traps. No unnecessary bells and whistles. Just an ultra-reliable platform focused entirely on helping you communicate clearly through instant video.",
+    "closingThanks": "Thanks for being part of the journey.",
+    "originP1": "theRec.site started because I needed a screen recording platform that was instantly fast, highly reliable, and actually pleasant to use every single day.",
+    "originP2": "Most tools on the market have become overly complicated, locked behind steep paywalls, or tuned exclusively for giant corporate sales teams. I wanted a lightweight, frictionless alternative built for high-velocity builders, creators, and teams who just need to:",
+    "originP3": "Instead of waiting for someone else to fix the broken UX of modern video sharing, I decided to build the solution myself.",
+    "uxFooter": "Perfect for: Bug reports, tutorials, and rapid team updates.",
+    "frictionTitle": "Frictionless Workflows",
+    "frictionBody": "Capture, render, and deploy your video links seamlessly with minimal clicks.",
+    "collabTitle": "Async Collaboration",
+    "collabBody": "Shared workspaces engineered specifically to keep modern distributed teams aligned.",
+    "iterationTitle": "Continuous Iteration",
+    "iterationBody": "Evolving aggressively based on actual community feedback and practical utility."
+  },
+  "demo": {
+    "backHome": "Back to home",
+    "walkthrough": "Platform Walkthrough",
+    "seeAction": "See theRec.site in Action.",
+    "tour": "60-second tour of recording, processing, and sharing.",
+    "systemDemo": "System Demo Video",
+    "journey": "The User Journey Blueprint",
+    "init": "One-Click Initialization",
+    "encoding": "Cloud Encoding Pipelines",
+    "distribution": "Instant Distribution",
+    "ready": "Ready to replace video bloat?",
+    "startFree": "Start Recording Free",
+    "noVideoTag": "Your browser does not support the video tag.",
+    "initBody": "Launch recording sessions instantaneously without extension overhead. The browser pipeline catches high-definition frames and local hardware audio configurations with zero configuration delay.",
+    "encodingBody": "The moment you click complete, your recording asset passes into optimized rendering blocks on our backend. Thumbnails are automatically generated while streams adapt seamlessly for cross-device playback.",
+    "distributionBody": "Organize videos inside isolated, shareable workspaces. Your secure share token is copied directly to your clipboard automatically, reducing your communication loop down to a single click.",
+    "ctaBody": "Create your first asset in seconds. No credit cards, no heavy installations. Just clear, friction-free async engineering updates.",
+    "title": "Platform Demo",
+    "subtitle": "See how theRec works end to end.",
+    "ctaDesc": "Create your first asset in seconds. No credit cards, no heavy installations. Just clear, friction-free async engineering updates."
+  },
+  "howItWorks": {
+    "pageTitle": "How it works",
+    "pageSubtitle": "A simple workflow from recording to sharing.",
+    "step1Title": "Start Recording",
+    "step1Top": "Open the recorder in your browser.",
+    "step1Bottom": "Choose screen, window, or tab with optional camera and mic.",
+    "step2Title": "Initialize Upload",
+    "step2Top": "Your recording uploads securely in the background.",
+    "step2Bottom": "Resume interrupted uploads when possible.",
+    "step3Title": "Processing Video",
+    "step3Top": "Automated encoding prepares your video.",
+    "step3Bottom": "Get notified when processing completes.",
+    "step4Title": "Recording Details",
+    "step4Top": "Review, share, and manage visibility.",
+    "step4Bottom": "Collaborate with your workspace team.",
+    "step5Title": "Workspace Dashboard",
+    "step5Top": "Organize recordings across workspaces.",
+    "step5Bottom": "Track usage and subscription limits.",
+    "componentTitle": "How It Works",
+    "componentSubtitle": "Record, process, and share in minutes",
+    "recordStep": "Start Recording",
+    "processStep": "Automatic Processing",
+    "shareStep": "Share Instantly",
+    "subscriptionWorkflow": "Subscription Workflow",
+    "subscriptionDesc": "Upgrade and manage your workspace easily",
+    "viewFull": "View Full Workflow",
+    "choosePlan": "Choose Your Plan",
+    "confirmBilling": "Confirm Billing",
+    "secureCheckout": "Secure Checkout",
+    "exploreComplete": "Explore the complete platform workflow",
+    "continueReading": "Continue reading",
+    "preview": "Preview"
+  },
+  "subscriptionFlow": {
+    "badge": "Subscription workflow",
+    "headingPart1": "Upgrade your workspace",
+    "headingPart2": "in minutes",
+    "subtitle": "A seamless billing and subscription experience designed for teams, creators, and businesses using theRec platform.",
+    "imageAlt": "Subscription workflow",
+    "preview": "Preview",
+    "steps": {
+      "01": {
+        "title": "Current Subscription",
+        "desc": "After logging into the platform, the user navigates to the Billing page from the dashboard sidebar. The current workspace subscription details, billing cycle, active plan, and subscription history are displayed here."
+      },
+      "02": {
+        "title": "Choose a Plan",
+        "desc": "The user can click “Change your plan” or upgrade to another plan. A pricing page is displayed with all available plans alongside monthly and yearly billing options for easy comparison."
+      },
+      "03": {
+        "title": "Confirm Subscription",
+        "desc": "After selecting a plan, the user is redirected to a confirmation page where recurring billing authorization and agreement to the terms and conditions must be accepted before continuing."
+      },
+      "04": {
+        "title": "Enter Billing Information",
+        "desc": "A billing popup or dialog appears requesting customer billing information such as name, email, country, city, address, and optional promo code before proceeding."
+      },
+      "05": {
+        "title": "Final Review & Payment",
+        "desc": "The final checkout review page displays the selected subscription plan, billing cycle, and payment summary. Clicking “Continue to Payment” redirects the user to Stripe Checkout where the payment is securely completed."
+      },
+      "s1": {
+        "title": "Current Subscription",
+        "desc": "After logging into the platform, the user navigates to the Billing page from the dashboard sidebar. The current workspace subscription details, billing cycle, active plan, and subscription history are displayed here."
+      },
+      "s2": {
+        "title": "Choose a Plan",
+        "desc": "The user can click \"Change your plan\" or upgrade to another plan. A pricing page is displayed with all available plans alongside monthly and yearly billing options for easy comparison."
+      },
+      "s3": {
+        "title": "Confirm Subscription",
+        "desc": "After selecting a plan, the user is redirected to a confirmation page where recurring billing authorization and agreement to the terms and conditions must be accepted before continuing."
+      },
+      "s4": {
+        "title": "Enter Billing Information",
+        "desc": "A billing popup or dialog appears requesting customer billing information such as name, email, country, city, address, and optional promo code before proceeding."
+      },
+      "s5": {
+        "title": "Final Review & Payment",
+        "desc": "The final checkout review page displays the selected subscription plan, billing cycle, and payment summary. Clicking \"Continue to Payment\" redirects the user to Stripe Checkout where the payment is securely completed."
+      }
+    },
+    "title": "Upgrade your workspace",
+    "titleAccent": "in minutes",
+    "description": "A seamless billing and subscription experience designed for teams, creators, and businesses using theRec platform.",
+    "previewAlt": "Subscription workflow"
+  }
+}

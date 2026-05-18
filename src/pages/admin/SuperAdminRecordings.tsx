@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useCallback, useEffect, useState } from "react";
 import AppLayout from "@/components/AppLayout";
 import AdminCrudTable from "@/components/admin/AdminCrudTable";
@@ -9,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@radix-ui/react-label";
 
 export default function SuperAdminRecordingsPage() {
+  const { t } = useTranslation(["admin", "common"]);
   const { toast } = useToast();
   const [rows, setRows] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -47,7 +49,7 @@ export default function SuperAdminRecordingsPage() {
           });
       setRows(payload?.recordings || payload?.data?.data || payload?.data || payload || []);
     } catch (err: any) {
-      toast({ title: "Error loading recordings", description: err.message, variant: "destructive" });
+      toast({ title: t("errorLoadingRecordings"), description: err?.message || t("common:errors.tryAgain"), variant: "destructive" });
     } finally {
       setLoading(false);
     }
@@ -59,12 +61,12 @@ export default function SuperAdminRecordingsPage() {
 
   const onCreate = async (payload: Record<string, any>) => {
     await superAdminApi.recordings.create(payload);
-    toast({ title: "Recording created", description: "Recording was created successfully." });
+    toast({ title: t("recordingCreated"), description: t("recordingCreatedDesc") });
     await load();
   };
   const onUpdate = async (id: number, payload: Record<string, any>) => {
     await superAdminApi.recordings.update(id, payload);
-    toast({ title: "Recording updated", description: "Recording was updated successfully." });
+    toast({ title: t("recordingUpdated"), description: t("recordingUpdatedDesc") });
     await load();
   };
   const onDelete = async (id: number) => {
@@ -75,25 +77,25 @@ export default function SuperAdminRecordingsPage() {
   return (
     <AppLayout>
       <div className="p-6 md:p-8 max-w-7xl mx-auto space-y-4">
-        <h1 className="text-3xl font-bold">All Recordings</h1>
+        <h1 className="text-3xl font-bold">{t("allRecordings")}</h1>
         <div className="flex flex-wrap gap-2">
-          <Input placeholder="Filter by title" value={title} onChange={(e) => setTitle(e.target.value)} className="max-w-xs" />
-          <Input placeholder="Filter by status" value={status} onChange={(e) => setStatus(e.target.value)} className="max-w-xs" />
-          <Input placeholder="Filter by visibility" value={visibility} onChange={(e) => setVisibility(e.target.value)} className="max-w-xs" />
+          <Input placeholder={t("filterByTitle")} value={title} onChange={(e) => setTitle(e.target.value)} className="max-w-xs" />
+          <Input placeholder={t("filterByStatus")} value={status} onChange={(e) => setStatus(e.target.value)} className="max-w-xs" />
+          <Input placeholder={t("filterByVisibility")} value={visibility} onChange={(e) => setVisibility(e.target.value)} className="max-w-xs" />
           <div className="flex flex-col gap-2">
-            <Label>Target workspaceId</Label>
+            <Label>{t("targetWorkspaceId")}</Label>
             <Input
-              placeholder="Target workspaceId"
+              placeholder={t("targetWorkspaceId")}
               value={workspaceId}
               onChange={(e) => setWorkspaceId(e.target.value)}
               className="max-w-xs"
             />
           </div>
           <Select value={order} onValueChange={(v: "ASC" | "DESC") => setOrder(v)}>
-            <SelectTrigger className="w-[140px]"><SelectValue placeholder="Order" /></SelectTrigger>
+            <SelectTrigger className="w-[140px]"><SelectValue placeholder={t("order")} /></SelectTrigger>
             <SelectContent>
-              <SelectItem value="DESC">Newest</SelectItem>
-              <SelectItem value="ASC">Oldest</SelectItem>
+              <SelectItem value="DESC">{t("newest")}</SelectItem>
+              <SelectItem value="ASC">{t("oldest")}</SelectItem>
             </SelectContent>
           </Select>
           <Button
@@ -102,12 +104,12 @@ export default function SuperAdminRecordingsPage() {
               setTrashView((prev) => !prev);
             }}
           >
-            {trashView ? "Active Recordings" : "Trash"}
+            {trashView ? t("activeRecordings") : t("trash")}
           </Button>
-          <Button variant="outline" onClick={() => void load()}>Apply filters</Button>
+          <Button variant="outline" onClick={() => void load()}>{t("applyFilters")}</Button>
         </div>
         <AdminCrudTable
-          title="Recordings Table"
+          title={t("recordingsTable")}
           rows={rows}
           loading={loading}
           onRefresh={load}

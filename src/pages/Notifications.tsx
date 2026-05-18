@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { notificationsApi } from "@/lib/api";
 import { getSocket } from "@/lib/socket";
 import { emitNotificationsUpdated, subscribeNotificationsUpdated } from "@/lib/notificationsSync";
@@ -53,6 +54,7 @@ function normalizePageNotifications(response: unknown): InboxNotification[] {
 }
 
 export default function NotificationsPage() {
+  const { t } = useTranslation(["layout", "common"]);
   const { toast } = useToast();
   const { user } = useAuth();
   const confirm = useConfirmDialog();
@@ -89,7 +91,7 @@ export default function NotificationsPage() {
       setTotalPages(total > 0 ? total : Math.max(1, currentPage + (next.length === PAGE_SIZE ? 1 : 0)));
       setHasNextPage(hasNext);
     } catch (err: any) {
-      toast({ title: "Error", description: err.message, variant: "destructive" });
+      toast({ title: t("common:toast.error"), description: err.message, variant: "destructive" });
     } finally {
       setLoading(false);
     }
@@ -139,16 +141,16 @@ export default function NotificationsPage() {
       });
       emitNotificationsUpdated();
     } catch (err: any) {
-      toast({ title: "Error", description: err.message, variant: "destructive" });
+      toast({ title: t("common:toast.error"), description: err.message, variant: "destructive" });
     }
   };
 
   const handleDeleteOne = async (id: number) => {
     const confirmed = await confirm({
-      title: "Delete notification?",
-      description: "This notification will be removed permanently.",
-      confirmText: "Delete",
-      cancelText: "Cancel",
+      title: t("notifications.deleteConfirm"),
+      description: t("notifications.deleteDesc"),
+      confirmText: t("common:actions.delete"),
+      cancelText: t("common:actions.cancel"),
     });
     if (!confirmed) return;
     try {
@@ -158,11 +160,11 @@ export default function NotificationsPage() {
       });
       emitNotificationsUpdated();
       toastApiSuccess(delRes, {
-        title: "Notification deleted",
-        fallbackDescription: "Notification deleted.",
+        title: t("notifications.deleted"),
+        fallbackDescription: t("notifications.deletedDesc"),
       });
     } catch (err: any) {
-      toast({ title: "Error", description: err.message, variant: "destructive" });
+      toast({ title: t("common:toast.error"), description: err.message, variant: "destructive" });
     }
   };
 
@@ -174,11 +176,11 @@ export default function NotificationsPage() {
       });
       emitNotificationsUpdated();
       toastApiSuccess(res, {
-        title: "Notifications updated",
-        fallbackDescription: "All notifications marked as read.",
+        title: t("notifications.updated"),
+        fallbackDescription: t("notifications.allMarkedRead"),
       });
     } catch (err: any) {
-      toast({ title: "Error", description: err.message, variant: "destructive" });
+      toast({ title: t("common:toast.error"), description: err.message, variant: "destructive" });
     }
   };
 
@@ -186,7 +188,7 @@ export default function NotificationsPage() {
     <AppLayout>
       <div className="p-6 md:p-8 max-w-7xl mx-auto">
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-bold">Notifications</h1>
+          <h1 className="text-2xl font-bold">{t("notifications.title")}</h1>
           <div className="flex items-center gap-2">
             <Button
               variant="outline"
@@ -197,9 +199,9 @@ export default function NotificationsPage() {
               className="gap-2"
             >
               <ArrowUpDown className="h-4 w-4" />
-              Order: {order === "DESC" ? "Newest" : "Oldest"}
+              {t("notifications.orderPrefix")}: {order === "DESC" ? t("notifications.newest") : t("notifications.oldest")}
             </Button>
-            <Button variant="outline" onClick={handleMarkAllRead}>Mark all as read</Button>
+            <Button variant="outline" onClick={handleMarkAllRead}>{t("notifications.markAllAsRead")}</Button>
           </div>
         </div>
 
@@ -209,7 +211,7 @@ export default function NotificationsPage() {
           <Card className="glass">
             <CardContent className="flex flex-col items-center justify-center py-16 text-center">
               <Bell className="h-10 w-10 text-muted-foreground/30 mb-4" />
-              <p className="text-muted-foreground">No notifications yet</p>
+              <p className="text-muted-foreground">{t("notifications.noNotificationsYet")}</p>
             </CardContent>
           </Card>
         ) : (
@@ -219,11 +221,11 @@ export default function NotificationsPage() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Priority</TableHead>
-                      <TableHead>Notification</TableHead>
-                      <TableHead>Date</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
+                      <TableHead>{t("notifications.colStatus")}</TableHead>
+                      <TableHead>{t("notifications.colPriority")}</TableHead>
+                      <TableHead>{t("notifications.colNotification")}</TableHead>
+                      <TableHead>{t("notifications.colDate")}</TableHead>
+                      <TableHead className="text-right">{t("notifications.colActions")}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -242,27 +244,27 @@ export default function NotificationsPage() {
                         >
                           <TableCell>
                             <span className={`inline-flex items-center rounded-full px-2 py-1 text-xs ${isUnread ? "bg-primary/15 text-primary" : "bg-muted text-muted-foreground"}`}>
-                              {isUnread ? "Unread" : "Read"}
+                              {isUnread ? t("notifications.unread") : t("notifications.read")}
                             </span>
                           </TableCell>
                           <TableCell>
                             <div className="flex flex-col gap-1">
                               {n.important ? (
                                 <Badge variant="secondary" className="w-fit text-[10px]">
-                                  Important
+                                  {t("notifications.important")}
                                 </Badge>
                               ) : (
                                 <span className="text-xs text-muted-foreground">—</span>
                               )}
                               {renewal3ds ? (
                                 <span className="text-[11px] font-medium text-amber-800 dark:text-amber-300">
-                                  Subscription renewal · 3DS (Paymob)
+                                  {t("notifications.billingRenewal")}
                                 </span>
                               ) : null}
                             </div>
                           </TableCell>
                           <TableCell>
-                            <p className={isUnread ? "font-semibold text-sm" : "font-medium text-sm"}>{n.title || "Notification"}</p>
+                            <p className={isUnread ? "font-semibold text-sm" : "font-medium text-sm"}>{n.title || t("notifications.fallbackTitle")}</p>
                             {bodyText ? (
                               <p className="text-sm text-muted-foreground mt-1 leading-relaxed break-words">
                                 {bodyText}
@@ -277,7 +279,7 @@ export default function NotificationsPage() {
                               {actionUrl ? (
                                 <Button variant="default" size="sm" asChild className="shrink-0">
                                   <a href={actionUrl} target="_blank" rel="noopener noreferrer">
-                                    Complete payment
+                                    {t("notifications.completePayment")}
                                   </a>
                                 </Button>
                               ) : null}
@@ -287,7 +289,7 @@ export default function NotificationsPage() {
                                 className="h-8 w-8"
                                 onClick={() => handleReadOne(n.id)}
                                 disabled={!isUnread}
-                                title="Mark as read"
+                                title={t("notifications.markAsRead")}
                               >
                                 <Check className="h-4 w-4" />
                               </Button>
@@ -296,7 +298,7 @@ export default function NotificationsPage() {
                                 size="icon"
                                 className="h-8 w-8 text-destructive hover:text-destructive"
                                 onClick={() => handleDeleteOne(n.id)}
-                                title="Delete"
+                                title={t("common:actions.delete")}
                               >
                                 <Trash2 className="h-4 w-4" />
                               </Button>
@@ -320,7 +322,7 @@ export default function NotificationsPage() {
                 >
                   <ChevronLeft className="h-4 w-4" />
                 </Button>
-                <span className="text-sm text-muted-foreground">Page {currentPage} of {displayedTotalPages}</span>
+                <span className="text-sm text-muted-foreground">{t("notifications.pageOf", { page: currentPage, total: displayedTotalPages })}</span>
                 <Button
                   variant="outline"
                   size="sm"

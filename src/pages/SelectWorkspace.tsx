@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -6,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Building2, CheckCircle2 } from "lucide-react";
 
 export default function SelectWorkspacePage() {
+  const { t } = useTranslation("workspaces");
   const { user, selectedWorkspaceId, setSelectedWorkspaceId } = useAuth();
   const navigate = useNavigate();
 
@@ -21,13 +23,11 @@ export default function SelectWorkspacePage() {
       <div className="min-h-screen flex items-center justify-center bg-background p-4">
         <Card className="w-full max-w-lg glass">
           <CardHeader className="text-center">
-            <CardTitle>No workspace found</CardTitle>
-            <CardDescription>
-              Your account is not assigned to any workspace yet.
-            </CardDescription>
+            <CardTitle>{t("notFound")}</CardTitle>
+            <CardDescription>{t("needOne")}</CardDescription>
           </CardHeader>
           <CardContent className="flex justify-center">
-            <Button onClick={() => navigate("/workspaces")}>Go to Workspaces</Button>
+            <Button onClick={() => navigate("/workspaces")}>{t("goWorkspaces")}</Button>
           </CardContent>
         </Card>
       </div>
@@ -38,10 +38,8 @@ export default function SelectWorkspacePage() {
     <div className="min-h-screen bg-background p-4 md:p-6">
       <div className="max-w-3xl mx-auto py-8">
         <div className="mb-8">
-          <h1 className="text-2xl md:text-3xl font-bold">Select a workspace</h1>
-          <p className="text-muted-foreground mt-2">
-            Choose the workspace you want to continue with.
-          </p>
+          <h1 className="text-2xl md:text-3xl font-bold">{t("selectTitle")}</h1>
+          <p className="text-muted-foreground mt-2">{t("selectSubtitle")}</p>
         </div>
 
         <div className="grid gap-4">
@@ -65,7 +63,7 @@ export default function SelectWorkspacePage() {
                     onClick={() => handleSelectWorkspace(workspace.id)}
                   >
                     {isSelected ? <CheckCircle2 className="h-4 w-4" /> : null}
-                    {isSelected ? "Continue" : "Select workspace"}
+                    {isSelected ? t("continue") : t("selectWorkspace")}
                   </Button>
                 </CardContent>
               </Card>

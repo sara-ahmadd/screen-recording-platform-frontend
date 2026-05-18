@@ -1,0 +1,179 @@
+{
+  "language": {
+    "names": {
+      "en": "English",
+      "ar": "Arabic"
+    },
+    "switchAria": "Switch language to {{language}}",
+    "switchTo": "Switch to {{language}}"
+  },
+  "brand": "theRec",
+  "actions": {
+    "confirm": "Confirm",
+    "cancel": "Cancel",
+    "continue": "Continue",
+    "close": "Close",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "back": "Back",
+    "retry": "Retry",
+    "ok": "OK",
+    "submit": "Submit",
+    "loading": "Loading…",
+    "sending": "Sending…",
+    "details": "Details",
+    "getStarted": "Get Started",
+    "signIn": "Sign in",
+    "signUp": "Sign up",
+    "signOut": "Sign out",
+    "backToHome": "Back to Home",
+    "contactSupport": "Contact Support",
+    "popular": "Popular",
+    "currentPlan": "Current plan",
+    "free": "Free",
+    "subscribe": "Subscribe",
+    "current": "Current"
+  },
+  "labels": {
+    "email": "Email",
+    "password": "Password",
+    "username": "Username",
+    "confirmPassword": "Confirm Password",
+    "otp": "OTP",
+    "title": "Title",
+    "status": "Status",
+    "visibility": "Visibility",
+    "name": "Name"
+  },
+  "placeholders": {
+    "email": "you@example.com",
+    "password": "••••••••",
+    "otp": "Enter OTP"
+  },
+  "confirm": {
+    "title": "Are you sure?",
+    "description": "This action cannot be undone.",
+    "confirm": "Continue",
+    "cancel": "Cancel"
+  },
+  "toast": {
+    "success": "Success",
+    "error": "Error"
+  },
+  "footer": {
+    "copyright": "© {{year}} theRec. All rights reserved."
+  },
+  "nav": {
+    "blogs": "Blogs",
+    "pricing": "Pricing",
+    "contact": "Contact",
+    "about": "About",
+    "securityPrivacy": "Security/Privacy",
+    "howItWorks": "How it works",
+    "privacyPolicy": "Privacy Policy",
+    "termsConditions": "Terms & Conditions"
+  },
+  "plans": {
+    "videosPerMonth": "{{count}} videos/month",
+    "minMaxDuration": "{{min}}–{{max}} min max duration",
+    "storageGb": "{{gb}} GB storage",
+    "teamMembers": "{{count}} team members",
+    "videoDownloads": "Video downloads",
+    "noWatermark": "No watermark",
+    "publicSharing": "Public sharing",
+    "teamCollaboration": "Team collaboration",
+    "signInRequired": "Sign in required",
+    "signInToSubscribe": "Please sign in to subscribe to a plan."
+  },
+  "feedback": {
+    "title": "Feedback",
+    "submitTitle": "Submit Feedback",
+    "submitDesc": "Share your experience with the app.",
+    "myFeedback": "My Feedback",
+    "rating": "Rating",
+    "selectRating": "Select rating",
+    "websiteSuccessful": "Was the website successful for you?",
+    "comment": "Comment",
+    "commentPlaceholder": "Tell us what worked and what can be improved...",
+    "submit": "Submit Feedback",
+    "editTitle": "Edit Feedback",
+    "websiteSuccessfulShort": "Website successful",
+    "successful": "Successful",
+    "date": "Date",
+    "empty": "No feedback submitted yet.",
+    "yes": "Yes",
+    "no": "No",
+    "commentTooShort": "Comment too short",
+    "commentTooShortDesc": "Comment must be at least 5 characters.",
+    "submitted": "Feedback submitted",
+    "submittedDesc": "Thanks for your feedback.",
+    "submitFailed": "Failed to submit feedback",
+    "loadFailed": "Failed to load feedback",
+    "updated": "Feedback updated",
+    "updatedDesc": "Your feedback has been updated.",
+    "updateFailed": "Failed to update feedback",
+    "deleteConfirm": "Delete feedback?",
+    "deleted": "Feedback deleted",
+    "deleteFailed": "Failed to delete feedback",
+    "actionsCol": "Actions"
+  },
+  "errors": {
+    "tryAgain": "Please try again."
+  },
+  "a11y": {
+    "showPassword": "Show password",
+    "hidePassword": "Hide password"
+  },
+  "workspace": {
+    "required": "Workspace required",
+    "selectFirst": "Select a workspace first",
+    "createFirst": "Create a workspace first",
+    "selectWorkspace": "Select Workspace",
+    "createWorkspace": "Create Workspace"
+  },
+  "theme": {
+    "toggle": "Toggle theme",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
+  },
+  "validation": {
+    "required": "This field is required",
+    "emailInvalid": "Enter a valid email",
+    "minLength": "Must be at least {{min}} characters",
+    "passwordsMismatch": "Passwords do not match"
+  },
+  "userAvatar": "User avatar",
+  "tryAgain": "Please try again.",
+  "refresh": "Refresh",
+  "plan": "Plan",
+  "perMonthShort": "/mo",
+  "perYearShort": "/year",
+  "membersUpTo": "Up to {{count}} members",
+  "yearlySave": "({{egp}} EGP ≈ ${{usd}} USD) /year (save {{percent}}%)",
+  "storage": {
+    "zero": "0 B",
+    "b": "B",
+    "kb": "KB",
+    "mb": "MB",
+    "gb": "GB",
+    "tb": "TB"
+  },
+  "workspaceIdShort": "ID: {{id}}",
+  "workspaceFallback": "Workspace",
+  "signInRequiredFree": "Please sign in to subscribe to the free plan.",
+  "googleNoToken": "Google sign-in did not return access token.",
+  "googleSessionFailed": "Could not verify Google session.",
+  "paidToFree": {
+    "subscribed": "Subscribed",
+    "subscribedDesc": "You are now on the free plan.",
+    "noSubscription": "No subscription",
+    "noSubscriptionDesc": "Could not find a subscription to cancel.",
+    "updated": "Subscription updated",
+    "updatedDesc": "Your subscription was downgraded to the free plan.",
+    "downgradeFailed": "Could not downgrade subscription",
+    "workspaceNotFound": "Workspace not found",
+    "workspaceNotFoundDesc": "Select a valid workspace and try again."
+  }
+}

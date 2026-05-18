@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useCallback, useEffect, useState } from "react";
 import AppLayout from "@/components/AppLayout";
 import { superAdminApi } from "@/lib/api";
@@ -19,6 +20,7 @@ function normalizeRows(res: any): any[] {
 }
 
 export default function SuperAdminFeedbackPage() {
+  const { t } = useTranslation(["admin", "common"]);
   const { toast } = useToast();
   const [overview, setOverview] = useState<any>(null);
   const [rows, setRows] = useState<any[]>([]);
@@ -35,11 +37,11 @@ export default function SuperAdminFeedbackPage() {
       const res = await superAdminApi.feedback.overview();
       setOverview(res?.data || res?.overview || res);
     } catch (err: any) {
-      toast({ title: "Failed to load feedback overview", description: err?.message || "Please try again.", variant: "destructive" });
+      toast({ title: t("feedbackOverviewFailed"), description: err?.message || t("common:errors.tryAgain"), variant: "destructive" });
     } finally {
       setLoadingOverview(false);
     }
-  }, [toast]);
+  }, [toast, t]);
 
   const loadRows = useCallback(async () => {
     setLoadingRows(true);
@@ -55,11 +57,11 @@ export default function SuperAdminFeedbackPage() {
       });
       setRows(normalizeRows(res));
     } catch (err: any) {
-      toast({ title: "Failed to load feedback list", description: err?.message || "Please try again.", variant: "destructive" });
+      toast({ title: t("feedbackListFailed"), description: err?.message || t("common:errors.tryAgain"), variant: "destructive" });
     } finally {
       setLoadingRows(false);
     }
-  }, [page, order, ratingFilter, successFilter, toast]);
+  }, [page, order, ratingFilter, successFilter, toast, t]);
 
   useEffect(() => {
     void loadOverview();
@@ -72,7 +74,7 @@ export default function SuperAdminFeedbackPage() {
   return (
     <AppLayout>
       <div className="p-6 md:p-8 max-w-7xl mx-auto space-y-6">
-        <h1 className="text-3xl font-bold">Feedback Analytics</h1>
+        <h1 className="text-3xl font-bold">{t("feedbackAnalytics")}</h1>
 
         {loadingOverview ? (
           <div className="py-8 text-center">
@@ -80,26 +82,26 @@ export default function SuperAdminFeedbackPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-            <Card><CardHeader><CardTitle className="text-sm">Total Feedback</CardTitle></CardHeader><CardContent className="text-2xl font-bold">{overview?.totalFeedback ?? 0}</CardContent></Card>
-            <Card><CardHeader><CardTitle className="text-sm">Positive</CardTitle></CardHeader><CardContent className="text-2xl font-bold">{overview?.positiveFeedback ?? 0}</CardContent></Card>
-            <Card><CardHeader><CardTitle className="text-sm">Negative</CardTitle></CardHeader><CardContent className="text-2xl font-bold">{overview?.negativeFeedback ?? 0}</CardContent></Card>
-            <Card><CardHeader><CardTitle className="text-sm">Average Rating</CardTitle></CardHeader><CardContent className="flex items-center pt-1"><StarRating value={Number(overview?.averageRating ?? 0)} size="lg" /></CardContent></Card>
-            <Card><CardHeader><CardTitle className="text-sm">Satisfaction Rate</CardTitle></CardHeader><CardContent className="text-2xl font-bold">{overview?.satisfactionRate ?? 0}%</CardContent></Card>
+            <Card><CardHeader><CardTitle className="text-sm">{t("feedback.totalFeedback")}</CardTitle></CardHeader><CardContent className="text-2xl font-bold">{overview?.totalFeedback ?? 0}</CardContent></Card>
+            <Card><CardHeader><CardTitle className="text-sm">{t("feedback.positive")}</CardTitle></CardHeader><CardContent className="text-2xl font-bold">{overview?.positiveFeedback ?? 0}</CardContent></Card>
+            <Card><CardHeader><CardTitle className="text-sm">{t("feedback.negative")}</CardTitle></CardHeader><CardContent className="text-2xl font-bold">{overview?.negativeFeedback ?? 0}</CardContent></Card>
+            <Card><CardHeader><CardTitle className="text-sm">{t("feedback.averageRating")}</CardTitle></CardHeader><CardContent className="flex items-center pt-1"><StarRating value={Number(overview?.averageRating ?? 0)} size="lg" /></CardContent></Card>
+            <Card><CardHeader><CardTitle className="text-sm">{t("feedback.satisfactionRate")}</CardTitle></CardHeader><CardContent className="text-2xl font-bold">{overview?.satisfactionRate ?? 0}%</CardContent></Card>
           </div>
         )}
 
         <Card>
           <CardHeader>
-            <CardTitle>All Feedback</CardTitle>
+            <CardTitle>{t("feedback.title")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex flex-wrap gap-2">
               <Select value={ratingFilter} onValueChange={setRatingFilter}>
                 <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="Filter by rating" />
+                  <SelectValue placeholder={t("filterByRating")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All ratings</SelectItem>
+                  <SelectItem value="all">{t("feedback.allRatings")}</SelectItem>
                   {[1, 2, 3, 4, 5].map((rating) => (
                     <SelectItem key={rating} value={String(rating)}>
                       <StarRating value={rating} size="sm" />
@@ -110,12 +112,12 @@ export default function SuperAdminFeedbackPage() {
 
               <Select value={successFilter} onValueChange={setSuccessFilter}>
                 <SelectTrigger className="w-[220px]">
-                  <SelectValue placeholder="Website success filter" />
+                  <SelectValue placeholder={t("websiteSuccessFilter")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All outcomes</SelectItem>
-                  <SelectItem value="true">Successful</SelectItem>
-                  <SelectItem value="false">Not successful</SelectItem>
+                  <SelectItem value="all">{t("feedback.allOutcomes")}</SelectItem>
+                  <SelectItem value="true">{t("feedback.successful")}</SelectItem>
+                  <SelectItem value="false">{t("feedback.notSuccessful")}</SelectItem>
                 </SelectContent>
               </Select>
 
@@ -124,8 +126,8 @@ export default function SuperAdminFeedbackPage() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="DESC">Newest first</SelectItem>
-                  <SelectItem value="ASC">Oldest first</SelectItem>
+                  <SelectItem value="DESC">{t("analytics.newestFirst")}</SelectItem>
+                  <SelectItem value="ASC">{t("analytics.oldestFirst")}</SelectItem>
                 </SelectContent>
               </Select>
               <Button
@@ -135,7 +137,7 @@ export default function SuperAdminFeedbackPage() {
                   void loadRows();
                 }}
               >
-                Apply
+                {t("apply")}
               </Button>
               <Button
                 variant="outline"
@@ -146,19 +148,19 @@ export default function SuperAdminFeedbackPage() {
                   setPage(1);
                 }}
               >
-                Reset filters
+                {t("resetFilters")}
               </Button>
             </div>
 
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>ID</TableHead>
-                  <TableHead>User</TableHead>
-                  <TableHead>Rating</TableHead>
-                  <TableHead>Successful</TableHead>
-                  <TableHead>Comment</TableHead>
-                  <TableHead>Date</TableHead>
+                  <TableHead>{t("table.id")}</TableHead>
+                  <TableHead>{t("table.user")}</TableHead>
+                  <TableHead>{t("table.rating")}</TableHead>
+                  <TableHead>{t("table.successful")}</TableHead>
+                  <TableHead>{t("table.comment")}</TableHead>
+                  <TableHead>{t("table.date")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -171,7 +173,7 @@ export default function SuperAdminFeedbackPage() {
                 ) : rows.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={6} className="py-8 text-center text-muted-foreground">
-                      No feedback found.
+                      {t("feedback.noFeedbackFound")}
                     </TableCell>
                   </TableRow>
                 ) : (
@@ -182,7 +184,7 @@ export default function SuperAdminFeedbackPage() {
                       <TableCell>
                         <StarRating value={Number(row.rating) || 0} size="sm" />
                       </TableCell>
-                      <TableCell>{row.isWebsiteSuccessful ? "Yes" : "No"}</TableCell>
+                      <TableCell>{row.isWebsiteSuccessful ? t("yes") : t("no")}</TableCell>
                       <TableCell className="max-w-sm truncate">{row.comment}</TableCell>
                       <TableCell>
                         {row.createdAt ? new Date(row.createdAt).toLocaleString() : "-"}
@@ -200,16 +202,16 @@ export default function SuperAdminFeedbackPage() {
                 disabled={page <= 1 || loadingRows}
                 onClick={() => setPage((prev) => Math.max(1, prev - 1))}
               >
-                Previous
+                {t("previous")}
               </Button>
-              <span className="text-sm text-muted-foreground">Page {page}</span>
+              <span className="text-sm text-muted-foreground">{t("pageNumber", { page })}</span>
               <Button
                 variant="outline"
                 size="sm"
                 disabled={loadingRows || rows.length < PAGE_SIZE}
                 onClick={() => setPage((prev) => prev + 1)}
               >
-                Next
+                {t("next")}
               </Button>
             </div>
           </CardContent>

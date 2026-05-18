@@ -1,0 +1,73 @@
+{
+  "defaultTitle": "Online Screen Recorder for Teams",
+  "defaultDescription": "theRec is an online screen recorder and video recorder for teams to capture, share, and collaborate faster.",
+  "defaultKeywords": "screen recording, video recorder, online recorder, online screen recorder, team collaboration, browser screen recorder, record screen online",
+  "robotsNoIndex": "noindex, nofollow",
+  "routes": {
+    "home": {
+      "title": "Online Screen Recorder for Teams",
+      "description": "Record your screen online, share video recordings instantly, and collaborate in one place with theRec.",
+      "keywords": "screen recording, online screen recorder, video recorder, record screen online, team video collaboration"
+    },
+    "login": {
+      "title": "Login",
+      "description": "Sign in to your theRec workspace to manage screen recordings and team videos."
+    },
+    "register": {
+      "title": "Create Account",
+      "description": "Create your theRec account to start recording your screen and sharing videos online."
+    },
+    "verify": {
+      "title": "Verify Account",
+      "description": "Verify your email to activate your theRec account."
+    },
+    "forgotPassword": {
+      "title": "Reset Password",
+      "description": "Reset your theRec account password securely."
+    },
+    "preview": {
+      "title": "Video Preview",
+      "description": "Preview a shared theRec screen recording."
+    },
+    "share": {
+      "title": "Shared Recording",
+      "description": "Watch and review a shared recording on theRec."
+    },
+    "about": {
+      "title": "About",
+      "description": "Learn about theRec, an online screen recorder built for faster team communication."
+    },
+    "blogs": {
+      "title": "Blogs",
+      "description": "Read tips on screen recording, video recording, and online collaboration with theRec."
+    },
+    "privacyPolicy": {
+      "title": "Privacy Policy",
+      "description": "Read theRec privacy policy and how we handle your data."
+    },
+    "terms": {
+      "title": "Terms and Conditions",
+      "description": "Read theRec terms and conditions for using our online recorder platform."
+    },
+    "contact": {
+      "title": "Contact",
+      "description": "Contact theRec support for help with screen recording and account questions."
+    },
+    "dashboard": {
+      "title": "Dashboard",
+      "description": "Manage your workspace recordings, status, and collaboration flow in theRec."
+    },
+    "howItWorks": {
+      "title": "How It Works",
+      "description": "Learn how to record, upload, process, and share videos with theRec."
+    },
+    "demo": {
+      "title": "Demo",
+      "description": "Watch a demo of theRec screen recording platform."
+    },
+    "plans": {
+      "title": "Pricing",
+      "description": "Compare theRec plans and choose the right subscription for your team."
+    }
+  }
+}

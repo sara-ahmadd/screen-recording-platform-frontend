@@ -1,0 +1,179 @@
+{
+  "language": {
+    "names": {
+      "en": "الإنجليزية",
+      "ar": "العربية"
+    },
+    "switchAria": "تبديل اللغة إلى {{language}}",
+    "switchTo": "التبديل إلى {{language}}"
+  },
+  "brand": "theRec",
+  "actions": {
+    "confirm": "تأكيد",
+    "cancel": "إلغاء",
+    "continue": "متابعة",
+    "close": "إغلاق",
+    "save": "حفظ",
+    "delete": "حذف",
+    "edit": "تعديل",
+    "back": "رجوع",
+    "retry": "إعادة المحاولة",
+    "ok": "موافق",
+    "submit": "إرسال",
+    "loading": "جاري التحميل…",
+    "sending": "جاري الإرسال…",
+    "details": "التفاصيل",
+    "getStarted": "ابدأ الآن",
+    "signIn": "تسجيل الدخول",
+    "signUp": "إنشاء حساب",
+    "signOut": "تسجيل الخروج",
+    "backToHome": "العودة للرئيسية",
+    "contactSupport": "تواصل مع الدعم",
+    "popular": "الأكثر شعبية",
+    "currentPlan": "الخطة الحالية",
+    "free": "مجاني",
+    "subscribe": "اشترك",
+    "current": "الحالية"
+  },
+  "labels": {
+    "email": "البريد الإلكتروني",
+    "password": "كلمة المرور",
+    "username": "اسم المستخدم",
+    "confirmPassword": "تأكيد كلمة المرور",
+    "otp": "رمز التحقق",
+    "title": "العنوان",
+    "status": "الحالة",
+    "visibility": "الظهور",
+    "name": "الاسم"
+  },
+  "placeholders": {
+    "email": "you@example.com",
+    "password": "••••••••",
+    "otp": "أدخل رمز التحقق"
+  },
+  "confirm": {
+    "title": "هل أنت متأكد؟",
+    "description": "لا يمكن التراجع عن هذا الإجراء.",
+    "confirm": "متابعة",
+    "cancel": "إلغاء"
+  },
+  "toast": {
+    "success": "نجاح",
+    "error": "خطأ"
+  },
+  "footer": {
+    "copyright": "© {{year}} theRec. جميع الحقوق محفوظة."
+  },
+  "nav": {
+    "blogs": "المدونة",
+    "pricing": "الأسعار",
+    "contact": "اتصل بنا",
+    "about": "من نحن",
+    "securityPrivacy": "الأمان والخصوصية",
+    "howItWorks": "كيف يعمل",
+    "privacyPolicy": "سياسة الخصوصية",
+    "termsConditions": "الشروط والأحكام"
+  },
+  "plans": {
+    "videosPerMonth": "{{count}} فيديو/شهر",
+    "minMaxDuration": "{{min}}–{{max}} دقيقة كحد أقصى",
+    "storageGb": "{{gb}} جيجابايت تخزين",
+    "teamMembers": "{{count}} أعضاء فريق",
+    "videoDownloads": "تنزيل الفيديو",
+    "noWatermark": "بدون علامة مائية",
+    "publicSharing": "مشاركة عامة",
+    "teamCollaboration": "تعاون الفريق",
+    "signInRequired": "يلزم تسجيل الدخول",
+    "signInToSubscribe": "يرجى تسجيل الدخول للاشتراك في خطة."
+  },
+  "errors": {
+    "tryAgain": "يرجى المحاولة مرة أخرى."
+  },
+  "a11y": {
+    "showPassword": "إظهار كلمة المرور",
+    "hidePassword": "إخفاء كلمة المرور"
+  },
+  "workspace": {
+    "required": "مساحة العمل مطلوبة",
+    "selectFirst": "اختر مساحة عمل أولاً",
+    "createFirst": "أنشئ مساحة عمل أولاً",
+    "selectWorkspace": "اختر مساحة العمل",
+    "createWorkspace": "إنشاء مساحة عمل"
+  },
+  "feedback": {
+    "title": "الملاحظات",
+    "submitTitle": "إرسال ملاحظة",
+    "submitDesc": "شاركنا تجربتك مع التطبيق.",
+    "myFeedback": "ملاحظاتي",
+    "rating": "التقييم",
+    "selectRating": "اختر التقييم",
+    "websiteSuccessful": "هل كان الموقع مفيدًا لك؟",
+    "comment": "تعليق",
+    "commentPlaceholder": "أخبرنا ما نجح وما يمكن تحسينه...",
+    "submit": "إرسال الملاحظة",
+    "editTitle": "تعديل الملاحظة",
+    "websiteSuccessfulShort": "الموقع ناجح",
+    "successful": "ناجح",
+    "date": "التاريخ",
+    "empty": "لم تُرسل ملاحظات بعد.",
+    "yes": "نعم",
+    "no": "لا",
+    "commentTooShort": "التعليق قصير جدًا",
+    "commentTooShortDesc": "يجب أن يكون التعليق 5 أحرف على الأقل.",
+    "submitted": "تم إرسال الملاحظة",
+    "submittedDesc": "شكرًا لملاحظتك.",
+    "submitFailed": "فشل إرسال الملاحظة",
+    "loadFailed": "فشل تحميل الملاحظات",
+    "updated": "تم تحديث الملاحظة",
+    "updatedDesc": "تم تحديث ملاحظتك.",
+    "updateFailed": "فشل تحديث الملاحظة",
+    "deleteConfirm": "حذف الملاحظة؟",
+    "deleted": "تم حذف الملاحظة",
+    "deleteFailed": "فشل حذف الملاحظة",
+    "actionsCol": "إجراءات"
+  },
+  "theme": {
+    "toggle": "تبديل السمة",
+    "light": "فاتح",
+    "dark": "داكن",
+    "system": "النظام"
+  },
+  "validation": {
+    "required": "هذا الحقل مطلوب",
+    "emailInvalid": "أدخل بريدًا إلكترونيًا صالحًا",
+    "minLength": "يجب أن يكون {{min}} أحرف على الأقل",
+    "passwordsMismatch": "كلمتا المرور غير متطابقتين"
+  },
+  "userAvatar": "صورة المستخدم",
+  "tryAgain": "يرجى المحاولة مرة أخرى.",
+  "refresh": "تحديث",
+  "plan": "الخطة",
+  "perMonthShort": "/شهر",
+  "perYearShort": "/سنة",
+  "membersUpTo": "حتى {{count}} أعضاء",
+  "yearlySave": "({{egp}} جنيه ≈ ${{usd}} دولار) /سنة (وفر {{percent}}%)",
+  "storage": {
+    "zero": "0 بايت",
+    "b": "بايت",
+    "kb": "ك.بايت",
+    "mb": "م.بايت",
+    "gb": "ج.بايت",
+    "tb": "ت.بايت"
+  },
+  "workspaceIdShort": "المعرف: {{id}}",
+  "workspaceFallback": "مساحة عمل",
+  "signInRequiredFree": "يرجى تسجيل الدخول للاشتراك في الخطة المجانية.",
+  "googleNoToken": "لم يُرجع تسجيل Google رمز وصول.",
+  "googleSessionFailed": "تعذّر التحقق من جلسة Google.",
+  "paidToFree": {
+    "subscribed": "تم الاشتراك",
+    "subscribedDesc": "أنت الآن على الخطة المجانية.",
+    "noSubscription": "لا يوجد اشتراك",
+    "noSubscriptionDesc": "تعذّر العثور على اشتراك للإلغاء.",
+    "updated": "تم تحديث الاشتراك",
+    "updatedDesc": "تم تخفيض اشتراكك إلى الخطة المجانية.",
+    "downgradeFailed": "تعذّر تخفيض الاشتراك",
+    "workspaceNotFound": "لم يُعثر على مساحة العمل",
+    "workspaceNotFoundDesc": "اختر مساحة عمل صالحة وحاول مرة أخرى."
+  }
+}

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { subscriptionApi, workspaceApi } from "@/lib/api";
@@ -26,6 +27,7 @@ import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export default function BillingPage() {
+  const { t } = useTranslation(["billing", "common"]);
   const { selectedWorkspaceId, user } = useAuth();
   const { toast } = useToast();
   const [workspaceDetails, setWorkspaceDetails] = useState<any>(null);
@@ -122,8 +124,8 @@ export default function BillingPage() {
     } catch (err: any) {
       setWorkspaceDetails(null);
       toast({
-        title: "Failed to load subscription history",
-        description: err?.message || "Could not fetch workspace details.",
+        title: t("historyLoadError"),
+        description: err?.message,
         variant: "destructive",
       });
     } finally {
@@ -157,7 +159,7 @@ export default function BillingPage() {
     const type = (subscription?.type || "").toLowerCase();
     if (type === "yearly") return `$${yearly}/year`;
     if (type === "monthly") return `$${monthly}/month`;
-    return monthly > 0 ? `$${monthly}/month` : "Free";
+    return monthly > 0 ? `$${monthly}/month` : t("freePrice");
   };
 
   const handleCancelSubscription = async () => {
@@ -166,12 +168,12 @@ export default function BillingPage() {
     try {
       const res = await subscriptionApi.update(Number(currentSubscription.id));
       toastApiSuccess(res, {
-        title: "Subscription updated",
-        fallbackDescription: "Subscription status was toggled successfully.",
+        title: t("updated"),
+        fallbackDescription: t("updatedDesc"),
       });
       await loadWorkspaceDetails();
     } catch (err: any) {
-      toast({ title: "Failed to cancel subscription", description: err?.message || "Please try again.", variant: "destructive" });
+      toast({ title: t("cancelFailed"), description: err?.message, variant: "destructive" });
     } finally {
       setActionLoading(null);
     }
@@ -181,22 +183,20 @@ export default function BillingPage() {
     <AppLayout>
       <div className="p-6 md:p-8 max-w-7xl mx-auto">
         <div className="text-center mb-12">
-          <h1 className="text-3xl font-bold mb-2">Subscription</h1>
-          <p className="text-muted-foreground">Current subscription details for your selected workspace</p>
+          <h1 className="text-3xl font-bold mb-2">{t("subscription")}</h1>
+          <p className="text-muted-foreground">{t("subtitle")}</p>
         </div>
 
         <Card className="glass mb-8">
           <CardHeader>
-            <CardTitle>Current Workspace Subscription</CardTitle>
-            <CardDescription>
-              Subscription details for your currently selected workspace.
-            </CardDescription>
+            <CardTitle>{t("currentWorkspace")}</CardTitle>
+            <CardDescription>{t("subtitle")}</CardDescription>
           </CardHeader>
           <CardContent>
             {!selectedWorkspaceId ? (
-              <p className="text-sm text-muted-foreground">Please select a workspace to view subscription details.</p>
+              <p className="text-sm text-muted-foreground">{t("selectWorkspace")}</p>
             ) : !selectedWorkspace ? (
-              <p className="text-sm text-muted-foreground">Selected workspace not found in your profile data.</p>
+              <p className="text-sm text-muted-foreground">{t("workspaceNotFound")}</p>
             ) : (
               <div className="space-y-6">
                 <div className="flex items-center gap-3">
@@ -218,12 +218,12 @@ export default function BillingPage() {
                 </div>
 
                 {!currentSubscription ? (
-                  <p className="text-sm text-muted-foreground">No subscription data available for this workspace.</p>
+                  <p className="text-sm text-muted-foreground">{t("noSubscriptionData")}</p>
                 ) : (
                   <div className="rounded-lg border border-border p-4 space-y-4">
                     <div className="flex flex-wrap items-center justify-between gap-3">
                       <div>
-                        <p className="text-sm text-muted-foreground">Current plan</p>
+                        <p className="text-sm text-muted-foreground">{t("currentPlan")}</p>
                         <p className="text-xl font-semibold capitalize">{currentSubscription.plan?.name || "Free"}</p>
                       </div>
                       <Badge
@@ -238,44 +238,44 @@ export default function BillingPage() {
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                       <div className="rounded-md border border-border p-3">
-                        <p className="text-xs uppercase tracking-wide text-muted-foreground">Price</p>
+                        <p className="text-xs uppercase tracking-wide text-muted-foreground">{t("price")}</p>
                         <p className="mt-1 text-sm font-medium">{getPriceLabel(currentSubscription)}</p>
                       </div>
                       <div className="rounded-md border border-border p-3">
-                        <p className="text-xs uppercase tracking-wide text-muted-foreground">Billing cycle</p>
+                        <p className="text-xs uppercase tracking-wide text-muted-foreground">{t("billingCycle")}</p>
                         <p className="mt-1 text-sm font-medium capitalize">{currentSubscription.type || "N/A"}</p>
                       </div>
                       <div className="rounded-md border border-border p-3">
-                        <p className="text-xs uppercase tracking-wide text-muted-foreground">Current period start</p>
+                        <p className="text-xs uppercase tracking-wide text-muted-foreground">{t("periodStart")}</p>
                         <p className="mt-1 text-sm font-medium">{formatDate(currentSubscription.currentPeriodStart)}</p>
                       </div>
                       <div className="rounded-md border border-border p-3">
-                        <p className="text-xs uppercase tracking-wide text-muted-foreground">Current period end</p>
+                        <p className="text-xs uppercase tracking-wide text-muted-foreground">{t("periodEnd")}</p>
                         <p className="mt-1 text-sm font-medium">{formatDate(currentSubscription.currentPeriodEnd)}</p>
                       </div>
                       <div className="rounded-md border border-border p-3">
-                        <p className="text-xs uppercase tracking-wide text-muted-foreground">Next billing date</p>
+                        <p className="text-xs uppercase tracking-wide text-muted-foreground">{t("nextBilling")}</p>
                         <p className="mt-1 text-sm font-medium">{formatDate(currentSubscription.nextBillingDate)}</p>
                       </div>
                       <div className="rounded-md border border-border p-3">
-                        <p className="text-xs uppercase tracking-wide text-muted-foreground">Auto renewal</p>
+                        <p className="text-xs uppercase tracking-wide text-muted-foreground">{t("autoRenewal")}</p>
                         <p className="mt-1 text-sm font-medium">
                           {typeof currentSubscription.autoRenewal === "boolean"
                             ? currentSubscription.autoRenewal
-                              ? "On"
-                              : "Off"
+                              ? t("on")
+                              : t("off")
                             : currentSubscription.stripeSubscriptionId
-                              ? "On"
-                              : "Off"}
+                              ? t("on")
+                              : t("off")}
                         </p>
                         {currentSubscription.cancelAtPeriodEnd ? (
                           <p className="mt-1 text-xs text-muted-foreground">
-                            Cancellation requested. Access remains until period end.
+                            {t("cancellationAccessNote")}
                           </p>
                         ) : null}
                       </div>
                       <div className="rounded-md border border-border p-3">
-                        <p className="text-xs uppercase tracking-wide text-muted-foreground">Plan limits</p>
+                        <p className="text-xs uppercase tracking-wide text-muted-foreground">{t("planLimits")}</p>
                         <p className="mt-1 text-sm font-medium">
                           {currentSubscription.plan?.maxVideosPerMonth ?? "-"} videos/mo, {currentSubscription.plan?.maxStorageGB ?? "-"} GB,{" "}
                           {currentSubscription.plan?.maxTeamMembers ?? "-"} members
@@ -290,7 +290,7 @@ export default function BillingPage() {
                             onClick={handleCancelSubscription}
                             disabled={actionLoading !== null}
                           >
-                            {actionLoading === "cancel" ? <Loader2 className="h-4 w-4 animate-spin" /> : "Cancel Subscription"}
+                            {actionLoading === "cancel" ? <Loader2 className="h-4 w-4 animate-spin" /> : t("cancelSubscription")}
                           </Button>
                         )}
                         {!isCurrentFree && (
@@ -300,9 +300,9 @@ export default function BillingPage() {
                               const cyclePrice = getCyclePrice(currentSubscription?.plan, cycle);
                               const switchLabel =
                                 currentSubscriptionType === "monthly" && cycle === "yearly"
-                                  ? "Upgrade to yearly"
+                                  ? t("upgradeYearly")
                                   : currentSubscriptionType === "yearly" && cycle === "monthly"
-                                    ? "Downgrade to monthly"
+                                    ? t("downgradeMonthly")
                                     : `Switch to ${cycle}`;
 
                               return isCurrentCycle ? (
@@ -324,7 +324,7 @@ export default function BillingPage() {
                         )}
                         <Link to="/plans">
                           <Button className="gradient-primary" disabled={actionLoading !== null}>
-                            Change your plan
+                            {t("changePlan")}
                           </Button>
                         </Link>
                       </div>
@@ -338,10 +338,8 @@ export default function BillingPage() {
 
         <Card className="glass">
           <CardHeader>
-            <CardTitle>Subscription History</CardTitle>
-            <CardDescription>
-              Past and current subscriptions for the selected workspace.
-            </CardDescription>
+            <CardTitle>{t("history")}</CardTitle>
+            <CardDescription>{t("subtitle")}</CardDescription>
           </CardHeader>
           <CardContent>
             {historyLoading ? (
@@ -349,19 +347,19 @@ export default function BillingPage() {
                 <Loader2 className="h-6 w-6 animate-spin text-primary" />
               </div>
             ) : subscriptionHistory.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No subscription history found for this workspace.</p>
+              <p className="text-sm text-muted-foreground">{t("noHistory")}</p>
             ) : (
               <div className="rounded-xl border border-border/80 bg-card/40 shadow-sm overflow-hidden">
                 <Table>
                   <TableHeader>
                     <TableRow className="border-border/60 hover:bg-transparent bg-muted/30">
-                      <TableHead className="min-w-[140px] font-semibold text-foreground/90">Plan</TableHead>
-                      <TableHead className="min-w-[100px] font-semibold text-foreground/90">Status</TableHead>
-                      <TableHead className="min-w-[90px] font-semibold text-foreground/90">Billing</TableHead>
-                      <TableHead className="min-w-[100px] font-semibold text-foreground/90">Price</TableHead>
-                      <TableHead className="min-w-[200px] font-semibold text-foreground/90">Billing period</TableHead>
-                      <TableHead className="min-w-[120px] font-semibold text-foreground/90">Created</TableHead>
-                      <TableHead className="min-w-[120px] font-semibold text-foreground/90 hidden lg:table-cell">Updated</TableHead>
+                      <TableHead className="min-w-[140px] font-semibold text-foreground/90">{t("colPlan")}</TableHead>
+                      <TableHead className="min-w-[100px] font-semibold text-foreground/90">{t("colStatus")}</TableHead>
+                      <TableHead className="min-w-[90px] font-semibold text-foreground/90">{t("colBilling")}</TableHead>
+                      <TableHead className="min-w-[100px] font-semibold text-foreground/90">{t("colPrice")}</TableHead>
+                      <TableHead className="min-w-[200px] font-semibold text-foreground/90">{t("colPeriod")}</TableHead>
+                      <TableHead className="min-w-[120px] font-semibold text-foreground/90">{t("colCreated")}</TableHead>
+                      <TableHead className="min-w-[120px] font-semibold text-foreground/90 hidden lg:table-cell">{t("colUpdated")}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -396,7 +394,7 @@ export default function BillingPage() {
                               <span className="capitalize">{planName}</span>
                               {isCurrent && (
                                 <Badge className="gradient-primary border-0 w-fit text-[10px] uppercase tracking-wide">
-                                  Current
+                                  {t("currentBadge")}
                                 </Badge>
                               )}
                             </div>

@@ -1,5 +1,6 @@
 import { toast } from "@/hooks/use-toast";
 import { messageFromApiSuccessResponse } from "@/lib/apiMessage";
+import i18n from "@/i18n/config";
 
 type ToastApiSuccessOptions = {
   title?: string;
@@ -8,7 +9,7 @@ type ToastApiSuccessOptions = {
 
 /** Prefer server `message` / `description` from JSON; otherwise use fallback copy. */
 export function toastApiSuccess(res: unknown, options?: ToastApiSuccessOptions) {
-  const { title = "Success", fallbackDescription } = options ?? {};
+  const { title = i18n.t("common:toast.success"), fallbackDescription } = options ?? {};
   const description = messageFromApiSuccessResponse(res) ?? fallbackDescription;
   toast({
     variant: "success",

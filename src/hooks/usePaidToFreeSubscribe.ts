@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "@/contexts/AuthContext";
 import { subscriptionApi } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
@@ -21,6 +22,7 @@ function formatPeriodEnd(value?: string | null) {
 }
 
 export function usePaidToFreeSubscribe() {
+  const { t } = useTranslation(["billing", "common"]);
   const { user, selectedWorkspaceId, refreshUser } = useAuth();
   const { toast } = useToast();
   const [busyPlanId, setBusyPlanId] = useState<number | null>(null);
@@ -58,12 +60,12 @@ export function usePaidToFreeSubscribe() {
         return;
       }
       toastApiSuccess(res, {
-        title: "Subscribed",
-        fallbackDescription: "You are now on the free plan.",
+        title: t("paidToFreeToast.subscribed"),
+        fallbackDescription: t("paidToFreeToast.nowOnFree"),
       });
       await refreshUser();
     },
-    [selectedWorkspaceId, toast, refreshUser],
+    [selectedWorkspaceId, toast, refreshUser, t],
   );
 
   const handlePeriodDialogContinue = useCallback(async () => {
@@ -82,8 +84,8 @@ export function usePaidToFreeSubscribe() {
     const sub = getCurrentWorkspaceSubscription(selectedWorkspace);
     if (!sub?.id) {
       toast({
-        title: "No subscription",
-        description: "Could not find a subscription to cancel.",
+        title: t("paidToFreeToast.noSubscription"),
+        description: t("paidToFreeToast.noSubscriptionDesc"),
         variant: "destructive",
       });
       return;
@@ -103,9 +105,8 @@ export function usePaidToFreeSubscribe() {
       );
       await refreshUser();
       toastApiSuccess(updateRes, {
-        title: "Subscription updated",
-        fallbackDescription:
-          "Your subscription was downgraded to the free plan.",
+        title: t("updated"),
+        fallbackDescription: t("paidToFreeToast.downgradedDesc"),
       });
       setConfirmOpen(false);
       setPendingPlan(null);
@@ -114,31 +115,31 @@ export function usePaidToFreeSubscribe() {
       setPeriodDialogOpen(false);
     } catch (err: any) {
       toast({
-        title: "Could not downgrade subscription",
-        description: err?.message || "Please try again.",
+        title: t("paidToFreeToast.downgradeFailed"),
+        description: err?.message || t("paidToFreeToast.tryAgain"),
         variant: "destructive",
       });
     } finally {
       setBusyPlanId(null);
     }
-  }, [pendingPlan, selectedWorkspaceId, selectedWorkspace, toast, refreshUser]);
+  }, [pendingPlan, selectedWorkspaceId, selectedWorkspace, toast, refreshUser, t]);
 
   const requestFreeSubscribe = useCallback(
     (plan: any) => {
       if (!user || !selectedWorkspaceId || !plan?.id) {
         toast({
-          title: "Workspace required",
+          title: t("common:workspace.required"),
           description: user
-            ? "Please select a workspace first."
-            : "Please sign in to subscribe.",
+            ? t("common:workspace.selectFirst")
+            : t("common:plans.signInToSubscribe"),
           variant: "destructive",
         });
         return;
       }
       if (!selectedWorkspace) {
         toast({
-          title: "Workspace not found",
-          description: "Select a valid workspace and try again.",
+          title: t("paidToFreeToast.workspaceNotFound"),
+          description: t("paidToFreeToast.workspaceNotFoundDesc"),
           variant: "destructive",
         });
         return;
@@ -158,7 +159,7 @@ export function usePaidToFreeSubscribe() {
           await runCreateFree(plan);
         } catch (err: any) {
           toast({
-            title: "Subscription failed",
+            title: t("subscriptionFailed"),
             description: err.message,
             variant: "destructive",
           });
@@ -167,7 +168,7 @@ export function usePaidToFreeSubscribe() {
         }
       })();
     },
-    [user, selectedWorkspaceId, selectedWorkspace, toast, runCreateFree],
+    [user, selectedWorkspaceId, selectedWorkspace, toast, runCreateFree, t],
   );
 
   const cancelDowngradeConfirm = useCallback(() => {

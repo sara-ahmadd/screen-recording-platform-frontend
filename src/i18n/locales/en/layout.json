@@ -1,0 +1,91 @@
+{
+  "nav": {
+    "dashboard": "Dashboard",
+    "record": "Record",
+    "upload": "Upload",
+    "workspaces": "Workspaces",
+    "billing": "Billing",
+    "feedback": "Feedback",
+    "notifications": "Notifications",
+    "allRecordings": "All Recordings",
+    "allWorkspaces": "All Workspaces",
+    "allUsers": "All Users",
+    "allPlans": "All Plans",
+    "paymobPlans": "Paymob plans",
+    "allPromocodes": "All Promocodes",
+    "analyticsOverview": "Analytics Overview",
+    "analyticsVisuals": "Analytics Visuals",
+    "subscriptions": "Subscriptions",
+    "allFeedback": "All Feedback"
+  },
+  "sidebar": {
+    "hide": "Hide sidebar",
+    "show": "Show sidebar",
+    "closeOverlay": "Close sidebar overlay",
+    "userAvatar": "User avatar"
+  },
+  "signOut": {
+    "title": "Sign out?",
+    "description": "You will need to login again to continue.",
+    "confirm": "Sign out"
+  },
+  "warning": {
+    "dismiss": "Dismiss warning"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "signInToView": "Sign in to view notifications",
+    "empty": "No notifications",
+    "important": "Important",
+    "billingRenewal": "Billing · renewal 3DS",
+    "fallbackTitle": "Notification",
+    "completePayment": "Complete payment",
+    "markAllRead": "Mark all read",
+    "viewAll": "View all",
+    "loadFailed": "Failed to load notifications",
+    "markReadFailed": "Failed to mark as read",
+    "updated": "Notifications updated",
+    "allMarkedRead": "All notifications marked as read.",
+    "actionFailed": "Failed",
+    "orderPrefix": "Order",
+    "newest": "Newest",
+    "oldest": "Oldest",
+    "markAllAsRead": "Mark all as read",
+    "noNotificationsYet": "No notifications yet",
+    "deleteConfirm": "Delete notification?",
+    "deleteDesc": "This notification will be removed permanently.",
+    "deleted": "Notification deleted",
+    "deletedDesc": "Notification deleted.",
+    "colStatus": "Status",
+    "colPriority": "Priority",
+    "colNotification": "Notification",
+    "colDate": "Date",
+    "colActions": "Actions",
+    "unread": "Unread",
+    "read": "Read",
+    "markAsRead": "Mark as read",
+    "pageOf": "Page {{page}} of {{total}}"
+  },
+  "theme": {
+    "switchToLight": "Switch to light mode",
+    "switchToDark": "Switch to dark mode",
+    "lightMode": "Light mode",
+    "darkMode": "Dark mode"
+  },
+  "renewal3ds": {
+    "headline": "Complete payment to keep your subscription.",
+    "paymentRequired": "Payment required",
+    "completePaymentSecure": "Complete payment (secure window)",
+    "continueInTab": "Continue in this tab",
+    "remindLater": "Remind me later"
+  },
+  "paidToFree": {
+    "cancelTitle": "Cancel current subscription?",
+    "cancelDescription": "You are on the {{plan}} plan. Switching to Free will cancel your paid subscription.",
+    "keepPlan": "Keep current plan",
+    "confirmSwitch": "Yes, cancel and switch to Free",
+    "cancelledTitle": "Subscription cancelled",
+    "cancelledDescription": "You keep paid benefits until {{date}}.",
+    "cancelledDescriptionEnd": "You keep paid benefits until the end of the billing period."
+  }
+}

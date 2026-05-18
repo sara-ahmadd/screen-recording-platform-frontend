@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useCallback, useEffect, useState } from "react";
 import AppLayout from "@/components/AppLayout";
 import { superAdminApi } from "@/lib/api";
@@ -18,6 +19,7 @@ function getEventsRows(res: any): any[] {
 }
 
 export default function SuperAdminAnalyticsPage() {
+  const { t } = useTranslation(["admin", "common"]);
   const { toast } = useToast();
   const [overview, setOverview] = useState<any>(null);
   const [events, setEvents] = useState<any[]>([]);
@@ -33,11 +35,11 @@ export default function SuperAdminAnalyticsPage() {
       const res = await superAdminApi.analytics.overview();
       setOverview(res?.data || res?.overview || res);
     } catch (err: any) {
-      toast({ title: "Failed to load analytics overview", description: err?.message || "Please try again.", variant: "destructive" });
+      toast({ title: t("failedLoadOverview"), description: err?.message || t("common:errors.tryAgain"), variant: "destructive" });
     } finally {
       setLoadingOverview(false);
     }
-  }, [toast]);
+  }, [toast, t]);
 
   const loadEvents = useCallback(async () => {
     setLoadingEvents(true);
@@ -50,11 +52,11 @@ export default function SuperAdminAnalyticsPage() {
       });
       setEvents(getEventsRows(res));
     } catch (err: any) {
-      toast({ title: "Failed to load analytics events", description: err?.message || "Please try again.", variant: "destructive" });
+      toast({ title: t("failedLoadEvents"), description: err?.message || t("common:errors.tryAgain"), variant: "destructive" });
     } finally {
       setLoadingEvents(false);
     }
-  }, [page, order, eventType, toast]);
+  }, [page, order, eventType, toast, t]);
 
   useEffect(() => {
     void loadOverview();
@@ -67,7 +69,7 @@ export default function SuperAdminAnalyticsPage() {
   return (
     <AppLayout>
       <div className="p-6 md:p-8 max-w-7xl mx-auto space-y-6">
-        <h1 className="text-3xl font-bold">Analytics Overview</h1>
+        <h1 className="text-3xl font-bold">{t("analyticsOverview")}</h1>
 
         {loadingOverview ? (
           <div className="py-8 text-center">
@@ -75,27 +77,27 @@ export default function SuperAdminAnalyticsPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Card><CardHeader><CardTitle className="text-sm">Total Users</CardTitle></CardHeader><CardContent className="text-2xl font-bold">{overview?.totalUsers ?? 0}</CardContent></Card>
-            <Card><CardHeader><CardTitle className="text-sm">Active Users</CardTitle></CardHeader><CardContent className="text-2xl font-bold">{overview?.activeUsers ?? 0}</CardContent></Card>
-            <Card><CardHeader><CardTitle className="text-sm">Currently Logged In</CardTitle></CardHeader><CardContent className="text-2xl font-bold">{overview?.currentlyLoggedInUsers ?? 0}</CardContent></Card>
-            <Card><CardHeader><CardTitle className="text-sm">Total Recordings</CardTitle></CardHeader><CardContent className="text-2xl font-bold">{overview?.totalRecordings ?? 0}</CardContent></Card>
-            <Card><CardHeader><CardTitle className="text-sm">Total Clicks</CardTitle></CardHeader><CardContent className="text-2xl font-bold">{overview?.totalClicks ?? 0}</CardContent></Card>
-            <Card><CardHeader><CardTitle className="text-sm">Recordings Completed Events</CardTitle></CardHeader><CardContent className="text-2xl font-bold">{overview?.recordingCompletedEvents ?? 0}</CardContent></Card>
+            <Card><CardHeader><CardTitle className="text-sm">{t("totalUsers")}</CardTitle></CardHeader><CardContent className="text-2xl font-bold">{overview?.totalUsers ?? 0}</CardContent></Card>
+            <Card><CardHeader><CardTitle className="text-sm">{t("activeUsers")}</CardTitle></CardHeader><CardContent className="text-2xl font-bold">{overview?.activeUsers ?? 0}</CardContent></Card>
+            <Card><CardHeader><CardTitle className="text-sm">{t("loggedIn")}</CardTitle></CardHeader><CardContent className="text-2xl font-bold">{overview?.currentlyLoggedInUsers ?? 0}</CardContent></Card>
+            <Card><CardHeader><CardTitle className="text-sm">{t("totalRecordings")}</CardTitle></CardHeader><CardContent className="text-2xl font-bold">{overview?.totalRecordings ?? 0}</CardContent></Card>
+            <Card><CardHeader><CardTitle className="text-sm">{t("totalClicks")}</CardTitle></CardHeader><CardContent className="text-2xl font-bold">{overview?.totalClicks ?? 0}</CardContent></Card>
+            <Card><CardHeader><CardTitle className="text-sm">{t("recordingCompleted")}</CardTitle></CardHeader><CardContent className="text-2xl font-bold">{overview?.recordingCompletedEvents ?? 0}</CardContent></Card>
           </div>
         )}
 
         <Card>
           <CardHeader>
-            <CardTitle>Analytics Events</CardTitle>
+            <CardTitle>{t("analyticsEvents")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex flex-wrap gap-2">
               <Select value={eventType} onValueChange={setEventType}>
                 <SelectTrigger className="w-[220px]">
-                  <SelectValue placeholder="Filter event type" />
+                  <SelectValue placeholder={t("filterEventType")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All event types</SelectItem>
+                  <SelectItem value="all">{t("analytics.allEventTypes")}</SelectItem>
                   <SelectItem value="click">click</SelectItem>
                   <SelectItem value="recording_created">recording_created</SelectItem>
                   <SelectItem value="recording_completed">recording_completed</SelectItem>
@@ -106,8 +108,8 @@ export default function SuperAdminAnalyticsPage() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="DESC">Newest first</SelectItem>
-                  <SelectItem value="ASC">Oldest first</SelectItem>
+                  <SelectItem value="DESC">{t("analytics.newestFirst")}</SelectItem>
+                  <SelectItem value="ASC">{t("analytics.oldestFirst")}</SelectItem>
                 </SelectContent>
               </Select>
               <Button
@@ -117,7 +119,7 @@ export default function SuperAdminAnalyticsPage() {
                   void loadEvents();
                 }}
               >
-                Apply
+                {t("apply")}
               </Button>
               <Button
                 variant="outline"
@@ -127,19 +129,19 @@ export default function SuperAdminAnalyticsPage() {
                   setPage(1);
                 }}
               >
-                Reset filters
+                {t("resetFilters")}
               </Button>
             </div>
 
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>ID</TableHead>
-                  <TableHead>User</TableHead>
-                  <TableHead>Type</TableHead>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Metadata</TableHead>
-                  <TableHead>Date</TableHead>
+                  <TableHead>{t("table.id")}</TableHead>
+                  <TableHead>{t("table.user")}</TableHead>
+                  <TableHead>{t("table.type")}</TableHead>
+                  <TableHead>{t("table.name")}</TableHead>
+                  <TableHead>{t("table.metadata")}</TableHead>
+                  <TableHead>{t("table.date")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -152,7 +154,7 @@ export default function SuperAdminAnalyticsPage() {
                 ) : events.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={6} className="py-8 text-center text-muted-foreground">
-                      No events found.
+                      {t("analytics.noEventsFound")}
                     </TableCell>
                   </TableRow>
                 ) : (
@@ -181,16 +183,16 @@ export default function SuperAdminAnalyticsPage() {
                 disabled={page <= 1 || loadingEvents}
                 onClick={() => setPage((prev) => Math.max(1, prev - 1))}
               >
-                Previous
+                {t("previous")}
               </Button>
-              <span className="text-sm text-muted-foreground">Page {page}</span>
+              <span className="text-sm text-muted-foreground">{t("pageNumber", { page })}</span>
               <Button
                 variant="outline"
                 size="sm"
                 disabled={loadingEvents || events.length < PAGE_SIZE}
                 onClick={() => setPage((prev) => prev + 1)}
               >
-                Next
+                {t("next")}
               </Button>
             </div>
           </CardContent>

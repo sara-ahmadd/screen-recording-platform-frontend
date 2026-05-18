@@ -1,8 +1,10 @@
 import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import Logo from "./Logo";
 import ThemeToggle from "./ThemeToggle";
+import LanguageSwitcher from "./LanguageSwitcher";
 
 type PublicPageLayoutProps = {
   title: string;
@@ -11,36 +13,40 @@ type PublicPageLayoutProps = {
   children: ReactNode;
 };
 
-export const headerLinks = [
-  { href: "/blogs", label: "Blogs" },
-  { href: "/plans", label: "Pricing" },
-  { href: "/contact", label: "Contact" },
-  { href: "/about", label: "About" },
-  { href: "/privacy-policy", label: "Security/Privacy" },
-  { href: "/how-it-works", label: "How it works" },
-  
-];
-
-const footerLinks = [
-  { href: "/privacy-policy", label: "Privacy Policy" },
-  { href: "/terms-and-conditions", label: "Terms & Conditions" },
-  { href: "/contact", label: "Contact" },
-  { href: "/about", label: "About" },
-  { href: "/blogs", label: "Blogs" },
-  { href: "/how-it-works", label: "How it works" },
-];
+export function useHeaderLinks() {
+  const { t } = useTranslation("common");
+  return [
+    { href: "/blogs", label: t("nav.blogs") },
+    { href: "/plans", label: t("nav.pricing") },
+    { href: "/contact", label: t("nav.contact") },
+    { href: "/about", label: t("nav.about") },
+    { href: "/privacy-policy", label: t("nav.securityPrivacy") },
+    { href: "/how-it-works", label: t("nav.howItWorks") },
+  ];
+}
 
 export default function PublicPageLayout({
   title,
   subtitle,
   children,
-  footer=true
+  footer = true,
 }: PublicPageLayoutProps) {
+  const { t } = useTranslation("common");
+  const headerLinks = useHeaderLinks();
+  const footerLinks = [
+    { href: "/privacy-policy", label: t("nav.privacyPolicy") },
+    { href: "/terms-and-conditions", label: t("nav.termsConditions") },
+    { href: "/contact", label: t("nav.contact") },
+    { href: "/about", label: t("nav.about") },
+    { href: "/blogs", label: t("nav.blogs") },
+    { href: "/how-it-works", label: t("nav.howItWorks") },
+  ];
+
   return (
     <div className="min-h-screen bg-background relative">
       <nav className="border-b border-border/50 backdrop-blur-sm sticky top-0 z-50 bg-background/80">
-        <div className="max-w-[95%] mx-auto px-6 h-16 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2">
+        <div className="max-w-[95%] mx-auto px-6 h-16 flex items-center justify-between gap-4">
+          <Link to="/" className="flex items-center gap-2 shrink-0">
             <Logo imageClassName="h-auto" withText textClassName="font-bold" />
           </Link>
           <div className="hidden md:flex items-center gap-5">
@@ -54,14 +60,14 @@ export default function PublicPageLayout({
               </Link>
             ))}
           </div>
-          <div className="flex items-center gap-2">
-                            <ThemeToggle className="sticky h-9 w-9" />
-            
+          <div className="flex items-center gap-2 shrink-0">
+            <LanguageSwitcher className="h-9" />
+            <ThemeToggle className="sticky h-9 w-9" />
             <Link to="/login">
-              <Button variant="ghost">Sign in</Button>
+              <Button variant="ghost">{t("actions.signIn")}</Button>
             </Link>
             <Link to="/register">
-              <Button className="gradient-primary">Get Started</Button>
+              <Button className="gradient-primary">{t("actions.getStarted")}</Button>
             </Link>
           </div>
         </div>
@@ -81,31 +87,33 @@ export default function PublicPageLayout({
       </nav>
 
       <main className="max-w-[95%] mx-auto px-6 py-12 md:py-16">
-        <section className="mb-8">
+        <section className="mb-8 text-start">
           <h1 className="text-3xl md:text-4xl font-bold tracking-tight">{title}</h1>
           <p className="text-muted-foreground mt-3">{subtitle}</p>
         </section>
         <section className="glass rounded-2xl p-6 md:p-8">{children}</section>
       </main>
 
-     {footer&& <footer className="border-t border-border/50 py-8">
-        <div className="max-w-[95%] mx-auto px-6 flex flex-wrap items-center justify-between gap-4">
-          <p className="text-sm text-muted-foreground">
-            © {new Date().getFullYear()} theRec. All rights reserved.
-          </p>
-          <div className="flex flex-wrap items-center gap-4 text-sm">
-            {footerLinks.map((item) => (
-              <Link
-                key={item.href}
-                to={item.href}
-                className="text-muted-foreground hover:text-foreground transition-colors"
-              >
-                {item.label}
-              </Link>
-            ))}
+      {footer && (
+        <footer className="border-t border-border/50 py-8">
+          <div className="max-w-[95%] mx-auto px-6 flex flex-wrap items-center justify-between gap-4">
+            <p className="text-sm text-muted-foreground">
+              {t("footer.copyright", { year: new Date().getFullYear() })}
+            </p>
+            <div className="flex flex-wrap items-center gap-4 text-sm">
+              {footerLinks.map((item) => (
+                <Link
+                  key={item.href}
+                  to={item.href}
+                  className="text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  {item.label}
+                </Link>
+              ))}
+            </div>
           </div>
-        </div>
-      </footer>}
+        </footer>
+      )}
     </div>
   );
 }

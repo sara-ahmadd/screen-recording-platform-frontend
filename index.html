@@ -16,7 +16,10 @@
 
 <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
 
-<link rel="manifest" href="/site.webmanifest">
+    <link rel="manifest" href="/site.webmanifest">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet" />
 
     <meta name="google-adsense-account" content="ca-pub-7034676662232707">
     <meta property="og:title" content="theRec - Online Screen Recorder for Teams" />
@@ -53,6 +56,14 @@
     <script>
       (function () {
         try {
+          var savedLang = localStorage.getItem("app-language");
+          if (savedLang === "ar") {
+            document.documentElement.lang = "ar";
+            document.documentElement.dir = "rtl";
+          } else if (savedLang === "en") {
+            document.documentElement.lang = "en";
+            document.documentElement.dir = "ltr";
+          }
           var savedTheme = localStorage.getItem("theme");
           var prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
           var shouldUseDark = savedTheme ? savedTheme === "dark" : prefersDark;

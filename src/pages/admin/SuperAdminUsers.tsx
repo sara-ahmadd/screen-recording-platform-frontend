@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useCallback, useEffect, useState } from "react";
 import AppLayout from "@/components/AppLayout";
 import AdminCrudTable from "@/components/admin/AdminCrudTable";
@@ -8,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Button } from "@/components/ui/button";
 
 export default function SuperAdminUsersPage() {
+  const { t } = useTranslation(["admin", "common"]);
   const { toast } = useToast();
   const [rows, setRows] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -25,11 +27,15 @@ export default function SuperAdminUsersPage() {
       });
       setRows(res?.users || res?.data || res || []);
     } catch (err: any) {
-      toast({ title: "Error loading users", description: err.message, variant: "destructive" });
+      toast({
+        title: t("errorLoadingUsers"),
+        description: err?.message || t("common:errors.tryAgain"),
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }
-  }, [roleFilter, emailSearch, nameSearch, toast]);
+  }, [roleFilter, emailSearch, nameSearch, toast, t]);
 
   useEffect(() => {
     void load();
@@ -38,34 +44,34 @@ export default function SuperAdminUsersPage() {
   return (
     <AppLayout>
       <div className="p-6 md:p-8 max-w-7xl mx-auto">
-        <h1 className="text-3xl font-bold mb-4">All Users</h1>
+        <h1 className="text-3xl font-bold mb-4">{t("allUsers")}</h1>
         <div className="flex flex-wrap gap-2 mb-4">
           <Select value={roleFilter || "__all"} onValueChange={(v) => setRoleFilter(v === "__all" ? "" : v)}>
             <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Filter by role" />
+              <SelectValue placeholder={t("filterByRole")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="__all">All roles</SelectItem>
-              <SelectItem value="superAdmin">Super Admin</SelectItem>
-              <SelectItem value="workspaceOwner">Workspace Owner</SelectItem>
-              <SelectItem value="workspaceAdmin">Workspace Admin</SelectItem>
-              <SelectItem value="workspaceMember">Workspace Member</SelectItem>
+              <SelectItem value="__all">{t("allRoles")}</SelectItem>
+              <SelectItem value="superAdmin">{t("superAdmin")}</SelectItem>
+              <SelectItem value="workspaceOwner">{t("workspaceOwner")}</SelectItem>
+              <SelectItem value="workspaceAdmin">{t("workspaceAdmin")}</SelectItem>
+              <SelectItem value="workspaceMember">{t("workspaceMember")}</SelectItem>
             </SelectContent>
           </Select>
           <Input
-            placeholder="Search by email"
+            placeholder={t("searchByEmail")}
             value={emailSearch}
             onChange={(e) => setEmailSearch(e.target.value)}
             className="max-w-xs"
           />
           <Input
-            placeholder="Search by name"
+            placeholder={t("searchByName")}
             value={nameSearch}
             onChange={(e) => setNameSearch(e.target.value)}
             className="max-w-xs"
           />
           <Button variant="outline" onClick={() => void load()}>
-            Apply filters
+            {t("applyFilters")}
           </Button>
           <Button
             variant="outline"
@@ -75,11 +81,11 @@ export default function SuperAdminUsersPage() {
               setNameSearch("");
             }}
           >
-            Reset filters
+            {t("resetFilters")}
           </Button>
         </div>
         <AdminCrudTable
-          title="Users Table"
+          title={t("usersTable")}
           hiddenColumns={["password"]}
           allowCreate={false}
           showSearchInput={false}
@@ -88,12 +94,12 @@ export default function SuperAdminUsersPage() {
           onRefresh={load}
           onCreate={async (payload) => {
             await superAdminApi.users.create(payload);
-            toast({ title: "User created", description: "User was created successfully." });
+            toast({ title: t("users.created"), description: t("users.createdDesc") });
             await load();
           }}
           onUpdate={async (id, payload) => {
             await superAdminApi.users.update(id, payload);
-            toast({ title: "User updated", description: "User was updated successfully." });
+            toast({ title: t("users.updated"), description: t("users.updatedDesc") });
             await load();
           }}
           onDelete={async (id) => { await superAdminApi.users.delete(id); await load(); }}

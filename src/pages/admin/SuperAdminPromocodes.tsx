@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import AppLayout from "@/components/AppLayout";
 import AdminCrudTable from "@/components/admin/AdminCrudTable";
@@ -5,6 +6,7 @@ import { plansApi, superAdminApi } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 
 export default function SuperAdminPromocodesPage() {
+  const { t } = useTranslation(["admin", "common"]);
   const { toast } = useToast();
   const [rows, setRows] = useState<any[]>([]);
   const [plans, setPlans] = useState<any[]>([]);
@@ -27,7 +29,7 @@ export default function SuperAdminPromocodesPage() {
       const res = await superAdminApi.promocodes.list();
       setRows(res?.promocodes || res?.data || res || []);
     } catch (err: any) {
-      toast({ title: "Error loading promocodes", description: err.message, variant: "destructive" });
+      toast({ title: t("errorLoadingPromocodes"), description: err?.message || t("common:errors.tryAgain"), variant: "destructive" });
     } finally {
       setLoading(false);
     }
@@ -43,7 +45,7 @@ export default function SuperAdminPromocodesPage() {
         const res = await plansApi.getAll();
         setPlans(res?.plans || res?.data || res || []);
       } catch (err: any) {
-        toast({ title: "Error loading plans", description: err.message, variant: "destructive" });
+        toast({ title: t("errorLoadingPlansList"), description: err?.message || t("common:errors.tryAgain"), variant: "destructive" });
       }
     };
     void loadPlans();
@@ -52,9 +54,9 @@ export default function SuperAdminPromocodesPage() {
   return (
     <AppLayout>
       <div className="p-6 md:p-8 max-w-7xl mx-auto">
-        <h1 className="text-3xl font-bold mb-4">All Promocodes</h1>
+        <h1 className="text-3xl font-bold mb-4">{t("allPromocodes")}</h1>
         <AdminCrudTable
-          title="Promocodes Table"
+          title={t("promocodesTable")}
           rows={rows}
           loading={loading}
           pinnedColumns={["code", "status", "type", "amount", "duration", "planId"]}
@@ -75,7 +77,7 @@ export default function SuperAdminPromocodesPage() {
           }}
           fieldSelectOptions={{
             planId: plans.map((plan: any) => ({
-              label: plan?.name ? `${plan.name} (ID: ${plan.id})` : `Plan ${plan.id}`,
+              label: plan?.name ? t("planLabel", { name: plan.name, id: plan.id }) : t("plans.planFallback", { id: plan.id }),
               value: String(plan.id),
             })),
           }}
@@ -97,10 +99,10 @@ export default function SuperAdminPromocodesPage() {
                 ...(payload.planId != null && payload.planId !== "" ? { planId: Number(payload.planId) } : {}),
               };
               await superAdminApi.promocodes.create(createPayload);
-              toast({ title: "Success", description: "Promocode created successfully." });
+              toast({ title: t("success"), description: t("promocodeCreated") });
               await load();
             } catch (err: any) {
-              toast({ title: "Failed", description: err?.message || "Could not create promocode.", variant: "destructive" });
+              toast({ title: t("failed"), description: err?.message || t("promocodeCreateFailed"), variant: "destructive" });
               throw err;
             }
           }}
@@ -155,14 +157,14 @@ export default function SuperAdminPromocodesPage() {
                 return acc;
               }, {});
               if (Object.keys(updatePayload).length === 0) {
-                toast({ title: "No changes", description: "No promo code fields were updated." });
+                toast({ title: t("noChanges"), description: t("promocodeNoChanges") });
                 return;
               }
               await superAdminApi.promocodes.update(id, updatePayload);
-              toast({ title: "Success", description: "Promocode updated successfully." });
+              toast({ title: t("success"), description: t("promocodeUpdated") });
               await load();
             } catch (err: any) {
-              toast({ title: "Failed", description: err?.message || "Could not update promocode.", variant: "destructive" });
+              toast({ title: t("failed"), description: err?.message || t("promocodeUpdateFailed"), variant: "destructive" });
               throw err;
             }
           }}

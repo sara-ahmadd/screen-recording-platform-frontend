@@ -1,5 +1,8 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { useHomePageSiteReset } from "@/hooks/useHomePageSiteReset";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Play, Upload, Users, Shield, Zap, ArrowRight, Check, Loader2, CircleCheck } from "lucide-react";
@@ -16,7 +19,7 @@ import { usePaidToFreeSubscribe } from "@/hooks/usePaidToFreeSubscribe";
 import { PaidToFreeDialogs } from "@/components/PaidToFreeDialogs";
 import { Ad } from "@/components/Ads";
 import Logo from "@/components/Logo";
-import { headerLinks } from "@/components/PublicPageLayout";
+import { useHeaderLinks } from "@/components/PublicPageLayout";
 import ThemeToggle from "@/components/ThemeToggle";
 import NotificationsBell from "@/components/NotificationsBell";
 import { Reveal } from "@/components/Reveal";
@@ -24,6 +27,9 @@ import { Badge } from "@/components/Badge";
 import HowItWorksSection from "@/components/HowItWorks";
 
 export default function Index() {
+  const { t } = useTranslation(["home", "common", "auth"]);
+  const headerLinks = useHeaderLinks();
+  useHomePageSiteReset(true);
   const { user, selectedWorkspaceId, refreshUser, lastAuthError, loading } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -96,7 +102,7 @@ export default function Index() {
         const res = await plansApi.getAll();
         setPlans(res.plans || res.data || res || []);
       } catch (err: any) {
-        toast({ title: "Error loading plans", description: err.message, variant: "destructive" });
+        toast({ title: t("home:toast.plansLoadError"), description: err.message, variant: "destructive" });
       } finally {
         setPlansLoading(false);
       }
@@ -186,24 +192,24 @@ export default function Index() {
             res?.accessToken || res?.token || res?.data?.accessToken || res?.user?.accessToken;
           const refresh =
             res?.refreshToken || res?.data?.refreshToken || res?.user?.refreshToken;
-          if (!token) throw new Error("Google sign-in did not return access token.");
+          if (!token) throw new Error(t("common:googleNoToken"));
           setAccessToken(token);
           if (refresh) setRefreshToken(refresh);
           const meOk = await refreshUser();
           if (!meOk) {
-            throw new Error(lastAuthError || "Could not verify Google session.");
+            throw new Error(lastAuthError || t("common:googleSessionFailed"));
           }
           toast({
             variant: "success",
-            title: "Signed in",
-            description: "Google login successful.",
+            title: t("home:toast.signedIn"),
+            description: t("auth:toast.googleLoginSuccess"),
           });
           navigate("/dashboard");
         } catch (err: any) {
-          const errMsg = err?.message || "Please try again.";
+          const errMsg = err?.message || t("common:tryAgain");
           const isInactive = String(errMsg).toLowerCase().includes("inactive");
           toast({
-            title: "Google login failed",
+            title: t("auth:toast.googleLoginFailed"),
             description: errMsg,
             variant: "destructive",
           });
@@ -276,6 +282,7 @@ export default function Index() {
             ))}
             </div>
           <div className="flex items-center gap-2 md:gap-3">
+            <LanguageSwitcher className="h-9" />
             {user && (
               <>
                 <NotificationsBell className="sticky h-9 w-9" />
@@ -285,7 +292,7 @@ export default function Index() {
             {user ? (
               <Link to="/profile" className="flex items-center gap-2 rounded-full border border-border bg-card/70 px-2.5 py-1.5 md:px-3">
                 {avatarSrc ? (
-                  <img src={avatarSrc} alt={user.user_name || "User avatar"} loading="lazy" className="h-7 w-7 rounded-full object-cover" />
+                  <img src={avatarSrc} alt={user.user_name || t("common:userAvatar")} loading="lazy" className="h-7 w-7 rounded-full object-cover" />
                 ) : (
                   <div className="h-7 w-7 rounded-full gradient-primary flex items-center justify-center text-xs font-bold text-primary-foreground">
                     {user?.user_name?.[0]?.toUpperCase() || "U"}
@@ -296,8 +303,8 @@ export default function Index() {
             ) : (
               <>
                 <ThemeToggle className="static h-9 w-9" />
-                <Link to="/login"><Button variant="ghost">Sign in</Button></Link>
-                <Link to="/register"><Button className="gradient-primary">SignUp</Button></Link>
+                <Link to="/login"><Button variant="ghost">{t("common:actions.signIn")}</Button></Link>
+                <Link to="/register"><Button className="gradient-primary">{t("common:actions.signUp")}</Button></Link>
               </>
             )}
           </div>
@@ -308,56 +315,56 @@ export default function Index() {
       <Reveal from="left">
       <section className="max-w-6xl mx-auto px-6 py-14 md:py-10 text-center">
         <Badge className="gradient-primary border-0 mb-6 text-sm px-4 py-1.5 text-primary-foreground">
-          <Zap className="h-3.5 w-3.5 mr-1" /> Screen Recording Made Simple
+          <Zap className="h-3.5 w-3.5 me-1" /> {t("home:hero.title")}
         </Badge>
         <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-6 leading-tight">
-  Record your screen,<br/> share videos instantly,<br />
-  <span className="gradient-text">and collaborate with your team.</span>
-</h1>
+          {t("home:hero.subtitle")}
+        </h1>
 
 <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-10">
-  theRec is a browser-based screen recording and video collaboration platform built for async communication, tutorials, product demos, and team collaboration.
+  {t("home:hero.description")}
 </p>
         <div className="flex items-center justify-center gap-4">
           {user ? (
             <>
               <Link to="/dashboard">
                 <Button size="lg" className="gradient-primary gap-2 text-base px-8">
-                  Go to Dashboard <ArrowRight className="h-4 w-4" />
+                  {t("home:hero.goDashboard")} <ArrowRight className="h-4 w-4" />
                 </Button>
               </Link>
               <Link to="/record">
-                <Button size="lg" variant="outline" className="text-base px-8">Start Recording</Button>
+                <Button size="lg" variant="outline" className="text-base px-8">{t("home:hero.startRecording")}</Button>
               </Link>
             </>
           ) : (
             <>
               <Link to="/demo">
                 <Button size="lg" className="gradient-primary gap-2 text-base px-8">
-                  Watch Demo <ArrowRight className="h-4 w-4" />
+                  {t("home:hero.watchDemo")} <ArrowRight className="h-4 w-4" />
                 </Button>
               </Link>
               <Link to="/record">
-                <Button size="lg" variant="outline" className="text-base px-8">Start Recording free</Button>
+                <Button size="lg" variant="outline" className="text-base px-8">{t("home:hero.startFree")}</Button>
               </Link>
             </>
           )}
         </div>
-        <p className="mt-4 text-sm text-muted-foreground">
-  No download required • Works in your browser • Free plan available
-</p>
+        
+        <p className="mt-4 text-muted-foreground">
+          {t("home:hero.browserNote")}
+        </p>
+        {/* <p className="text-base text-muted-foreground mt-5">
+          {t("home:cta.noCreditCard")}
+        </p> */}
         {!user && showGoogleFallback && (
           <div className="mt-4 flex justify-center">
             <div id="google-one-tap-fallback" />
           </div>
         )}
         <p className="mt-6 text-sm text-muted-foreground max-w-3xl mx-auto">
-          theRec is the official website for recording your screen, uploading videos, and collaborating with your workspace team.
-          To use core features, we request account/profile information and recording metadata only to authenticate users,
-          organize workspaces, process videos, and enable secure sharing.
-          Read our full policy here:{" "}
+          {t("home:hero.privacyBlurb")}{" "}
           <Link to="/privacy-policy" className="underline underline-offset-4 hover:text-foreground">
-            Privacy Policy
+            {t("home:hero.privacyLink")}
           </Link>
           .
         </p>
@@ -366,83 +373,8 @@ export default function Index() {
   {/* Ad here */}
   {/* <!-- landing _top --> */}
       <Ad/>
-      
-     {/* Product Overview */}
-    <Reveal from="right">
-    <section className="max-w-6xl mx-auto px-6 py-24">
-      <div className="text-center mb-14">
-        <Badge className="gradient-primary border-0 mb-4 text-primary-foreground px-4 py-1.5">
-          Product Overview
-        </Badge>
-
-        <h2 className="text-3xl md:text-5xl font-bold tracking-tight">
-          Everything your team needs
-          <span className="gradient-text block mt-2">
-            to communicate with video
-          </span>
-        </h2>
-
-        <p className="text-muted-foreground max-w-2xl mx-auto mt-5 text-lg">
-          theRec helps teams record, explain, share, and collaborate asynchronously —
-          without meetings, complicated tools, or downloads.
-        </p>
-      </div>
-
-          <div className="grid lg:grid-cols-3 gap-6">
-            {[
-              {
-                icon: Zap,
-                title: "Instant Browser Recording",
-                desc: "Start recording immediately with no installation required. Capture your screen, tab, or window directly from your browser.",
-              },
-              {
-                icon: Upload,
-                title: "Upload Existing Videos",
-                desc: "Already have recordings? Upload and organize them inside your workspace in seconds.",
-              },
-              {
-                icon: Users,
-                title: "Async Team Collaboration",
-                desc: "Share visual updates instead of scheduling meetings. Keep communication faster and clearer.",
-              },
-              {
-                icon: Shield,
-                title: "Privacy & Access Control",
-                desc: "Keep recordings private, workspace-only, or publicly shareable with secure links.",
-              },
-              {
-                icon: Play,
-                title: "Fast Video Playback",
-                desc: "Videos are processed automatically for smooth streaming and instant viewing.",
-              },
-              {
-                icon: Check,
-                title: "Workspace Organization",
-                desc: "Manage recordings, teammates, permissions, and collaboration from one central place.",
-              },
-            ].map((item) => (
-              <div
-                key={item.title}
-                className="glass rounded-3xl p-7 hover:border-primary/30 hover:-translate-y-1 transition-all duration-300"
-              >
-                <div className="gradient-primary rounded-2xl p-4 w-fit mb-5">
-                  <item.icon className="h-6 w-6 text-primary-foreground" />
-                </div>
-
-                <h3 className="text-xl font-semibold mb-3">
-                  {item.title}
-                </h3>
-
-                <p className="text-muted-foreground leading-relaxed text-sm">
-                  {item.desc}
-                </p>
-              </div>
-            ))}
-          </div>
-    </section>
-    </Reveal>
-
-      {/* Google verification info */}
+          {/* How it works */}
+<HowItWorksSection/> 
 {/* Trust & Security */}
 <Reveal from="left">
 <section className="max-w-6xl mx-auto px-6 py-14">
@@ -452,54 +384,38 @@ export default function Index() {
 
     <div className="relative z-10">
       <Badge className="gradient-primary border-0 mb-5 text-primary-foreground px-4 py-1.5">
-        Trust & Security
+        {t("home:trust.badge")}
       </Badge>
 
       <div className="max-w-3xl">
         <h2 className="text-3xl md:text-5xl font-bold tracking-tight">
-          Built with transparency,
+          {t("home:trust.title")}
           <span className="gradient-text block mt-2">
-            privacy, and secure collaboration
+            {t("home:trust.titleHighlight")}
           </span>
         </h2>
 
         <p className="text-muted-foreground mt-5 text-lg leading-relaxed">
-          theRec is designed for modern teams that need secure video communication,
-          protected workspace collaboration, and reliable recording infrastructure.
+          {t("home:trust.subtitle")}
         </p>
       </div>
 
       <div className="grid md:grid-cols-2 gap-5 mt-12">
 
-        {[
-          {
-            title: "Secure Authentication",
-            desc: "Protected login, workspace access control, and secure account authentication across your organization.",
-          },
-          {
-            title: "Private Video Access",
-            desc: "Control who can access recordings using workspace permissions or secure shareable links.",
-          },
-          {
-            title: "Automated Video Processing",
-            desc: "Videos are automatically optimized for playback, streaming, thumbnails, and organization.",
-          },
-          {
-            title: "Minimal Data Collection",
-            desc: "We only collect essential account and recording data necessary to operate the platform.",
-          },
-        ].map((item) => (
+        {(
+          [
+            { titleKey: "home:trust.authTitle", descKey: "home:trust.authDesc" },
+            { titleKey: "home:trust.privateTitle", descKey: "home:trust.privateDesc" },
+            { titleKey: "home:trust.processingTitle", descKey: "home:trust.processingDesc" },
+            { titleKey: "home:trust.minimalTitle", descKey: "home:trust.minimalDesc" },
+          ] as const
+        ).map((item) => (
           <div
-            key={item.title}
+            key={item.titleKey}
             className="rounded-2xl border border-border bg-background/50 p-6 hover:border-primary/30 transition-colors"
           >
-            <h3 className="font-semibold text-lg mb-2">
-              {item.title}
-            </h3>
-
-            <p className="text-sm text-muted-foreground leading-relaxed">
-              {item.desc}
-            </p>
+            <h3 className="font-semibold text-lg mb-2">{t(item.titleKey)}</h3>
+            <p className="text-sm text-muted-foreground leading-relaxed">{t(item.descKey)}</p>
           </div>
         ))}
 
@@ -510,23 +426,68 @@ export default function Index() {
           to="/privacy-policy"
           className="underline underline-offset-4 hover:text-foreground"
         >
-          Privacy Policy
+          {t("common:nav.privacyPolicy")}
         </Link>
 
         <Link
           to="/terms-and-conditions"
           className="underline underline-offset-4 hover:text-foreground"
         >
-          Terms & Conditions
+          {t("common:nav.termsConditions")}
         </Link>
       </div>
     </div>
   </div>
 </section>
 </Reveal>
+     {/* Product Overview */}
+    <Reveal from="right">
+    <section className="max-w-6xl mx-auto px-6 py-24">
+      <div className="text-center mb-14">
+        <Badge className="gradient-primary border-0 mb-4 text-primary-foreground px-4 py-1.5">
+          {t("home:overview.badge")}
+        </Badge>
 
-     {/* How it works */}
-<HowItWorksSection/>
+        <h2 className="text-3xl md:text-5xl font-bold tracking-tight">
+          {t("home:overview.title")}
+          <span className="gradient-text block mt-2">
+            {t("home:overview.titleHighlight")}
+          </span>
+        </h2>
+
+        <p className="text-muted-foreground max-w-2xl mx-auto mt-5 text-lg">
+          {t("home:overview.subtitle")}
+        </p>
+      </div>
+
+          <div className="grid lg:grid-cols-3 gap-6">
+            {(
+              [
+                { icon: Zap, titleKey: "home:overview.instantTitle", descKey: "home:overview.instantDesc" },
+                { icon: Upload, titleKey: "home:overview.uploadTitle", descKey: "home:overview.uploadDesc" },
+                { icon: Users, titleKey: "home:overview.collabTitle", descKey: "home:overview.collabDesc" },
+                { icon: Shield, titleKey: "home:overview.privacyTitle", descKey: "home:overview.privacyDesc" },
+                { icon: Play, titleKey: "home:overview.playbackTitle", descKey: "home:overview.playbackDesc" },
+                { icon: Check, titleKey: "home:overview.workspaceTitle", descKey: "home:overview.workspaceDesc" },
+              ] as const
+            ).map((item) => (
+              <div
+                key={item.titleKey}
+                className="glass rounded-3xl p-7 hover:border-primary/30 hover:-translate-y-1 transition-all duration-300"
+              >
+                <div className="gradient-primary rounded-2xl p-4 w-fit mb-5">
+                  <item.icon className="h-6 w-6 text-primary-foreground" />
+                </div>
+
+                <h3 className="text-xl font-semibold mb-3">{t(item.titleKey)}</h3>
+
+                <p className="text-muted-foreground leading-relaxed text-sm">{t(item.descKey)}</p>
+              </div>
+            ))}
+          </div>
+    </section>
+    </Reveal>
+
 
 
 {/* Async Communication CTA */}
@@ -538,35 +499,35 @@ export default function Index() {
 
     <div className="relative z-10">
       <Badge className="gradient-primary border-0 mb-5 text-primary-foreground px-4 py-1.5">
-        Async Communication
+        {t("home:async.badge")}
       </Badge>
 
       <h2 className="text-3xl md:text-5xl font-bold tracking-tight max-w-3xl mx-auto">
-        Replace long meetings
+        {t("home:async.title")}
         <span className="gradient-text block mt-2">
-          with quick video updates
+          {t("home:async.titleHighlight")}
         </span>
       </h2>
 
       <p className="text-muted-foreground text-lg max-w-2xl mx-auto mt-6 leading-relaxed">
-        Share product demos, bug reports, tutorials, onboarding videos,
-        and team updates without interrupting everyone's schedule.
+        {t("home:async.subtitle")}
       </p>
 
       <div className="mt-8 flex flex-wrap justify-center gap-3">
-
-        {[
-          "Product demos",
-          "Bug reporting",
-          "Team updates",
-          "Client walkthroughs",
-          "Async onboarding",
-        ].map((item) => (
+        {(
+          [
+            "home:async.tagDemos",
+            "home:async.tagBugs",
+            "home:async.tagUpdates",
+            "home:async.tagWalkthroughs",
+            "home:async.tagOnboarding",
+          ] as const
+        ).map((key) => (
           <div
-            key={item}
+            key={key}
             className="rounded-full border border-border bg-background/60 px-4 py-2 text-sm"
           >
-            {item}
+            {t(key)}
           </div>
         ))}
 
@@ -584,12 +545,12 @@ export default function Index() {
         <Reveal from="right">
           <section id="plans-section" className="max-w-6xl mx-auto px-6 py-16">
             <Badge className="gradient-primary border-0 mb-5 text-primary-foreground px-4 py-1.5">
-        Pricing
+        {t("home:pricing.title")}
       </Badge>
             <h2 className="text-3xl md:text-5xl font-bold tracking-tight pb-5">
-  Flexible pricing for
+  {t("home:pricing.subtitle")}
   <span className="gradient-text block mt-2">
-    individuals and teams
+    {t("home:pricing.subtitleHighlight")}
   </span>
 </h2>
             {plansLoading ? (
@@ -602,14 +563,23 @@ export default function Index() {
               const isCurrentForWorkspace =
                 Boolean(user && selectedWorkspaceId && currentWorkspacePlanId != null && Number(plan.id) === currentWorkspacePlanId);
               const features = [
-                plan.maxVideosPerMonth ? `${plan.maxVideosPerMonth} videos/month` : null,
-                plan.maxVideoDuration ? `${plan.maxVideoDuration} min max duration` : null,
-                plan.maxStorageGB ? `${plan.maxStorageGB} GB storage` : null,
-                plan.maxTeamMembers ? `${plan.maxTeamMembers} team members` : null,
-                plan.canDownloadVideos ? "Video downloads" : null,
-                plan.canRemoveWaterMark ? "No watermark" : null,
-                plan.canSharePublicLink ? "Public sharing" : null,
-                plan.teamAccess ? "Team collaboration" : null,
+                plan.maxVideosPerMonth
+                  ? t("common:plans.videosPerMonth", { count: plan.maxVideosPerMonth })
+                  : null,
+                plan.maxVideoDuration
+                  ? t("common:plans.minMaxDuration", {
+                      min: plan.minVideoDuration || 0,
+                      max: plan.maxVideoDuration,
+                    })
+                  : null,
+                plan.maxStorageGB ? t("common:plans.storageGb", { gb: plan.maxStorageGB }) : null,
+                plan.maxTeamMembers
+                  ? t("common:plans.teamMembers", { count: plan.maxTeamMembers })
+                  : null,
+                plan.canDownloadVideos ? t("common:plans.videoDownloads") : null,
+                plan.canRemoveWaterMark ? t("common:plans.noWatermark") : null,
+                plan.canSharePublicLink ? t("common:plans.publicSharing") : null,
+                plan.teamAccess ? t("common:plans.teamCollaboration") : null,
               ].filter(Boolean);
 
                 return (
@@ -622,31 +592,39 @@ export default function Index() {
                     {isPopular && (
                       <div className="absolute -top-3 left-1/2 -translate-x-1/2">
                         <Badge className="gradient-primary border-0 text-xs px-3 py-1 text-primary-foreground">
-                          <Zap className="h-3 w-3 mr-1" /> Popular
+                          <Zap className="h-3 w-3 me-1" /> {t("common:actions.popular")}
                         </Badge>
                       </div>
                     )}
 
                   <div className="text-center">
-                    <h3 className="font-semibold text-lg capitalize">{plan.name || "Plan"}</h3>
+                    <h3 className="font-semibold text-lg capitalize">{plan.name || t("home:pricing.planFallback")}</h3>
                     <div className="mt-4 flex flex-col items-center">
                     {/* Primary: EGP */}
                     <div className="text-3xl font-bold">
-                      {Number(plan.monthlyPriceEGP).toLocaleString() ?? 0} EGP
-                      <span className="text-muted-foreground text-base font-normal">/mo</span>
+                      {Number(plan.monthlyPriceEGP).toLocaleString() ?? 0} {t("home:pricing.egp")}
+                      <span className="text-muted-foreground text-base font-normal">{t("home:pricing.perMonth")}</span>
                     </div>
 
                     {/* Secondary: USD */}
                     <div className="text-sm text-muted-foreground mt-1">
-                    ≈  {Number(plan.monthlyPriceUSD).toLocaleString() ?? plan.monthlyPrice ?? 0} USD /mo
+                    {t("home:pricing.usdApprox", {
+                      amount: Number(plan.monthlyPriceUSD).toLocaleString() ?? plan.monthlyPrice ?? 0,
+                    })}
                     </div>
                   </div>
                     <p className="text-xs text-muted-foreground mt-1">
-                      Up to {Number(plan.maxTeamMembers || 0)} members
+                      {t("home:pricing.membersUpTo", { count: Number(plan.maxTeamMembers || 0) })}
                     </p>
                     {plan.yearlyPrice > 0 && (
                       <p className="text-xs text-muted-foreground mt-1">
-                       ({Number(plan.yearlyPriceEGP).toLocaleString()} EGP ≈  ${plan.yearlyPrice}USD) /year  (save {Math.round((1 - plan.yearlyPrice / (plan.monthlyPrice * 12)) * 100)}%)
+                        {t("common:yearlySave", {
+                          egp: Number(plan.yearlyPriceEGP).toLocaleString(),
+                          usd: plan.yearlyPrice,
+                          percent: Math.round(
+                            (1 - plan.yearlyPrice / (plan.monthlyPrice * 12)) * 100,
+                          ),
+                        })}
                       </p>
                     )}
                   </div>
@@ -662,7 +640,7 @@ export default function Index() {
 
                   {isCurrentForWorkspace ? (
                     <Button type="button" className="w-full mt-6" variant="outline" disabled>
-                      Current plan
+                      {t("common:actions.currentPlan")}
                     </Button>
                   ) : free ? (
                     <Button
@@ -673,8 +651,8 @@ export default function Index() {
                       onClick={() => {
                         if (!user) {
                           toast({
-                            title: "Sign in required",
-                            description: "Please sign in to subscribe to the free plan.",
+                            title: t("common:plans.signInRequired"),
+                            description: t("home:toast.freePlanSignIn"),
                           });
                           return;
                         }
@@ -688,7 +666,7 @@ export default function Index() {
                       {busyPlanId === plan.id ? (
                         <Loader2 className="h-4 w-4 animate-spin" />
                       ) : (
-                        "Get Started"
+                        t("common:actions.getStarted")
                       )}
                     </Button>
                   ) : (
@@ -700,7 +678,7 @@ export default function Index() {
                         className={`w-full ${isPopular ? "gradient-primary" : ""}`}
                         variant={isPopular ? "default" : "outline"}
                       >
-                        Details
+                        {t("common:actions.details")}
                       </Button>
                     </Link>
                   )}
@@ -720,64 +698,41 @@ export default function Index() {
 
   <div className="text-center mb-14">
     <Badge className="gradient-primary border-0 mb-4 text-primary-foreground px-4 py-1.5">
-      Testimonials
+      {t("home:testimonials.badge")}
     </Badge>
 
     <h2 className="text-3xl md:text-5xl font-bold tracking-tight">
-      Trusted by modern
+      {t("home:testimonials.title")}
       <span className="gradient-text block mt-2">
-        remote-first teams
+        {t("home:testimonials.titleHighlight")}
       </span>
     </h2>
 
     <p className="text-muted-foreground mt-5 text-lg max-w-2xl mx-auto">
-      Teams use theRec to reduce meetings, explain faster,
-      and collaborate more efficiently with video.
+      {t("home:testimonials.subtitle")}
     </p>
   </div>
 
   <div className="grid md:grid-cols-3 gap-6">
 
-    {[
-      {
-        quote:
-          "theRec completely changed how our product team communicates updates asynchronously.",
-        name: "Aya O.",
-        role: "Product Manager",
-      },
-      {
-        quote:
-          "We replaced many internal meetings with quick recordings and saved hours every week.",
-        name: "Karim M.",
-        role: "Engineering Lead",
-      },
-      {
-        quote:
-          "Support explanations became much clearer after switching to video walkthroughs.",
-        name: "Lina S.",
-        role: "Customer Success",
-      },
-    ].map((item) => (
+    {(
+      [
+        { quoteKey: "home:testimonials.quote1", nameKey: "home:testimonials.name1", roleKey: "home:testimonials.role1" },
+        { quoteKey: "home:testimonials.quote2", nameKey: "home:testimonials.name2", roleKey: "home:testimonials.role2" },
+        { quoteKey: "home:testimonials.quote3", nameKey: "home:testimonials.name3", roleKey: "home:testimonials.role3" },
+      ] as const
+    ).map((item) => (
       <div
-        key={item.name}
+        key={item.nameKey}
         className="glass rounded-3xl p-8 hover:-translate-y-1 transition-all duration-300"
       >
-        <div className="text-5xl leading-none text-primary/20 mb-5">
-          "
-        </div>
+        <div className="text-5xl leading-none text-primary/20 mb-5">"</div>
 
-        <p className="text-muted-foreground leading-relaxed">
-          {item.quote}
-        </p>
+        <p className="text-muted-foreground leading-relaxed">{t(item.quoteKey)}</p>
 
         <div className="mt-8">
-          <p className="font-semibold">
-            {item.name}
-          </p>
-
-          <p className="text-sm text-muted-foreground">
-            {item.role}
-          </p>
+          <p className="font-semibold">{t(item.nameKey)}</p>
+          <p className="text-sm text-muted-foreground">{t(item.roleKey)}</p>
         </div>
       </div>
     ))}
@@ -791,49 +746,27 @@ export default function Index() {
       <section className="max-w-4xl mx-auto px-6 py-16">
         <div className="text-center mb-10">
 <h2 className="text-3xl md:text-5xl font-bold tracking-tight">
-  Questions?
+  {t("home:faq.title")}
   <span className="gradient-text block mt-2">
-    We’ve got answers
+    {t("home:faq.titleHighlight")}
   </span>
 </h2>        </div>
         <div className="space-y-4">
-        {[
-  {
-    q: "What is theRec used for?",
-    a: "theRec helps individuals and teams record their screen, explain ideas visually, share video updates, and collaborate asynchronously without unnecessary meetings.",
-  },
-  {
-    q: "Do I need to install any software?",
-    a: "No. theRec works directly in your browser, so you can start recording instantly without downloading or installing anything.",
-  },
-  {
-    q: "Can I share recordings with people outside my workspace?",
-    a: "Yes. You can generate secure public links for external sharing or keep videos private inside your workspace.",
-  },
-  {
-    q: "Is theRec suitable for remote teams?",
-    a: "Absolutely. theRec is built for async communication, making it ideal for remote teams, distributed companies, product demos, onboarding, and team updates.",
-  },
-  {
-    q: "How are videos processed after recording?",
-    a: "Videos are automatically processed in the background to generate optimized playback formats, thumbnails, and streaming-ready files.",
-  },
-  {
-    q: "Can I upload existing videos?",
-    a: "Yes. In addition to screen recording, you can upload existing video files and organize them inside your workspace.",
-  },
-  {
-    q: "Are recordings private and secure?",
-    a: "Yes. You control who can access recordings through workspace permissions and secure sharing settings.",
-  },
-  {
-    q: "Is there a free plan available?",
-    a: "Yes. You can start with a free plan and upgrade anytime when your team needs more storage, collaboration, and advanced features.",
-  },
-].map((item) => (
-            <div key={item.q} className="glass rounded-2xl p-6 hover:-translate-y-0.5 transition-transform duration-300">
-              <h3 className="font-semibold">{item.q}</h3>
-              <p className="text-sm text-muted-foreground mt-2">{item.a}</p>
+        {(
+          [
+            { qKey: "home:faq.q1", aKey: "home:faq.a1" },
+            { qKey: "home:faq.q2", aKey: "home:faq.a2" },
+            { qKey: "home:faq.q3", aKey: "home:faq.a3" },
+            { qKey: "home:faq.q4", aKey: "home:faq.a4" },
+            { qKey: "home:faq.q5", aKey: "home:faq.a5" },
+            { qKey: "home:faq.q6", aKey: "home:faq.a6" },
+            { qKey: "home:faq.q7", aKey: "home:faq.a7" },
+            { qKey: "home:faq.q8", aKey: "home:faq.a8" },
+          ] as const
+        ).map((item) => (
+            <div key={item.qKey} className="glass rounded-2xl p-6 hover:-translate-y-0.5 transition-transform duration-300">
+              <h3 className="font-semibold">{t(item.qKey)}</h3>
+              <p className="text-sm text-muted-foreground mt-2">{t(item.aKey)}</p>
             </div>
           ))}
         </div>
@@ -853,30 +786,30 @@ export default function Index() {
       {user ? (
         <>
           <Badge className="gradient-primary border-0 mb-5 text-primary-foreground px-4 py-1.5">
-            Welcome Back
+            {t("home:cta.welcomeBack")}
           </Badge>
 
           <h2 className="text-3xl md:text-5xl font-bold tracking-tight">
-            Continue creating
+            {t("home:cta.continueCreating")}
             <span className="gradient-text block mt-2">
-              and collaborating
+              {t("home:cta.continueHighlight")}
             </span>
           </h2>
 
           <p className="text-muted-foreground mt-6 text-lg">
-            Jump back into your workspace and manage your recordings.
+            {t("home:cta.continueDesc")}
           </p>
 
           <div className="mt-8 flex items-center justify-center gap-3">
             <Link to="/dashboard">
               <Button size="lg" className="gradient-primary">
-                Open Dashboard
+                {t("home:cta.openDashboard")}
               </Button>
             </Link>
 
             <Link to="/workspaces">
               <Button size="lg" variant="outline">
-                Manage Workspaces
+                {t("home:cta.manageWorkspaces")}
               </Button>
             </Link>
           </div>
@@ -884,38 +817,35 @@ export default function Index() {
       ) : (
         <>
           <Badge className="gradient-primary border-0 mb-5 text-primary-foreground px-4 py-1.5">
-            Start Free
+            {t("home:cta.startFree")}
           </Badge>
 
           <h2 className="text-3xl md:text-5xl font-bold tracking-tight">
-            Start recording
+            {t("home:cta.startRecording")}
             <span className="gradient-text block mt-2">
-              in less than a minute
+              {t("home:cta.startHighlight")}
             </span>
           </h2>
 
           <p className="text-muted-foreground mt-6 text-lg max-w-2xl mx-auto">
-            Create your workspace, record your screen,
-            and collaborate with your team — directly from the browser.
+            {t("home:cta.startDesc")}
           </p>
 
           <div className="mt-8 flex items-center justify-center gap-3">
             <Link to="/register">
               <Button size="lg" className="gradient-primary">
-                Get Started Free
+                {t("home:cta.getStartedFree")}
               </Button>
             </Link>
 
             <Link to="/login">
               <Button size="lg" variant="outline">
-                Sign In
+                {t("home:cta.signIn")}
               </Button>
             </Link>
           </div>
 
-          <p className="text-base text-muted-foreground mt-5">
-            No credit card required
-          </p>
+         
         </>
       )}
 
@@ -928,23 +858,23 @@ export default function Index() {
       <footer className="border-t border-border/50 py-8 mt-12">
         <div className="max-w-6xl mx-auto px-6 flex flex-wrap items-center justify-between gap-4">
           <p className="text-sm text-muted-foreground">
-            © {new Date().getFullYear()} theRec. All rights reserved.
+            {t("common:footer.copyright", { year: new Date().getFullYear() })}
           </p>
           <div className="flex flex-wrap items-center gap-4 text-sm">
             <Link to="/privacy-policy" className="text-muted-foreground hover:text-foreground transition-colors">
-              Privacy Policy
+              {t("common:nav.privacyPolicy")}
             </Link>
             <Link to="/terms-and-conditions" className="text-muted-foreground hover:text-foreground transition-colors">
-              Terms & Conditions
+              {t("common:nav.termsConditions")}
             </Link>
             <Link to="/contact" className="text-muted-foreground hover:text-foreground transition-colors">
-              Contact
+              {t("common:nav.contact")}
             </Link>
             <Link to="/about" className="text-muted-foreground hover:text-foreground transition-colors">
-              About
+              {t("common:nav.about")}
             </Link>
             <Link to="/blogs" className="text-muted-foreground hover:text-foreground transition-colors">
-              Blogs
+              {t("common:nav.blogs")}
             </Link>
           </div>
         </div>
@@ -964,15 +894,14 @@ export default function Index() {
                 className="h-7 w-7 text-emerald-600 dark:text-emerald-400 shrink-0"
                 aria-hidden
               />
-              Payment successful
+              {t("home:dialogs.paymentSuccess")}
             </DialogTitle>
             <DialogDescription>
-              {paymentSuccessMessage?.trim() ||
-                "Your payment was completed successfully and your subscription is now active."}
+              {paymentSuccessMessage?.trim() || t("home:dialogs.paymentSuccessDesc")}
             </DialogDescription>
           </DialogHeader>
           <div className="flex justify-end">
-            <Button onClick={closePaymentDialog}>Confirm</Button>
+            <Button onClick={closePaymentDialog}>{t("common:actions.confirm")}</Button>
           </div>
         </DialogContent>
       </Dialog>
@@ -986,13 +915,11 @@ export default function Index() {
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Payment Cancelled</DialogTitle>
-            <DialogDescription>
-              Your payment was cancelled. You can try again anytime from the plans section.
-            </DialogDescription>
+            <DialogTitle>{t("home:dialogs.paymentCancelled")}</DialogTitle>
+            <DialogDescription>{t("home:dialogs.paymentCancelledDesc")}</DialogDescription>
           </DialogHeader>
           <div className="flex justify-end">
-            <Button variant="outline" onClick={closePaymentDialog}>OK</Button>
+            <Button variant="outline" onClick={closePaymentDialog}>{t("common:actions.ok")}</Button>
           </div>
         </DialogContent>
       </Dialog>
@@ -1004,12 +931,14 @@ export default function Index() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              {hasWorkspaces ? "Select a workspace first" : "Create a workspace first"}
+              {hasWorkspaces
+                ? t("home:dialogs.workspaceRequired")
+                : t("home:dialogs.createWorkspaceRequired")}
             </DialogTitle>
             <DialogDescription>
               {hasWorkspaces
-                ? "To continue with the free plan, please select a workspace."
-                : "You do not have any workspaces yet. Create one to continue with the free plan."}
+                ? t("home:dialogs.selectWorkspaceDesc")
+                : t("home:dialogs.createWorkspaceDesc")}
             </DialogDescription>
           </DialogHeader>
           <div className="flex justify-end gap-2">
@@ -1017,11 +946,13 @@ export default function Index() {
               variant="outline"
               onClick={() => setWorkspaceRequiredDialogOpen(false)}
             >
-              Cancel
+              {t("common:actions.cancel")}
             </Button>
             <Link to={hasWorkspaces ? "/select-workspace" : "/workspaces"}>
               <Button onClick={() => setWorkspaceRequiredDialogOpen(false)}>
-                {hasWorkspaces ? "Select Workspace" : "Create Workspace"}
+                {hasWorkspaces
+                  ? t("common:workspace.selectWorkspace")
+                  : t("common:workspace.createWorkspace")}
               </Button>
             </Link>
           </div>

@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import { getSelectedWorkspaceId, recordingsApi } from "@/lib/api";
 import { getSocket } from "@/lib/socket";
 import { Link } from "react-router-dom";
@@ -34,6 +35,7 @@ interface Recording {
 }
 
 export default function DashboardPage() {
+  const { t } = useTranslation(["dashboard", "common"]);
   const { toast } = useToast();
   const confirm = useConfirmDialog();
   const [recordings, setRecordings] = useState<Recording[]>([]);
@@ -73,11 +75,11 @@ export default function DashboardPage() {
       setRecordings(res.recordings || res.data || []);
       setTotal(res.total || res.count || 0);
     } catch (err: any) {
-      toast({ title: "Error loading recordings", description: err.message, variant: "destructive" });
+      toast({ title: t("loadError"), description: err.message, variant: "destructive" });
     } finally {
       setLoading(false);
     }
-  }, [page, order, titleFilter, statusFilter, visibilityFilter, startDateFilter, endDateFilter, toast]);
+  }, [page, order, titleFilter, statusFilter, visibilityFilter, startDateFilter, endDateFilter, toast, t]);
   
   
   const fetchTrashRecordings = useCallback(async () => {
@@ -98,11 +100,11 @@ export default function DashboardPage() {
       setTrashRecordings(res.data?.data || []);
       setTotal(res.total || res.count || 0);
     } catch (err: any) {
-      toast({ title: "Error loading trash recordings", description: err.message, variant: "destructive" });
+      toast({ title: t("trashLoadError"), description: err.message, variant: "destructive" });
     } finally {
       setLoading(false);
     }
-  }, [page, order, titleFilter, statusFilter, visibilityFilter, startDateFilter, endDateFilter, toast]);
+  }, [page, order, titleFilter, statusFilter, visibilityFilter, startDateFilter, endDateFilter, toast, t]);
 
 
 
@@ -174,9 +176,9 @@ export default function DashboardPage() {
 
       toast({
         variant: "success",
-        title: "Video ready!",
+        title: t("videoReady"),
         description:
-          messageFromApiSuccessResponse(data) ?? data?.title ?? "Your recording is ready.",
+          messageFromApiSuccessResponse(data) ?? data?.title ?? t("videoReadyDesc"),
       });
       fetchRecordings();
     };
@@ -188,12 +190,12 @@ export default function DashboardPage() {
       );
     };
     const onFailed = (data: any) => {
-      toast({ title: "Processing failed", description: data?.message || "Something went wrong.", variant: "destructive" });
+      toast({ title: t("processingFailed"), description: data?.message || t("processingFailedDesc"), variant: "destructive" });
       fetchRecordings();
     };
     const onDeleted = () => fetchRecordings();
     const onLimitWarning = (data: any) => {
-      toast({ title: "⚠️ Usage warning", description: data?.message || "You're approaching your plan limits." });
+      toast({ title: t("usageWarning"), description: data?.message || t("usageWarningDesc"), variant: "destructive" });
     };
 
     socket.on("video_ready", onVideoReady);
@@ -209,26 +211,25 @@ export default function DashboardPage() {
       socket.off("video_deleted", onDeleted);
       socket.off("limit_warning", onLimitWarning);
     };
-  }, [fetchRecordings, toast]);
+  }, [fetchRecordings, toast, t]);
 
   const handleCancelStuckUpload = async (id: number) => {
     const confirmed = await confirm({
-      title: "Cancel this upload?",
-      description:
-        "The in-progress file transfer will be stopped and the draft will be reset. You can start a new upload afterward.",
-      confirmText: "Cancel upload",
-      cancelText: "Keep",
+      title: t("cancelUploadConfirm"),
+      description: t("cancelUploadDesc"),
+      confirmText: t("cancelUpload"),
+      cancelText: t("keep"),
     });
     if (!confirmed) return;
     try {
       const res = await recordingsApi.abortMultipartUpload(id);
       toastApiSuccess(res, {
-        title: "Upload cancelled",
-        fallbackDescription: "You can record or upload again.",
+        title: t("uploadCancelled"),
+        fallbackDescription: t("uploadCancelledDesc"),
       });
       fetchRecordings();
     } catch (err: any) {
-      toast({ title: "Could not cancel upload", description: err.message, variant: "destructive" });
+      toast({ title: t("cancelUploadFailed"), description: err.message, variant: "destructive" });
     }
   };
 
@@ -240,9 +241,8 @@ export default function DashboardPage() {
       setRecordings((prev) => prev.filter((item) => item.id !== id));
       setTotal((prev) => Math.max(0, prev - 1));
       toastApiSuccess(delRes, {
-        title: "Moved to trash",
-        fallbackDescription:
-          "Recording moved to trash and will be permanently deleted after the grace period.",
+        title: t("movedToTrash"),
+        fallbackDescription: t("movedToTrashDesc"),
       });
       trackClientEvent({
         eventType: "click",
@@ -251,7 +251,7 @@ export default function DashboardPage() {
       });
       if (viewMode === "active") void fetchRecordings();
     } catch (err: any) {
-      toast({ title: "Error", description: err.message, variant: "destructive" });
+      toast({ title: t("common:toast.error"), description: err.message, variant: "destructive" });
     } finally {
       setDeletingIds((prev) => prev.filter((itemId) => itemId !== id));
     }
@@ -260,10 +260,10 @@ export default function DashboardPage() {
   const handleDeletePermanently = async (id: number) => {
     if (deletingIds.includes(id)) return;
     const confirmed = await confirm({
-      title: "Delete recording permanently?",
-      description: "This action cannot be undone.",
-      confirmText: "Delete permanently",
-      cancelText: "Cancel",
+      title: t("deletePermanently"),
+      description: t("common:confirm.description"),
+      confirmText: t("deletePermanentlyConfirm"),
+      cancelText: t("common:actions.cancel"),
     });
     if (!confirmed) return;
     try {
@@ -272,8 +272,8 @@ export default function DashboardPage() {
       setRecordings((prev) => prev.filter((item) => item.id !== id));
       setTotal((prev) => Math.max(0, prev - 1));
       toastApiSuccess(delRes, {
-        title: "Deleted permanently",
-        fallbackDescription: "Recording permanently deleted successfully.",
+        title: t("deletedPermanently"),
+        fallbackDescription: t("deletedPermanentlyDesc"),
       });
       trackClientEvent({
         eventType: "click",
@@ -288,11 +288,11 @@ export default function DashboardPage() {
         setTotal((prev) => Math.max(0, prev - 1));
         toast({
           variant: "success",
-          title: "Already deleted",
-          description: "This recording was already permanently deleted.",
+          title: t("alreadyDeleted"),
+          description: t("alreadyDeletedDesc"),
         });
       } else {
-        toast({ title: "Error", description: msg, variant: "destructive" });
+        toast({ title: t("common:toast.error"), description: msg, variant: "destructive" });
       }
     } finally {
       setDeletingIds((prev) => prev.filter((itemId) => itemId !== id));
@@ -306,11 +306,11 @@ export default function DashboardPage() {
         prev.map((item) => (item.id === rec.id ? { ...item, visibility: nextVisibility } : item))
       );
       toastApiSuccess(visRes, {
-        title: "Visibility updated",
-        fallbackDescription: `Visibility set to ${nextVisibility}.`,
+        title: t("visibilityUpdated"),
+        fallbackDescription: t("visibilityUpdatedDesc", { visibility: nextVisibility }),
       });
     } catch (err: any) {
-      toast({ title: "Error", description: err.message, variant: "destructive" });
+      toast({ title: t("common:toast.error"), description: err.message, variant: "destructive" });
     }
   };
 
@@ -323,11 +323,11 @@ export default function DashboardPage() {
       setTrashRecordings((prev) => prev.filter((item) => item.id !== id));
       setTotal((prev) => Math.max(0, prev - 1));
       toastApiSuccess(restoreRes, {
-        title: "Recording restored",
-        fallbackDescription: "Recording has been restored from trash.",
+        title: t("restored"),
+        fallbackDescription: t("restoredDesc"),
       });
     } catch (err: any) {
-      toast({ title: "Restore failed", description: err.message, variant: "destructive" });
+      toast({ title: t("restoreFailed"), description: err.message, variant: "destructive" });
     } finally {
       setDeletingIds((prev) => prev.filter((itemId) => itemId !== id));
     }
@@ -343,12 +343,12 @@ export default function DashboardPage() {
         prev.map((item) => (item.id === rec.id ? { ...item, status: "processing" } : item)),
       );
       toastApiSuccess(res, {
-        title: "Processing retried",
-        fallbackDescription: "Recording re-queued for processing.",
+        title: t("retrySuccess"),
+        fallbackDescription: t("retryDesc"),
       });
     } catch (err: any) {
       toast({
-        title: "Retry failed",
+        title: t("retryFailed"),
         description: err.message,
         variant: "destructive",
       });
@@ -359,9 +359,9 @@ export default function DashboardPage() {
 
   const statusBadge = (status: string) => {
     switch (status) {
-      case "ready": return <Badge className="bg-success/20 text-success border-0 hover:bg-success/20">Ready</Badge>;
-      case "processing": return <Badge className="bg-warning/20 text-warning border-0 hover:bg-warning/20"><Loader2 className="h-3 w-3 mr-1 animate-spin" />Processing</Badge>;
-      case "failed": return <Badge variant="destructive" className="hover:bg-destructive"><AlertCircle className="h-3 w-3 mr-1" />Failed</Badge>;
+      case "ready": return <Badge className="bg-success/20 text-success border-0 hover:bg-success/20">{t("ready")}</Badge>;
+      case "processing": return <Badge className="bg-warning/20 text-warning border-0 hover:bg-warning/20"><Loader2 className="h-3 w-3 mr-1 animate-spin" />{t("processing")}</Badge>;
+      case "failed": return <Badge variant="destructive" className="hover:bg-destructive"><AlertCircle className="h-3 w-3 mr-1" />{t("failed")}</Badge>;
       default: return <Badge variant="secondary" className="hover:bg-secondary">{status}</Badge>;
     }
   };
@@ -373,8 +373,8 @@ export default function DashboardPage() {
       <div className="p-6 md:p-8 max-w-7xl mx-auto">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-2xl font-bold">My Recordings</h1>
-              <p className="text-muted-foreground text-sm mt-1">{total} recording{total !== 1 ? "s" : ""}</p>
+            <h1 className="text-2xl font-bold">{t("title")}</h1>
+              <p className="text-muted-foreground text-sm mt-1">{t("count", { count: total })}</p>
           </div>
           <div className="flex items-center gap-2">
             <Button
@@ -383,7 +383,7 @@ export default function DashboardPage() {
               onClick={() => setOrder((prev) => (prev === "DESC" ? "ASC" : "DESC"))}
             >
               <ArrowUpDown className="h-4 w-4" />
-              Order: {order === "DESC" ? "Newest" : "Oldest"}
+              {t("orderPrefix")}: {order === "DESC" ? t("orderNewest") : t("orderOldest")}
             </Button>
             <Link
               to="/record"
@@ -396,14 +396,14 @@ export default function DashboardPage() {
               }
             >
               <Button className="gradient-primary gap-2">
-                <Upload className="h-4 w-4" /> New Recording
+                <Upload className="h-4 w-4" /> {t("newRecording")}
               </Button>
             </Link>
           </div>
         </div>
         {viewMode === "trash" && (
           <p className="text-xs text-muted-foreground mb-4">
-            Items in Trash are permanently deleted after 30 days.
+            {t("trashNote")}
           </p>
         )}
 
@@ -411,28 +411,28 @@ export default function DashboardPage() {
           <Input
             value={titleFilter}
             onChange={(e) => setTitleFilter(e.target.value)}
-            placeholder="Filter by title (e.g. test)"
+            placeholder={t("filterTitle")}
           />
           <Select value={statusFilter || "all"} onValueChange={(v) => setStatusFilter(v === "all" ? "" : v)}>
             <SelectTrigger>
-              <SelectValue placeholder="Filter by status" />
+              <SelectValue placeholder={t("filterByStatus")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All statuses</SelectItem>
-              <SelectItem value="uploaded">Uploaded</SelectItem>
-              <SelectItem value="failed">Failed</SelectItem>
-              <SelectItem value="uploading">Uploading</SelectItem>
-              <SelectItem value="ready">Ready</SelectItem>
+              <SelectItem value="all">{t("allStatuses")}</SelectItem>
+              <SelectItem value="uploaded">{t("uploaded")}</SelectItem>
+              <SelectItem value="failed">{t("failed")}</SelectItem>
+              <SelectItem value="uploading">{t("uploading")}</SelectItem>
+              <SelectItem value="ready">{t("ready")}</SelectItem>
             </SelectContent>
           </Select>
           <Select value={visibilityFilter || "all"} onValueChange={(v) => setVisibilityFilter(v === "all" ? "" : v)}>
             <SelectTrigger>
-              <SelectValue placeholder="Filter by visibility" />
+              <SelectValue placeholder={t("filterByVisibility")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All visibility</SelectItem>
-              <SelectItem value="public">Public</SelectItem>
-              <SelectItem value="private">Private</SelectItem>
+              <SelectItem value="all">{t("allVisibility")}</SelectItem>
+              <SelectItem value="public">{t("public")}</SelectItem>
+              <SelectItem value="private">{t("private")}</SelectItem>
             </SelectContent>
           </Select>
           <Popover>
@@ -444,7 +444,7 @@ export default function DashboardPage() {
                 <CalendarIcon className="mr-2 h-4 w-4" />
                 {startDateFilter
                   ? `${startDateFilter.toLocaleDateString()} - ${endDateFilter ? endDateFilter.toLocaleDateString() : "..."}`
-                  : "Select date range"}
+                  : t("selectDateRange")}
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0" align="start">
@@ -487,13 +487,13 @@ export default function DashboardPage() {
                       setHoveredDate(undefined);
                     }}
                   >
-                    Reset date range
+                    {t("resetDateRange")}
                   </Button>
                 </div>
               </div>
             </PopoverContent>
           </Popover>
-          <Button variant="outline" onClick={resetFilters}>Reset filters</Button>
+          <Button variant="outline" onClick={resetFilters}>{t("resetFilters")}</Button>
           <Button
             variant={viewMode === "trash" ? "default" : "outline"}
             onClick={() => {
@@ -501,7 +501,7 @@ export default function DashboardPage() {
               setViewMode("trash");
             }}
           >
-            Trash
+            {t("trash")}
           </Button>
           <Button
             variant={viewMode === "active" ? "default" : "outline"}
@@ -510,7 +510,7 @@ export default function DashboardPage() {
               setViewMode("active");
             }}
           >
-            Active Recordings
+            {t("activeRecordings")}
           </Button>
         </div>
 
@@ -522,8 +522,8 @@ export default function DashboardPage() {
               <div className="gradient-primary rounded-2xl p-4 mb-4">
                 <Play className="h-8 w-8 text-primary-foreground" />
               </div>
-              <h3 className="text-lg font-semibold mb-2">No recordings yet</h3>
-              <p className="text-muted-foreground mb-4">Upload your first screen recording to get started.</p>
+              <h3 className="text-lg font-semibold mb-2">{t("emptyTitle")}</h3>
+              <p className="text-muted-foreground mb-4">{t("emptyDesc")}</p>
               <Link
                 to="/upload"
                 onClick={() =>
@@ -534,7 +534,7 @@ export default function DashboardPage() {
                   })
                 }
               >
-                <Button className="gradient-primary">Upload Recording</Button>
+                <Button className="gradient-primary">{t("uploadRecording")}</Button>
               </Link>
             </CardContent>
           </Card>
@@ -564,13 +564,13 @@ export default function DashboardPage() {
                           <div className="flex items-center justify-between gap-2">
                             <p className="flex items-center gap-1.5 text-[11px] font-medium text-amber-500">
                               <Info className="h-3 w-3" />
-                              Upload paused.
+                              {t("uploadPaused")}
                             </p>
                             <Link
                               to={`/recording/${rec.id}?resumeUpload=1`}
                               className="text-[11px] font-semibold text-amber-600 hover:text-amber-500 underline underline-offset-2"
                             >
-                              Resume upload
+                              {t("resumeUpload")}
                             </Link>
                           </div>
                         </div>
@@ -588,7 +588,7 @@ export default function DashboardPage() {
                         </span>
                         <div className="flex items-center gap-1 flex-wrap justify-end">
                           <div className="flex items-center gap-1.5 rounded-md border border-border px-2 py-1">
-                            <span className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Visibility</span>
+                            <span className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">{t("visibilityLabel")}</span>
                             <Select
                               value={(rec.visibility || "public") as "public" | "private"}
                               onValueChange={(v: "public" | "private") => handleUpdateVisibility(rec, v)}
@@ -597,8 +597,8 @@ export default function DashboardPage() {
                                 <SelectValue />
                               </SelectTrigger>
                               <SelectContent>
-                                <SelectItem value="public">Public</SelectItem>
-                                <SelectItem value="private">Private</SelectItem>
+                                <SelectItem value="public">{t("public")}</SelectItem>
+                                <SelectItem value="private">{t("private")}</SelectItem>
                               </SelectContent>
                             </Select>
                           </div>
@@ -617,7 +617,7 @@ export default function DashboardPage() {
                               ) : (
                                 <RotateCcw className="h-3.5 w-3.5" />
                               )}
-                              Retry
+                              {t("common:actions.retry")}
                             </Button>
                           )}
                           <Button
@@ -635,21 +635,21 @@ export default function DashboardPage() {
                           </Button>
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                              <Button variant="outline" size="sm" className="h-7 w-7 p-0" aria-label="Recording actions">
+                              <Button variant="outline" size="sm" className="h-7 w-7 p-0" aria-label={t("recordingActions")}>
                                 <MoreVertical className="h-3.5 w-3.5" />
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
                               <DropdownMenuItem asChild>
-                                <Link to={`/recording/${rec.id}`}>Open details</Link>
+                                <Link to={`/recording/${rec.id}`}>{t("openDetails")}</Link>
                               </DropdownMenuItem>
                               {(rec.status === "uploading" || rec.cameraMultipartUploadId) && (
                                 <>
                                   <DropdownMenuItem asChild>
-                                    <Link to={`/recording/${rec.id}?resumeUpload=1`}>Resume upload</Link>
+                                    <Link to={`/recording/${rec.id}?resumeUpload=1`}>{t("resumeUpload")}</Link>
                                   </DropdownMenuItem>
                                   <DropdownMenuItem asChild>
-                                    <Link to={`/recording/${rec.id}?resumeUpload=1`}>Open and resume</Link>
+                                    <Link to={`/recording/${rec.id}?resumeUpload=1`}>{t("openAndResume")}</Link>
                                   </DropdownMenuItem>
                                   <DropdownMenuItem
                                     className="text-destructive focus:text-white"
@@ -657,7 +657,7 @@ export default function DashboardPage() {
                                       void handleCancelStuckUpload(rec.id);
                                     }}
                                   >
-                                    Cancel upload
+                                    {t("cancelUpload")}
                                   </DropdownMenuItem>
                                 </>
                               )}
@@ -667,7 +667,7 @@ export default function DashboardPage() {
                                   void handleDeletePermanently(rec.id);
                                 }}
                               >
-                                Delete permanently
+                                {t("deletePermanentlyMenu")}
                               </DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>
@@ -684,7 +684,7 @@ export default function DashboardPage() {
                 <Button variant="outline" size="sm" onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1}>
                   <ChevronLeft className="h-4 w-4" />
                 </Button>
-                <span className="text-sm text-muted-foreground">Page {page} of {totalPages}</span>
+                <span className="text-sm text-muted-foreground">{t("pageOf", { page, total: totalPages })}</span>
                 <Button variant="outline" size="sm" onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page === totalPages}>
                   <ChevronRight className="h-4 w-4" />
                 </Button>
@@ -700,8 +700,8 @@ export default function DashboardPage() {
               <div className="gradient-primary rounded-2xl p-4 mb-4">
                 <Play className="h-8 w-8 text-primary-foreground" />
               </div>
-              <h3 className="text-lg font-semibold mb-2">No trashed recordings</h3>
-              <p className="text-muted-foreground mb-4">Deleted recordings will appear here.</p>
+              <h3 className="text-lg font-semibold mb-2">{t("trashEmptyTitle")}</h3>
+              <p className="text-muted-foreground mb-4">{t("trashEmptyDesc")}</p>
             </CardContent>
           </Card>
         ) : (
@@ -750,7 +750,7 @@ export default function DashboardPage() {
                           ) : (
                             <RotateCcw className="h-3.5 w-3.5" />
                           )}
-                          Restore
+                          {t("restore")}
                         </Button>
                       </div>
                     </div>
@@ -764,7 +764,7 @@ export default function DashboardPage() {
                 <Button variant="outline" size="sm" onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1}>
                   <ChevronLeft className="h-4 w-4" />
                 </Button>
-                <span className="text-sm text-muted-foreground">Page {page} of {totalPages}</span>
+                <span className="text-sm text-muted-foreground">{t("pageOf", { page, total: totalPages })}</span>
                 <Button variant="outline" size="sm" onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page === totalPages}>
                   <ChevronRight className="h-4 w-4" />
                 </Button>

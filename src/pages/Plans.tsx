@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import AppLayout from "@/components/AppLayout";
 import { plansApi } from "@/lib/api";
@@ -17,6 +18,7 @@ import { usePaidToFreeSubscribe } from "@/hooks/usePaidToFreeSubscribe";
 import { PaidToFreeDialogs } from "@/components/PaidToFreeDialogs";
 
 export default function PlansPage() {
+  const { t } = useTranslation(["billing", "common"]);
   const { toast } = useToast();
   const { user, selectedWorkspaceId } = useAuth();
   const [plans, setPlans] = useState<any[]>([]);
@@ -59,7 +61,7 @@ export default function PlansPage() {
         const res = await plansApi.getAll();
         setPlans(res?.plans || res?.data || res || []);
       } catch (err: any) {
-        toast({ title: "Error loading plans", description: err.message, variant: "destructive" });
+        toast({ title: t("errorLoadingPlans"), description: err.message, variant: "destructive" });
       } finally {
         setLoading(false);
       }
@@ -69,14 +71,14 @@ export default function PlansPage() {
 
   const featureList = (plan: any) => {
     const features = [];
-    if (plan.maxVideosPerMonth) features.push(`${plan.maxVideosPerMonth} videos/month`);
-    if (plan.maxVideoDuration) features.push(`${plan.maxVideoDuration} min max duration`);
-    if (plan.maxStorageGB) features.push(`${plan.maxStorageGB} GB storage`);
-    if (plan.maxTeamMembers) features.push(`${plan.maxTeamMembers} team members`);
-    if (plan.canDownloadVideos) features.push("Video downloads");
-    if (plan.canRemoveWaterMark) features.push("No watermark");
-    if (plan.canSharePublicLink) features.push("Public sharing");
-    if (plan.teamAccess) features.push("Team collaboration");
+    if (plan.maxVideosPerMonth) features.push(t("common:plans.videosPerMonth", { count: plan.maxVideosPerMonth }));
+    if (plan.maxVideoDuration) features.push(t("common:plans.minMaxDuration", { min: plan.maxVideoDuration, max: plan.maxVideoDuration }));
+    if (plan.maxStorageGB) features.push(t("common:plans.storageGb", { gb: plan.maxStorageGB }));
+    if (plan.maxTeamMembers) features.push(t("common:plans.teamMembers", { count: plan.maxTeamMembers }));
+    if (plan.canDownloadVideos) features.push(t("common:plans.videoDownloads"));
+    if (plan.canRemoveWaterMark) features.push(t("common:plans.noWatermark"));
+    if (plan.canSharePublicLink) features.push(t("common:plans.publicSharing"));
+    if (plan.teamAccess) features.push(t("common:plans.teamCollaboration"));
     return features;
   };
 
@@ -99,25 +101,44 @@ export default function PlansPage() {
       ? getCyclePriceUsd(currentWorkspaceSubscription?.plan, currentSubscriptionType as "monthly" | "yearly")
       : 0;
 
+  const cycleLabel = (cycle: "monthly" | "yearly") => t(`cycle.${cycle}`);
+
   const getActionLabel = (plan: any, targetType: "monthly" | "yearly") => {
-    if (!currentWorkspaceSubscription) return `Choose ${targetType}`;
+    const cycle = cycleLabel(targetType);
+    if (!currentWorkspaceSubscription) return t("chooseCycle", { cycle });
     const currentPlanId = Number(currentWorkspacePlanId);
     const targetPlanId = Number(plan?.id);
     if (!Number.isNaN(currentPlanId) && currentPlanId === targetPlanId) {
-      if (currentSubscriptionType === targetType) return "Current";
-      return targetType === "yearly" ? "Upgrade to yearly" : "Downgrade to monthly";
+      if (currentSubscriptionType === targetType) return t("common:actions.current");
+      return targetType === "yearly" ? t("upgradeYearly") : t("downgradeMonthly");
     }
     const targetPrice = getCyclePriceUsd(plan, targetType);
-    if (targetPrice > currentCyclePrice) return `Upgrade to ${targetType}`;
-    if (targetPrice < currentCyclePrice) return `Downgrade to ${targetType}`;
-    return `Switch to ${targetType}`;
+    if (targetPrice > currentCyclePrice) return t("upgradeToCycle", { cycle });
+    if (targetPrice < currentCyclePrice) return t("downgradeToCycle", { cycle });
+    return t("switchToCycle", { cycle });
+  };
+
+  const formatCycleButtonLabel = (
+    plan: any,
+    cycle: "monthly" | "yearly",
+    actionLabel: string,
+    isCurrentForCycle: boolean,
+  ) => {
+    if (isCurrentForCycle) {
+      return t("currentCycle", { cycle: cycleLabel(cycle) });
+    }
+    return t("planActionWithPrice", {
+      action: actionLabel,
+      egp: getCyclePriceEgp(plan, cycle).toLocaleString(),
+      period: cycle === "yearly" ? t("yearShort") : t("monthShort"),
+    });
   };
 
   const handleFreePlanSelect = async (plan: any) => {
     if (!user) {
       toast({
-        title: "Sign in required",
-        description: "Please sign in to subscribe to the free plan.",
+        title: t("common:plans.signInRequired"),
+        description: t("common:plans.signInToSubscribe"),
       });
       return;
     }
@@ -128,8 +149,8 @@ export default function PlansPage() {
     <AppLayout>
       <div className="p-6 md:p-8 max-w-7xl mx-auto">
         <div className="text-center mb-10">
-          <h1 className="text-3xl font-bold">Choose Your Plan</h1>
-          <p className="text-muted-foreground mt-2">Compare features and continue to subscription confirmation.</p>
+          <h1 className="text-3xl font-bold">{t("choosePlan")}</h1>
+          <p className="text-muted-foreground mt-2">{t("compareFeatures")}</p>
         </div>
 
         {loading ? (
@@ -149,7 +170,7 @@ export default function PlansPage() {
                   {isPopular && (
                     <div className="absolute -top-3 left-1/2 -translate-x-1/2">
                       <Badge className="gradient-primary border-0 gap-1">
-                        <Zap className="h-3 w-3" /> Popular
+                        <Zap className="h-3 w-3" /> {t("common:actions.popular")}
                       </Badge>
                     </div>
                   )}
@@ -157,19 +178,23 @@ export default function PlansPage() {
                     <CardTitle className="text-lg capitalize">{plan.name}</CardTitle>
                     <div className="mt-4">
                       <span className="text-3xl font-bold">
-                        EGP {getCyclePriceEgp(plan, "monthly").toLocaleString()}
+                        {t("priceEgp", { amount: getCyclePriceEgp(plan, "monthly").toLocaleString() })}
                       </span>
-                      <span className="text-muted-foreground">/mo</span>
+                      <span className="text-muted-foreground">{t("perMonth")}</span>
                       <p className="text-xs text-muted-foreground mt-1">
-                        ≈ ${getCyclePriceUsd(plan, "monthly").toLocaleString()} USD
+                        {t("approxUsd", { amount: getCyclePriceUsd(plan, "monthly").toLocaleString() })}
                       </p>
                     </div>
                     <p className="text-xs text-muted-foreground">
-                      Up to {Number(plan.maxTeamMembers || 0)} members
+                      {t("membersUpTo", { count: Number(plan.maxTeamMembers || 0) })}
                     </p>
                     {plan.yearlyPrice > 0 && (
                       <p className="text-xs text-muted-foreground">
-                        EGP {getCyclePriceEgp(plan, "yearly").toLocaleString()}/year (≈ ${getCyclePriceUsd(plan, "yearly").toLocaleString()} USD)
+                        {t("yearlyPriceLine", {
+                          egp: getCyclePriceEgp(plan, "yearly").toLocaleString(),
+                          perYear: t("perYear"),
+                          usd: getCyclePriceUsd(plan, "yearly").toLocaleString(),
+                        })}
                       </p>
                     )}
                   </CardHeader>
@@ -185,7 +210,7 @@ export default function PlansPage() {
                     {free ? (
                       isCurrentForWorkspace ? (
                         <Button type="button" className="w-full" variant="outline" disabled>
-                          Current plan
+                          {t("common:actions.currentPlan")}
                         </Button>
                       ) : (
                         <Button
@@ -195,7 +220,7 @@ export default function PlansPage() {
                           disabled={busyPlanId === plan.id}
                           onClick={() => handleFreePlanSelect(plan)}
                         >
-                          {busyPlanId === plan.id ? <Loader2 className="h-4 w-4 animate-spin" /> : "Subscribe"}
+                          {busyPlanId === plan.id ? <Loader2 className="h-4 w-4 animate-spin" /> : t("common:actions.subscribe")}
                         </Button>
                       )
                     ) : (
@@ -211,9 +236,7 @@ export default function PlansPage() {
                               variant={isPopular && cycle === "yearly" ? "default" : "outline"}
                               disabled={disabled}
                             >
-                              {isCurrentForCycle
-                                ? `Current (${cycle})`
-                                : `${actionLabel} (EGP ${getCyclePriceEgp(plan, cycle).toLocaleString()} / ${cycle === "yearly" ? "yr" : "mo"})`}
+                              {formatCycleButtonLabel(plan, cycle, actionLabel, isCurrentForCycle)}
                             </Button>
                           );
                           return (

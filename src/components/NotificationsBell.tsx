@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { notificationsApi, recordingsApi } from "@/lib/api";
 import { getSocket } from "@/lib/socket";
 import { emitNotificationsUpdated, subscribeNotificationsUpdated } from "@/lib/notificationsSync";
@@ -113,6 +114,7 @@ type NotificationsBellProps = {
 };
 
 export default function NotificationsBell({ className }: NotificationsBellProps) {
+  const { t } = useTranslation("layout");
   const { user } = useAuth();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
@@ -147,12 +149,12 @@ export default function NotificationsBell({ className }: NotificationsBellProps)
       setNotifications(next);
     } catch (err: any) {
       if (!String(err?.message || "").toLowerCase().includes("401")) {
-        toast({ title: "Failed to load notifications", description: err.message, variant: "destructive" });
+        toast({ title: t("notifications.loadFailed"), description: err.message, variant: "destructive" });
       }
     } finally {
       setLoading(false);
     }
-  }, [user, toast]);
+  }, [user, toast, t]);
 
   useEffect(() => {
     if (user) {
@@ -239,7 +241,7 @@ export default function NotificationsBell({ className }: NotificationsBellProps)
       setUnreadCount((prev) => Math.max(0, prev - 1));
       emitNotificationsUpdated();
     } catch (err: any) {
-      toast({ title: "Failed to mark as read", description: err.message, variant: "destructive" });
+      toast({ title: t("notifications.markReadFailed"), description: err.message, variant: "destructive" });
     }
   };
 
@@ -253,11 +255,11 @@ export default function NotificationsBell({ className }: NotificationsBellProps)
       setUnreadCount(0);
       emitNotificationsUpdated();
       toastApiSuccess(res, {
-        title: "Notifications updated",
-        fallbackDescription: "All notifications marked as read.",
+        title: t("notifications.updated"),
+        fallbackDescription: t("notifications.allMarkedRead"),
       });
     } catch (err: any) {
-      toast({ title: "Failed", description: err.message, variant: "destructive" });
+      toast({ title: t("notifications.actionFailed"), description: err.message, variant: "destructive" });
     }
   };
 
@@ -271,8 +273,8 @@ export default function NotificationsBell({ className }: NotificationsBellProps)
           size="icon"
           variant="outline"
           className={cn("fixed top-4 right-16 z-[65] rounded-full shadow-sm", className)}
-          aria-label="Notifications"
-          title="Notifications"
+          aria-label={t("notifications.title")}
+          title={t("notifications.title")}
         >
           <Bell className="h-4 w-4" />
           {unreadCount > 0 && (
@@ -285,7 +287,7 @@ export default function NotificationsBell({ className }: NotificationsBellProps)
 
       <DropdownMenuContent align="end" className="w-[360px] p-0 z-[65]">
         <div className="p-3">
-          <DropdownMenuLabel className="px-0">Notifications</DropdownMenuLabel>
+          <DropdownMenuLabel className="px-0">{t("notifications.title")}</DropdownMenuLabel>
         </div>
         <DropdownMenuSeparator />
 
@@ -295,9 +297,9 @@ export default function NotificationsBell({ className }: NotificationsBellProps)
               <Loader2 className="h-5 w-5 animate-spin text-primary" />
             </div>
           ) : !isLoggedIn ? (
-            <p className="text-sm text-muted-foreground py-4 text-center">Sign in to view notifications</p>
+            <p className="text-sm text-muted-foreground py-4 text-center">{t("notifications.signInToView")}</p>
           ) : notifications.length === 0 ? (
-            <p className="text-sm text-muted-foreground py-4 text-center">No notifications</p>
+            <p className="text-sm text-muted-foreground py-4 text-center">{t("notifications.empty")}</p>
           ) : (
             notifications.map((n) => {
               const isUnread = (n.read ?? n.isRead) === false;
@@ -318,16 +320,18 @@ export default function NotificationsBell({ className }: NotificationsBellProps)
                   <div className="flex flex-wrap items-center gap-2">
                     {n.important ? (
                       <Badge variant="secondary" className="text-[10px] font-semibold">
-                        Important
+                        {t("notifications.important")}
                       </Badge>
                     ) : null}
                     {renewal3ds ? (
                       <span className="text-[10px] font-medium uppercase tracking-wide text-amber-700 dark:text-amber-400">
-                        Billing · renewal 3DS
+                        {t("notifications.billingRenewal")}
                       </span>
                     ) : null}
                   </div>
-                  <p className={`text-sm mt-1 ${isUnread ? "font-semibold" : "font-medium"}`}>{n.title || "Notification"}</p>
+                  <p className={`text-sm mt-1 ${isUnread ? "font-semibold" : "font-medium"}`}>
+                    {n.title || t("notifications.fallbackTitle")}
+                  </p>
                   {bodyText ? (
                     <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{bodyText}</p>
                   ) : null}
@@ -339,7 +343,7 @@ export default function NotificationsBell({ className }: NotificationsBellProps)
                       className="inline-flex mt-2 text-xs font-semibold text-primary underline underline-offset-2 hover:text-primary/90"
                       onClick={(e) => e.stopPropagation()}
                     >
-                      Complete payment
+                      {t("notifications.completePayment")}
                     </a>
                   ) : null}
                   {n.createdAt && (
@@ -354,10 +358,12 @@ export default function NotificationsBell({ className }: NotificationsBellProps)
         <DropdownMenuSeparator />
         <div className="p-2 grid grid-cols-2 gap-2">
           <Button variant="outline" size="sm" onClick={handleReadAll} className="gap-1" disabled={!isLoggedIn}>
-            <CheckCheck className="h-3.5 w-3.5" /> Mark all read
+            <CheckCheck className="h-3.5 w-3.5" /> {t("notifications.markAllRead")}
           </Button>
           <Link to="/notifications">
-            <Button variant="outline" size="sm" className="w-full" disabled={!isLoggedIn}>View all</Button>
+            <Button variant="outline" size="sm" className="w-full" disabled={!isLoggedIn}>
+              {t("notifications.viewAll")}
+            </Button>
           </Link>
         </div>
       </DropdownMenuContent>

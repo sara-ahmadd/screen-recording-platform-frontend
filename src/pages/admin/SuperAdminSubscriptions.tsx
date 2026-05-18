@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useEffect, useMemo, useState } from "react";
 import {
   Bar,
@@ -55,6 +56,7 @@ function formatDateTime(value?: string | null) {
 }
 
 export default function SuperAdminSubscriptionsPage() {
+  const { t } = useTranslation(["admin", "common"]);
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [rows, setRows] = useState<any[]>([]);
@@ -124,8 +126,8 @@ export default function SuperAdminSubscriptionsPage() {
       } catch (err: any) {
         if (cancelled) return;
         toast({
-          title: "Failed to load subscriptions",
-          description: err?.message || "Unexpected error",
+          title: t("failedLoadSubscriptions"),
+          description: err?.message || t("common:errors.tryAgain"),
           variant: "destructive",
         });
       } finally {
@@ -136,7 +138,7 @@ export default function SuperAdminSubscriptionsPage() {
     return () => {
       cancelled = true;
     };
-  }, [page, limit, debouncedFilters, toast]);
+  }, [page, limit, debouncedFilters, toast, t]);
 
   const statusChartData = useMemo(
     () =>
@@ -161,8 +163,8 @@ export default function SuperAdminSubscriptionsPage() {
       });
     } catch (err: any) {
       toast({
-        title: "Could not load subscription",
-        description: err?.message || "Unexpected error",
+        title: t("couldNotLoadSubscription"),
+        description: err?.message || t("common:errors.tryAgain"),
         variant: "destructive",
       });
       setDetailOpen(false);
@@ -185,8 +187,8 @@ export default function SuperAdminSubscriptionsPage() {
       });
     } catch (err: any) {
       toast({
-        title: "Refresh failed",
-        description: err?.message || "Unexpected error",
+        title: t("refreshFailed"),
+        description: err?.message || t("common:errors.tryAgain"),
         variant: "destructive",
       });
     } finally {
@@ -201,17 +203,15 @@ export default function SuperAdminSubscriptionsPage() {
         Number(detailRow.id),
       );
       toast({
-        title: res?.duplicate
-          ? "Replay skipped (idempotent)"
-          : "Renewal simulated successfully",
-        description: res?.message || "OK",
+        title: res?.duplicate ? t("replaySkipped") : t("renewalSimulated"),
+        description: res?.message || t("common:actions.ok"),
       });
       await refreshDetail();
       setDetailRow((r: any) => ({ ...r, ...res?.subscription }));
     } catch (err: any) {
       toast({
-        title: "Simulation failed",
-        description: err?.message || "Unexpected error",
+        title: t("simulationFailed"),
+        description: err?.message || t("common:errors.tryAgain"),
         variant: "destructive",
       });
     }
@@ -224,14 +224,14 @@ export default function SuperAdminSubscriptionsPage() {
         Number(detailRow.id),
       );
       toast({
-        title: "Failure state applied",
-        description: res?.message || "OK",
+        title: t("failureStateApplied"),
+        description: res?.message || t("common:actions.ok"),
       });
       await refreshDetail();
     } catch (err: any) {
       toast({
-        title: "Simulation failed",
-        description: err?.message || "Unexpected error",
+        title: t("simulationFailed"),
+        description: err?.message || t("common:errors.tryAgain"),
         variant: "destructive",
       });
     }
@@ -239,8 +239,8 @@ export default function SuperAdminSubscriptionsPage() {
 
   const runRefund = async () => {
     if (!detailRow?.id) return;
-    const amountRaw = window.prompt("Refund amount (leave empty for full):", "");
-    const reasonRaw = window.prompt("Refund reason (optional):", "admin_refund");
+    const amountRaw = window.prompt(t("subscriptions.refundAmountPrompt"), "");
+    const reasonRaw = window.prompt(t("subscriptions.refundReasonPrompt"), "admin_refund");
     const amount =
       amountRaw != null && amountRaw.trim() !== ""
         ? Number(amountRaw)
@@ -253,14 +253,14 @@ export default function SuperAdminSubscriptionsPage() {
         ...(reasonRaw && reasonRaw.trim() ? { reason: reasonRaw.trim() } : {}),
       });
       toast({
-        title: "Refund submitted",
-        description: res?.message || "OK",
+        title: t("refundSubmitted"),
+        description: res?.message || t("common:actions.ok"),
       });
       await refreshDetail();
     } catch (err: any) {
       toast({
-        title: "Refund failed",
-        description: err?.message || "Unexpected error",
+        title: t("refundFailed"),
+        description: err?.message || t("common:errors.tryAgain"),
         variant: "destructive",
       });
     }
@@ -278,11 +278,11 @@ export default function SuperAdminSubscriptionsPage() {
   return (
     <AppLayout>
       <div className="p-6 md:p-8 max-w-7xl mx-auto space-y-6">
-        <h1 className="text-3xl font-bold">Super Admin Subscriptions</h1>
+        <h1 className="text-3xl font-bold">{t("subscriptions.title")}</h1>
 
         <Card className="glass">
           <CardHeader>
-            <CardTitle>Filters</CardTitle>
+            <CardTitle>{t("filters")}</CardTitle>
           </CardHeader>
           <CardContent className="grid grid-cols-1 md:grid-cols-4 gap-3">
             <Select
@@ -290,14 +290,14 @@ export default function SuperAdminSubscriptionsPage() {
               onValueChange={(v: StatusFilter) => setStatusFilter(v)}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Status" />
+                <SelectValue placeholder={t("status")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All status</SelectItem>
-                <SelectItem value="active">Active</SelectItem>
-                <SelectItem value="canceled">Canceled</SelectItem>
-                <SelectItem value="past_due">Past Due</SelectItem>
-                <SelectItem value="pending">Pending</SelectItem>
+                <SelectItem value="all">{t("subscriptions.allStatus")}</SelectItem>
+                <SelectItem value="active">{t("subscriptions.active")}</SelectItem>
+                <SelectItem value="canceled">{t("subscriptions.canceled")}</SelectItem>
+                <SelectItem value="past_due">{t("subscriptions.pastDue")}</SelectItem>
+                <SelectItem value="pending">{t("subscriptions.pending")}</SelectItem>
               </SelectContent>
             </Select>
             <Select
@@ -305,26 +305,26 @@ export default function SuperAdminSubscriptionsPage() {
               onValueChange={(v: TypeFilter) => setTypeFilter(v)}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Type" />
+                <SelectValue placeholder={t("type")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All types</SelectItem>
-                <SelectItem value="monthly">Monthly</SelectItem>
-                <SelectItem value="yearly">Yearly</SelectItem>
-                <SelectItem value="none">None</SelectItem>
+                <SelectItem value="all">{t("allTypes")}</SelectItem>
+                <SelectItem value="monthly">{t("subscriptions.monthly")}</SelectItem>
+                <SelectItem value="yearly">{t("subscriptions.yearly")}</SelectItem>
+                <SelectItem value="none">{t("subscriptions.none")}</SelectItem>
               </SelectContent>
             </Select>
             <Input
               type="date"
               value={dateFrom}
               onChange={(e) => setDateFrom(e.target.value)}
-              placeholder="Date from"
+              placeholder={t("dateFrom")}
             />
             <Input
               type="date"
               value={dateTo}
               onChange={(e) => setDateTo(e.target.value)}
-              placeholder="Date to"
+              placeholder={t("dateTo")}
             />
           </CardContent>
         </Card>
@@ -332,7 +332,7 @@ export default function SuperAdminSubscriptionsPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <Card className="glass">
             <CardHeader>
-              <CardTitle>By Status</CardTitle>
+              <CardTitle>{t("byStatus")}</CardTitle>
             </CardHeader>
             <CardContent className="h-72">
               <ResponsiveContainer width="100%" height="100%">
@@ -360,7 +360,7 @@ export default function SuperAdminSubscriptionsPage() {
 
           <Card className="glass">
             <CardHeader>
-              <CardTitle>Subscriptions Over Time</CardTitle>
+              <CardTitle>{t("subscriptionsOverTime")}</CardTitle>
             </CardHeader>
             <CardContent className="h-72">
               <ResponsiveContainer width="100%" height="100%">
@@ -379,7 +379,7 @@ export default function SuperAdminSubscriptionsPage() {
 
         <Card className="glass">
           <CardHeader>
-            <CardTitle>Subscriptions</CardTitle>
+            <CardTitle>{t("subscriptions.listTitle")}</CardTitle>
           </CardHeader>
           <CardContent>
             {loading ? (
@@ -392,30 +392,30 @@ export default function SuperAdminSubscriptionsPage() {
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>User</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead>Type</TableHead>
-                        <TableHead>Start Date</TableHead>
-                        <TableHead>End Date</TableHead>
-                        <TableHead className="w-[100px]">Details</TableHead>
+                        <TableHead>{t("table.user")}</TableHead>
+                        <TableHead>{t("table.status")}</TableHead>
+                        <TableHead>{t("table.type")}</TableHead>
+                        <TableHead>{t("table.startDate")}</TableHead>
+                        <TableHead>{t("table.endDate")}</TableHead>
+                        <TableHead className="w-[100px]">{t("table.details")}</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {rows.length === 0 ? (
                         <TableRow>
                           <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
-                            No subscriptions found.
+                            {t("subscriptions.noSubscriptions")}
                           </TableCell>
                         </TableRow>
                       ) : (
                         rows.map((row: any) => (
                           <TableRow key={row.id}>
                             <TableCell>
-                              {row?.user?.user_name || "Unknown"} ({row?.user?.email || "—"})
+                              {row?.user?.user_name || t("userUnknown")} ({row?.user?.email || "—"})
                             </TableCell>
                             <TableCell className="capitalize">{row.status || "—"}</TableCell>
                             <TableCell className="capitalize">
-                              {String(row.type || "") === "null" ? "none" : row.type || "—"}
+                              {String(row.type || "") === "null" ? t("subscriptions.none") : row.type || "—"}
                             </TableCell>
                             <TableCell>{formatDate(row.currentPeriodStart)}</TableCell>
                             <TableCell>{formatDate(row.currentPeriodEnd)}</TableCell>
@@ -426,7 +426,7 @@ export default function SuperAdminSubscriptionsPage() {
                                 variant="outline"
                                 onClick={() => void openDetail(row)}
                               >
-                                Open
+                                {t("open")}
                               </Button>
                             </TableCell>
                           </TableRow>
@@ -442,17 +442,17 @@ export default function SuperAdminSubscriptionsPage() {
                     disabled={page <= 1}
                     onClick={() => setPage((p) => Math.max(1, p - 1))}
                   >
-                    Previous
+                    {t("previous")}
                   </Button>
                   <span className="text-sm text-muted-foreground">
-                    Page {page} / {totalPages}
+                    {t("pageOf", { page, total: totalPages })}
                   </span>
                   <Button
                     variant="outline"
                     disabled={page >= totalPages}
                     onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                   >
-                    Next
+                    {t("next")}
                   </Button>
                 </div>
               </>
@@ -464,7 +464,7 @@ export default function SuperAdminSubscriptionsPage() {
           <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>
-                Subscription #{detailRow?.id != null ? detailRow.id : "—"}
+                {detailRow?.id != null ? t("subscriptions.subscriptionTitle", { id: detailRow.id }) : "—"}
               </DialogTitle>
             </DialogHeader>
             {detailLoading && !detailPayload ? (
@@ -474,25 +474,25 @@ export default function SuperAdminSubscriptionsPage() {
             ) : (
               <div className="space-y-4 text-sm">
                 <div className="rounded-lg border border-border/80 p-3 space-y-1.5">
-                  <p className="font-medium">Billing period</p>
+                  <p className="font-medium">{t("subscriptions.billingPeriod")}</p>
                   <p>
-                    <span className="text-muted-foreground">Current plan: </span>
+                    <span className="text-muted-foreground">{t("subscriptions.currentPlan")} </span>
                     {detailPayload?.subscription?.plan?.name ?? "—"}
                   </p>
                   <p>
-                    <span className="text-muted-foreground">Period start: </span>
+                    <span className="text-muted-foreground">{t("subscriptions.periodStart")} </span>
                     {formatDateTime(
                       detailPayload?.subscription?.currentPeriodStart,
                     )}
                   </p>
                   <p>
-                    <span className="text-muted-foreground">Period end: </span>
+                    <span className="text-muted-foreground">{t("subscriptions.periodEnd")} </span>
                     {formatDateTime(
                       detailPayload?.subscription?.currentPeriodEnd,
                     )}
                   </p>
                   <p>
-                    <span className="text-muted-foreground">Next billing: </span>
+                    <span className="text-muted-foreground">{t("subscriptions.nextBilling")} </span>
                     {formatDateTime(
                       detailPayload?.subscription?.nextBillingDate,
                     )}
@@ -500,19 +500,19 @@ export default function SuperAdminSubscriptionsPage() {
                 </div>
 
                 <div className="rounded-lg border border-border/80 p-3 space-y-1.5">
-                  <p className="font-medium">Retries &amp; errors</p>
+                  <p className="font-medium">{t("subscriptions.retriesErrors")}</p>
                   <p>
-                    <span className="text-muted-foreground">Last attempt: </span>
+                    <span className="text-muted-foreground">{t("subscriptions.lastAttempt")} </span>
                     {formatDateTime(
                       detailPayload?.subscription?.lastBillingAttemptAt,
                     )}
                   </p>
                   <p>
-                    <span className="text-muted-foreground">Retry count: </span>
+                    <span className="text-muted-foreground">{t("subscriptions.retryCount")} </span>
                     {detailPayload?.subscription?.billingRetryCount ?? 0}
                   </p>
                   <p>
-                    <span className="text-muted-foreground">Last error: </span>
+                    <span className="text-muted-foreground">{t("subscriptions.lastError")} </span>
                     {detailPayload?.subscription?.lastBillingError || "—"}
                   </p>
                 </div>
@@ -520,26 +520,23 @@ export default function SuperAdminSubscriptionsPage() {
                 {Boolean(detailPayload?.subscription?.changeAtPeriodEnd) &&
                 detailPayload?.nextPlanName ? (
                   <div className="rounded-lg border border-amber-500/40 bg-amber-500/10 p-3 text-amber-200">
-                    Scheduled downgrade to{" "}
-                    <strong>{detailPayload.nextPlanName}</strong> at{" "}
-                    {formatDateTime(
-                      detailPayload?.subscription?.currentPeriodEnd,
-                    )}
+                    {t("subscriptions.scheduledDowngrade", {
+                      plan: detailPayload.nextPlanName,
+                      date: formatDateTime(detailPayload?.subscription?.currentPeriodEnd),
+                    })}
                   </div>
                 ) : null}
 
                 <div className="rounded-lg border border-border/80 p-3 space-y-2">
                   <p className="font-medium flex items-center gap-2">
                     <Wrench className="h-4 w-4" />
-                    Testing أدوات (Admin Only)
+                    {t("subscriptions.testingTools")}
                   </p>
                   {!detailPayload?.simulationAllowed ? (
                     <p className="text-muted-foreground text-xs">
-                      Simulation is disabled (production requires{" "}
-                      <code className="text-xs bg-muted px-1 rounded">
-                        PAYMOB_RECURRING_SIMULATION_ENABLED=true
-                      </code>
-                      ).
+                      {t("subscriptions.simulationDisabled", {
+                        envVar: "PAYMOB_RECURRING_SIMULATION_ENABLED=true",
+                      })}
                     </p>
                   ) : (
                     <div className="flex flex-wrap gap-2">
@@ -549,7 +546,7 @@ export default function SuperAdminSubscriptionsPage() {
                         onClick={() => void runSimulateRenewal()}
                         disabled={detailLoading}
                       >
-                        Simulate renewal
+                        {t("subscriptions.simulateRenewal")}
                       </Button>
                       <Button
                         type="button"
@@ -558,7 +555,7 @@ export default function SuperAdminSubscriptionsPage() {
                         onClick={() => void runSimulateFailure()}
                         disabled={detailLoading}
                       >
-                        Simulate failure
+                        {t("subscriptions.simulateFailure")}
                       </Button>
                       <Button
                         type="button"
@@ -567,7 +564,7 @@ export default function SuperAdminSubscriptionsPage() {
                         onClick={() => void runRefund()}
                         disabled={detailLoading}
                       >
-                        Refund payment
+                        {t("subscriptions.refundPayment")}
                       </Button>
                     </div>
                   )}

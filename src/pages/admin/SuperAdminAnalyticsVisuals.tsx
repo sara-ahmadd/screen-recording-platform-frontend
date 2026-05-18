@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Bar,
@@ -31,44 +32,57 @@ function getEventsRows(res: any): any[] {
   return [];
 }
 
-const eventTypeChartConfig = {
-  count: {
-    label: "Events",
-    color: "hsl(var(--primary))",
-  },
-} satisfies ChartConfig;
-
-const trendChartConfig = {
-  click: {
-    label: "Clicks",
-    color: "hsl(var(--chart-1))",
-  },
-  recording_created: {
-    label: "Recording Created",
-    color: "hsl(var(--chart-2))",
-  },
-  recording_completed: {
-    label: "Recording Completed",
-    color: "hsl(var(--chart-3))",
-  },
-} satisfies ChartConfig;
-
-const pieChartConfig = {
-  completed: {
-    label: "Completed",
-    color: "hsl(var(--chart-2))",
-  },
-  pending: {
-    label: "Remaining",
-    color: "hsl(var(--muted))",
-  },
-} satisfies ChartConfig;
-
 export default function SuperAdminAnalyticsVisualsPage() {
+  const { t } = useTranslation(["admin", "common"]);
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [overview, setOverview] = useState<any>(null);
   const [events, setEvents] = useState<any[]>([]);
+
+  const eventTypeChartConfig = useMemo(
+    () =>
+      ({
+        count: {
+          label: t("analytics.chartEvents"),
+          color: "hsl(var(--primary))",
+        },
+      }) satisfies ChartConfig,
+    [t],
+  );
+
+  const trendChartConfig = useMemo(
+    () =>
+      ({
+        click: {
+          label: t("analytics.chartClicks"),
+          color: "hsl(var(--chart-1))",
+        },
+        recording_created: {
+          label: t("analytics.recordingCreated"),
+          color: "hsl(var(--chart-2))",
+        },
+        recording_completed: {
+          label: t("analytics.recordingCompleted"),
+          color: "hsl(var(--chart-3))",
+        },
+      }) satisfies ChartConfig,
+    [t],
+  );
+
+  const pieChartConfig = useMemo(
+    () =>
+      ({
+        completed: {
+          label: t("analytics.completed"),
+          color: "hsl(var(--chart-2))",
+        },
+        pending: {
+          label: t("analytics.remaining"),
+          color: "hsl(var(--muted))",
+        },
+      }) satisfies ChartConfig,
+    [t],
+  );
 
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -85,14 +99,14 @@ export default function SuperAdminAnalyticsVisualsPage() {
       setEvents(getEventsRows(eventsRes));
     } catch (err: any) {
       toast({
-        title: "Failed to load analytics visuals",
-        description: err?.message || "Please try again.",
+        title: t("failedLoadVisuals"),
+        description: err?.message || t("common:errors.tryAgain"),
         variant: "destructive",
       });
     } finally {
       setLoading(false);
     }
-  }, [toast]);
+  }, [toast, t]);
 
   useEffect(() => {
     void loadData();
@@ -153,10 +167,8 @@ export default function SuperAdminAnalyticsVisualsPage() {
       <div className="p-6 md:p-8 max-w-7xl mx-auto space-y-6">
         <div className="flex items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold">Analytics Visuals</h1>
-            <p className="text-sm text-muted-foreground">
-              High-level platform performance in easy-to-read charts.
-            </p>
+            <h1 className="text-3xl font-bold">{t("analyticsVisuals")}</h1>
+            <p className="text-sm text-muted-foreground">{t("analytics.visualsSubtitle")}</p>
           </div>
         </div>
 
@@ -169,7 +181,7 @@ export default function SuperAdminAnalyticsVisualsPage() {
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-sm">Total Users</CardTitle>
+                  <CardTitle className="text-sm">{t("totalUsers")}</CardTitle>
                 </CardHeader>
                 <CardContent className="text-2xl font-bold">
                   {overview?.totalUsers ?? 0}
@@ -177,7 +189,7 @@ export default function SuperAdminAnalyticsVisualsPage() {
               </Card>
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-sm">Active Users</CardTitle>
+                  <CardTitle className="text-sm">{t("activeUsers")}</CardTitle>
                 </CardHeader>
                 <CardContent className="text-2xl font-bold">
                   {overview?.activeUsers ?? 0}
@@ -185,7 +197,7 @@ export default function SuperAdminAnalyticsVisualsPage() {
               </Card>
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-sm">Total Recordings</CardTitle>
+                  <CardTitle className="text-sm">{t("totalRecordings")}</CardTitle>
                 </CardHeader>
                 <CardContent className="text-2xl font-bold">
                   {overview?.totalRecordings ?? 0}
@@ -193,7 +205,7 @@ export default function SuperAdminAnalyticsVisualsPage() {
               </Card>
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-sm">Total Events</CardTitle>
+                  <CardTitle className="text-sm">{t("analytics.totalEvents")}</CardTitle>
                 </CardHeader>
                 <CardContent className="text-2xl font-bold">
                   {events.length}
@@ -204,7 +216,7 @@ export default function SuperAdminAnalyticsVisualsPage() {
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
               <Card>
                 <CardHeader>
-                  <CardTitle>Events by Type</CardTitle>
+                  <CardTitle>{t("eventsByType")}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <ChartContainer config={eventTypeChartConfig} className="h-[320px] w-full">
@@ -221,7 +233,7 @@ export default function SuperAdminAnalyticsVisualsPage() {
 
               <Card>
                 <CardHeader>
-                  <CardTitle>Recording Completion Status</CardTitle>
+                  <CardTitle>{t("recordingCompletionStatus")}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <ChartContainer config={pieChartConfig} className="h-[320px] w-full">
@@ -243,7 +255,7 @@ export default function SuperAdminAnalyticsVisualsPage() {
 
             <Card>
               <CardHeader>
-                <CardTitle>Event Trend Over Time</CardTitle>
+                <CardTitle>{t("eventTrend")}</CardTitle>
               </CardHeader>
               <CardContent>
                 <ChartContainer config={trendChartConfig} className="h-[340px] w-full">

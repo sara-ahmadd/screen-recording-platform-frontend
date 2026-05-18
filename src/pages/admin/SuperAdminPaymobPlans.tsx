@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useCallback, useEffect, useState } from "react";
 import AppLayout from "@/components/AppLayout";
 import { superAdminApi } from "@/lib/api";
@@ -53,6 +54,7 @@ function parsePlansPayload(res: unknown): PaymobPlanRow[] {
 }
 
 export default function SuperAdminPaymobPlansPage() {
+  const { t } = useTranslation(["admin", "common"]);
   const { toast } = useToast();
   const confirm = useConfirmDialog();
   const [rows, setRows] = useState<PaymobPlanRow[]>([]);
@@ -72,12 +74,12 @@ export default function SuperAdminPaymobPlansPage() {
       const res = await superAdminApi.paymobSubscriptionPlans.list();
       setRows(parsePlansPayload(res));
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "Request failed";
-      toast({ title: "Could not load Paymob plans", description: message, variant: "destructive" });
+      const message = err instanceof Error ? err.message : t("requestFailed");
+      toast({ title: t("couldNotLoadPaymob"), description: message, variant: "destructive" });
     } finally {
       setLoading(false);
     }
-  }, [toast]);
+  }, [toast, t]);
 
   useEffect(() => {
     void load();
@@ -99,12 +101,12 @@ export default function SuperAdminPaymobPlansPage() {
     if (!id) return;
     const egp = Number(amountEgp);
     if (!Number.isFinite(egp) || egp <= 0) {
-      toast({ title: "Invalid amount", description: "Enter a positive amount in EGP.", variant: "destructive" });
+      toast({ title: t("invalidAmount"), description: t("invalidAmountDesc"), variant: "destructive" });
       return;
     }
     const integ = Number(integration);
     if (!Number.isFinite(integ) || integ <= 0) {
-      toast({ title: "Invalid integration", description: "Enter the Paymob integration ID.", variant: "destructive" });
+      toast({ title: t("invalidIntegration"), description: t("invalidIntegrationDesc"), variant: "destructive" });
       return;
     }
     const amountCents = Math.max(1, Math.round(egp * 100));
@@ -122,12 +124,12 @@ export default function SuperAdminPaymobPlansPage() {
         if (Number.isFinite(n) && n >= 0) payload.numberOfDeductions = n;
       }
       await superAdminApi.paymobSubscriptionPlans.update(id, payload);
-      toast({ title: "Plan updated", description: "Paymob subscription plan was updated." });
+      toast({ title: t("paymobUpdated"), description: t("paymobUpdatedDesc") });
       setEditOpen(false);
       await load();
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "Update failed";
-      toast({ title: "Update failed", description: message, variant: "destructive" });
+      const message = err instanceof Error ? err.message : t("updateFailed");
+      toast({ title: t("updateFailed"), description: message, variant: "destructive" });
     } finally {
       setSubmitting(false);
     }
@@ -137,19 +139,19 @@ export default function SuperAdminPaymobPlansPage() {
     const id = pickPlanId(row);
     if (!id) return;
     const ok = await confirm({
-      title: "Suspend this plan?",
-      description: "New subscriptions using this Paymob plan may be blocked until you resume it.",
-      confirmText: "Suspend",
-      cancelText: "Cancel",
+      title: t("suspendTitle"),
+      description: t("suspendDesc"),
+      confirmText: t("suspend"),
+      cancelText: t("common:actions.cancel"),
     });
     if (!ok) return;
     try {
       await superAdminApi.paymobSubscriptionPlans.suspend(id);
-      toast({ title: "Plan suspended" });
+      toast({ title: t("planSuspended") });
       await load();
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "Request failed";
-      toast({ title: "Suspend failed", description: message, variant: "destructive" });
+      const message = err instanceof Error ? err.message : t("requestFailed");
+      toast({ title: t("suspendFailed"), description: message, variant: "destructive" });
     }
   };
 
@@ -157,19 +159,19 @@ export default function SuperAdminPaymobPlansPage() {
     const id = pickPlanId(row);
     if (!id) return;
     const ok = await confirm({
-      title: "Resume this plan?",
-      description: "This re-enables the plan on Paymob for new checkouts.",
-      confirmText: "Resume",
-      cancelText: "Cancel",
+      title: t("resumeTitle"),
+      description: t("resumeDesc"),
+      confirmText: t("resume"),
+      cancelText: t("common:actions.cancel"),
     });
     if (!ok) return;
     try {
       await superAdminApi.paymobSubscriptionPlans.resume(id);
-      toast({ title: "Plan resumed" });
+      toast({ title: t("planResumed") });
       await load();
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "Request failed";
-      toast({ title: "Resume failed", description: message, variant: "destructive" });
+      const message = err instanceof Error ? err.message : t("requestFailed");
+      toast({ title: t("resumeFailed"), description: message, variant: "destructive" });
     }
   };
 
@@ -178,14 +180,14 @@ export default function SuperAdminPaymobPlansPage() {
     try {
       const res = await superAdminApi.paymobSubscriptions.incomplete();
       const count = Number((res as any)?.count ?? (res as any)?.data?.count ?? 0);
-      setIntegritySummary(`Incomplete Paymob subscriptions: ${count}`);
+      setIntegritySummary(t("integrityIncomplete", { count }));
       toast({
-        title: "Integrity audit complete",
-        description: `${count} paymob subscriptions without paymobSubscriptionV2Id.`,
+        title: t("auditComplete"),
+        description: t("paymob.auditCompleteDesc", { count }),
       });
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "Audit failed";
-      toast({ title: "Audit failed", description: message, variant: "destructive" });
+      const message = err instanceof Error ? err.message : t("auditFailed");
+      toast({ title: t("auditFailed"), description: message, variant: "destructive" });
     } finally {
       setIntegrityLoading(false);
     }
@@ -193,16 +195,10 @@ export default function SuperAdminPaymobPlansPage() {
 
   const handleRepairIncomplete = async (mode: "relink" | "mark_invalid") => {
     const ok = await confirm({
-      title:
-        mode === "relink"
-          ? "Relink incomplete Paymob subscriptions?"
-          : "Mark unresolved subscriptions invalid?",
-      description:
-        mode === "relink"
-          ? "Attempts to resolve and persist paymobSubscriptionV2Id for existing paymob subscriptions."
-          : "Marks unresolved subscriptions as failed and disables auto-renewal.",
-      confirmText: mode === "relink" ? "Run relink" : "Mark invalid",
-      cancelText: "Cancel",
+      title: mode === "relink" ? t("relinkTitle") : t("markInvalidTitle"),
+      description: mode === "relink" ? t("relinkDesc") : t("markInvalidDesc"),
+      confirmText: mode === "relink" ? t("runRelink") : t("markInvalid"),
+      cancelText: t("common:actions.cancel"),
     });
     if (!ok) return;
 
@@ -214,18 +210,18 @@ export default function SuperAdminPaymobPlansPage() {
       const unresolved = Number(payload?.unresolved ?? 0);
       const markedInvalid = Number(payload?.markedInvalid ?? 0);
       setIntegritySummary(
-        `Repair result → relinked: ${relinked}, unresolved: ${unresolved}, markedInvalid: ${markedInvalid}`,
+        t("repairResult", { relinked, unresolved, markedInvalid }),
       );
       toast({
-        title: "Repair completed",
+        title: t("repairCompleted"),
         description:
           mode === "relink"
-            ? `Relinked ${relinked}, unresolved ${unresolved}.`
-            : `Marked invalid ${markedInvalid}.`,
+            ? t("repairRelinked", { relinked, unresolved })
+            : t("repairMarkedInvalid", { markedInvalid }),
       });
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "Repair failed";
-      toast({ title: "Repair failed", description: message, variant: "destructive" });
+      const message = err instanceof Error ? err.message : t("repairFailed");
+      toast({ title: t("repairFailed"), description: message, variant: "destructive" });
     } finally {
       setIntegrityLoading(false);
     }
@@ -236,24 +232,20 @@ export default function SuperAdminPaymobPlansPage() {
       <div className="mx-auto flex h-[90vh] max-h-[90vh] min-h-0 w-full max-w-7xl flex-col gap-4 overflow-hidden p-6 md:p-8">
         <div className="flex shrink-0 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Paymob subscription plans</h1>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Plans hosted on Paymob Accept — enable, suspend, or adjust amounts and integration without using the Paymob dashboard.
-            </p>
+            <h1 className="text-3xl font-bold tracking-tight">{t("paymobPlans")}</h1>
+            <p className="mt-1 text-sm text-muted-foreground">{t("paymob.description")}</p>
           </div>
           <Button variant="outline" className="shrink-0 gap-2" onClick={() => void load()} disabled={loading}>
             {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
-            Refresh
+            {t("refresh")}
           </Button>
         </div>
 
         <div className="shrink-0 rounded-xl border border-border/80 bg-card/60 p-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <h2 className="text-sm font-semibold">Data integrity tools</h2>
-              <p className="text-xs text-muted-foreground">
-                Audit and repair subscriptions where `paymobSubscriptionV2Id` is missing.
-              </p>
+              <h2 className="text-sm font-semibold">{t("paymob.integrityTitle")}</h2>
+              <p className="text-xs text-muted-foreground">{t("paymob.integrityDesc")}</p>
               {integritySummary ? (
                 <p className="mt-1 text-xs text-foreground">{integritySummary}</p>
               ) : null}
@@ -261,13 +253,13 @@ export default function SuperAdminPaymobPlansPage() {
             <div className="flex flex-wrap gap-2">
               <Button variant="outline" size="sm" onClick={() => void handleAuditIncomplete()} disabled={integrityLoading}>
                 {integrityLoading ? <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" /> : null}
-                Audit incomplete
+                {t("paymob.auditIncomplete")}
               </Button>
               <Button variant="outline" size="sm" onClick={() => void handleRepairIncomplete("relink")} disabled={integrityLoading}>
-                Relink missing IDs
+                {t("paymob.relinkMissing")}
               </Button>
               <Button variant="outline" size="sm" onClick={() => void handleRepairIncomplete("mark_invalid")} disabled={integrityLoading}>
-                Mark unresolved invalid
+                {t("paymob.markUnresolved")}
               </Button>
             </div>
           </div>
@@ -278,13 +270,13 @@ export default function SuperAdminPaymobPlansPage() {
             <Table>
               <TableHeader>
                 <TableRow className="hover:bg-transparent">
-                  <TableHead className="w-[72px]">ID</TableHead>
-                  <TableHead>Name</TableHead>
-                  <TableHead className="whitespace-nowrap">Frequency</TableHead>
-                  <TableHead className="whitespace-nowrap">Amount (EGP)</TableHead>
-                  <TableHead className="whitespace-nowrap">Integration</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead className="w-[72px]">{t("table.id")}</TableHead>
+                  <TableHead>{t("table.name")}</TableHead>
+                  <TableHead className="whitespace-nowrap">{t("table.frequency")}</TableHead>
+                  <TableHead className="whitespace-nowrap">{t("table.amountEgp")}</TableHead>
+                  <TableHead className="whitespace-nowrap">{t("table.integration")}</TableHead>
+                  <TableHead>{t("status")}</TableHead>
+                  <TableHead className="text-right">{t("table.actions")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -297,9 +289,10 @@ export default function SuperAdminPaymobPlansPage() {
                 ) : rows.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={7} className="py-16 text-center text-muted-foreground">
-                      No Paymob subscription plans returned. Create plans from{" "}
-                      <span className="font-medium text-foreground">All Plans</span> or verify{" "}
-                      <code className="rounded bg-muted px-1 py-0.5 text-xs">PAYMOB_API_KEY</code>.
+                      {t("paymob.noPlansEmpty", {
+                        allPlans: t("paymob.allPlansLink"),
+                        envKey: "PAYMOB_API_KEY",
+                      })}
                     </TableCell>
                   </TableRow>
                 ) : (
@@ -313,7 +306,7 @@ export default function SuperAdminPaymobPlansPage() {
                           <span className="line-clamp-2">{String(row.name ?? "—")}</span>
                         </TableCell>
                         <TableCell className="text-muted-foreground">
-                          {row.frequency != null ? `${row.frequency} days` : "—"}
+                          {row.frequency != null ? t("paymob.frequencyDays", { count: row.frequency }) : "—"}
                         </TableCell>
                         <TableCell>{formatEgpFromCents(row.amount_cents)}</TableCell>
                         <TableCell className="font-mono text-xs">{row.integration != null ? String(row.integration) : "—"}</TableCell>
@@ -326,14 +319,14 @@ export default function SuperAdminPaymobPlansPage() {
                                 : "bg-amber-500/15 text-amber-800 dark:text-amber-300",
                             )}
                           >
-                            {active ? "Active" : "Suspended"}
+                            {active ? t("active") : t("suspended")}
                           </span>
                         </TableCell>
                         <TableCell>
                           <div className="flex flex-wrap justify-end gap-1">
                             <Button size="sm" variant="ghost" className="h-8 px-2" onClick={() => openEdit(row)}>
                               <Pencil className="mr-1 h-3.5 w-3.5" />
-                              Edit
+                              {t("edit")}
                             </Button>
                             {active ? (
                               <Button
@@ -343,7 +336,7 @@ export default function SuperAdminPaymobPlansPage() {
                                 onClick={() => void handleSuspend(row)}
                               >
                                 <PauseCircle className="mr-1 h-3.5 w-3.5" />
-                                Suspend
+                                {t("suspend")}
                               </Button>
                             ) : (
                               <Button
@@ -353,7 +346,7 @@ export default function SuperAdminPaymobPlansPage() {
                                 onClick={() => void handleResume(row)}
                               >
                                 <PlayCircle className="mr-1 h-3.5 w-3.5" />
-                                Resume
+                                {t("resume")}
                               </Button>
                             )}
                           </div>
@@ -372,38 +365,34 @@ export default function SuperAdminPaymobPlansPage() {
         <DialogContent className="flex max-h-[90vh] max-w-lg flex-col gap-0 overflow-hidden p-0">
           <div className="border-b border-border/60 px-6 pb-3 pt-6 pr-12">
             <DialogHeader>
-              <DialogTitle>Update Paymob plan</DialogTitle>
-              <DialogDescription>
-                Amount is in <strong>EGP</strong> (major units). Paymob stores{" "}
-                <code className="rounded bg-muted px-1 text-xs">amount_cents</code>. Integration must match your MOTO /
-                subscription integration on Paymob.
-              </DialogDescription>
+              <DialogTitle>{t("paymob.updateDialogTitle")}</DialogTitle>
+              <DialogDescription>{t("paymob.updateDialogDesc")}</DialogDescription>
             </DialogHeader>
           </div>
           <div className="space-y-4 overflow-y-auto px-6 py-4">
             <div className="space-y-1">
-              <label className="text-sm font-medium">Amount (EGP)</label>
-              <Input value={amountEgp} onChange={(e) => setAmountEgp(e.target.value)} inputMode="decimal" placeholder="e.g. 267.80" />
+              <label className="text-sm font-medium">{t("paymob.amountEgpLabel")}</label>
+              <Input value={amountEgp} onChange={(e) => setAmountEgp(e.target.value)} inputMode="decimal" placeholder={t("paymob.amountPlaceholder")} />
             </div>
             <div className="space-y-1">
-              <label className="text-sm font-medium">Integration ID</label>
+              <label className="text-sm font-medium">{t("paymob.integrationIdLabel")}</label>
               <Input value={integration} onChange={(e) => setIntegration(e.target.value)} inputMode="numeric" />
             </div>
             <div className="space-y-1">
-              <label className="text-sm font-medium">Number of deductions (optional)</label>
+              <label className="text-sm font-medium">{t("paymob.deductionsLabel")}</label>
               <Input
                 value={deductions}
                 onChange={(e) => setDeductions(e.target.value)}
-                placeholder="Leave empty for Paymob default / null"
+                placeholder={t("paymobDefaultPlaceholder")}
               />
             </div>
           </div>
           <div className="flex justify-end gap-2 border-t border-border/60 px-6 py-4">
             <Button variant="outline" onClick={() => setEditOpen(false)}>
-              Cancel
+              {t("common:actions.cancel")}
             </Button>
             <Button className="gradient-primary" onClick={() => void handleSaveEdit()} disabled={submitting}>
-              {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save changes"}
+              {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : t("saveChanges")}
             </Button>
           </div>
         </DialogContent>

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Moon, Sun } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -16,6 +17,7 @@ type ThemeToggleProps = {
 };
 
 export default function ThemeToggle({ className }: ThemeToggleProps) {
+  const { t } = useTranslation("layout");
   const [theme, setTheme] = useState<Theme>("light");
 
   useEffect(() => {
@@ -37,8 +39,8 @@ export default function ThemeToggle({ className }: ThemeToggleProps) {
       variant="outline"
       className={cn("fixed top-4 right-4 z-[60] rounded-full shadow-sm", className)}
       onClick={toggleTheme}
-      aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
-      title={theme === "dark" ? "Light mode" : "Dark mode"}
+      aria-label={theme === "dark" ? t("theme.switchToLight") : t("theme.switchToDark")}
+      title={theme === "dark" ? t("theme.lightMode") : t("theme.darkMode")}
     >
       {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
     </Button>

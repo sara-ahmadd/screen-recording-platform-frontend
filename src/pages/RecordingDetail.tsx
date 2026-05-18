@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { recordingsApi } from "@/lib/api";
 import { getSocket } from "@/lib/socket";
@@ -24,6 +25,7 @@ import { resumeScreenRecordingFromServer } from "@/lib/resumeScreenUpload";
 import { trackClientEvent } from "@/lib/analyticsClient";
 
 export default function RecordingDetailPage() {
+  const { t } = useTranslation(["dashboard", "recording", "common"]);
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -44,6 +46,15 @@ export default function RecordingDetailPage() {
   const durationInMin = typeof recording?.duration === "number" ? (recording.duration / 60).toFixed(2) : null;
   const isPrivate = (recording?.visibility || "public") === "private";
   const recordingId = Number(id);
+
+  const recordingStatusLabel = useMemo(() => {
+    const status = recording?.status;
+    if (!status) return "";
+    const key = `statusLabels.${status}`;
+    if (status === "processing") return t("detail.processingStatus");
+    const translated = t(key, { defaultValue: "" });
+    return translated || status;
+  }, [recording?.status, t]);
 
   const selectedWorkspace = useMemo(() => {
     if (!selectedWorkspaceId || !user?.workspaces?.length) return null;
@@ -103,7 +114,7 @@ export default function RecordingDetailPage() {
       try {
         await loadRecording();
       } catch (err: any) {
-        toast({ title: "Error", description: err.message, variant: "destructive" });
+        toast({ title: t("common:toast.error"), description: err.message, variant: "destructive" });
       } finally {
         setLoading(false);
       }
@@ -161,7 +172,7 @@ export default function RecordingDetailPage() {
       const eventRecId = getEventRecordingId(data);
       if (Number.isFinite(eventRecId) && eventRecId !== recordingId) return;
       setRecording((prev: any) => (prev ? { ...prev, status: "failed" } : prev));
-      toast({ title: "Processing failed", description: data?.message || "Something went wrong.", variant: "destructive" });
+      toast({ title: t("processingFailed"), description: data?.message || t("processingFailedDesc"), variant: "destructive" });
     };
 
     socket.on("video_ready", onVideoReady);
@@ -180,9 +191,9 @@ export default function RecordingDetailPage() {
       const updateRes = await recordingsApi.update(Number(id), { title: newTitle });
       setRecording({ ...recording, title: newTitle });
       setEditing(false);
-      toastApiSuccess(updateRes, { title: "Updated", fallbackDescription: "Recording updated." });
+      toastApiSuccess(updateRes, { title: t("dashboard:updated"), fallbackDescription: t("dashboard:updatedDesc") });
     } catch (err: any) {
-      toast({ title: "Error", description: err.message, variant: "destructive" });
+      toast({ title: t("common:toast.error"), description: err.message, variant: "destructive" });
     }
   };
 
@@ -191,30 +202,31 @@ export default function RecordingDetailPage() {
       const visRes = await recordingsApi.update(Number(id), { visibility });
       setRecording({ ...recording, visibility });
       toastApiSuccess(visRes, {
-        title: "Visibility updated",
-        fallbackDescription: `Visibility set to ${visibility}.`,
+        title: t("dashboard:visibilityUpdated"),
+        fallbackDescription: t("dashboard:visibilityUpdatedDesc", {
+          visibility: t(visibility === "public" ? "dashboard:public" : "dashboard:private"),
+        }),
       });
     } catch (err: any) {
-      toast({ title: "Error", description: err.message, variant: "destructive" });
+      toast({ title: t("common:toast.error"), description: err.message, variant: "destructive" });
     }
   };
 
   const handleDelete = async () => {
     if (deleting) return;
     const confirmed = await confirm({
-      title: "Delete recording?",
-      description: "This recording will be moved to trash and will be permanently deleted after the grace period.",
-      confirmText: "Move to trash",
-      cancelText: "Cancel",
+      title: t("dashboard:moveToTrashConfirm"),
+      description: t("dashboard:moveToTrashDesc"),
+      confirmText: t("dashboard:moveToTrashAction"),
+      cancelText: t("common:actions.cancel"),
     });
     if (!confirmed) return;
     try {
       setDeleting(true);
       const delRes = await recordingsApi.delete(Number(id));
       toastApiSuccess(delRes, {
-        title: "Moved to trash",
-        fallbackDescription:
-          "Recording moved to trash and will be permanently deleted after the grace period.",
+        title: t("dashboard:movedToTrash"),
+        fallbackDescription: t("dashboard:movedToTrashDesc"),
       });
       trackClientEvent({
         eventType: "click",
@@ -223,7 +235,7 @@ export default function RecordingDetailPage() {
       });
       navigate("/dashboard");
     } catch (err: any) {
-      toast({ title: "Error", description: err.message, variant: "destructive" });
+      toast({ title: t("common:toast.error"), description: err.message, variant: "destructive" });
     } finally {
       setDeleting(false);
     }
@@ -232,10 +244,10 @@ export default function RecordingDetailPage() {
   const handleDeletePermanently = async () => {
     if (deleting) return;
     const confirmed = await confirm({
-      title: "Delete recording permanently?",
-      description: "This action cannot be undone.",
-      confirmText: "Delete permanently",
-      cancelText: "Cancel",
+      title: t("dashboard:deletePermanently"),
+      description: t("dashboard:permanentDeleteConfirm"),
+      confirmText: t("dashboard:deletePermanentlyMenu"),
+      cancelText: t("common:actions.cancel"),
     });
     if (!confirmed) return;
     try {
@@ -244,8 +256,8 @@ export default function RecordingDetailPage() {
         permanent: true,
       });
       toastApiSuccess(delRes, {
-        title: "Deleted permanently",
-        fallbackDescription: "Recording permanently deleted successfully.",
+        title: t("dashboard:deletedPermanently"),
+        fallbackDescription: t("dashboard:deletedPermanentlyDesc"),
       });
       trackClientEvent({
         eventType: "click",
@@ -258,12 +270,12 @@ export default function RecordingDetailPage() {
       if (msg.toLowerCase().includes("not found")) {
         toast({
           variant: "success",
-          title: "Already deleted",
-          description: "This recording was already permanently deleted.",
+          title: t("dashboard:alreadyDeleted"),
+          description: t("dashboard:alreadyDeletedDesc"),
         });
         navigate("/dashboard");
       } else {
-        toast({ title: "Error", description: msg, variant: "destructive" });
+        toast({ title: t("common:toast.error"), description: msg, variant: "destructive" });
       }
     } finally {
       setDeleting(false);
@@ -275,9 +287,9 @@ export default function RecordingDetailPage() {
       const res = await recordingsApi.downloadVideo(Number(id));
       const downloadUrl = res.downloadUrl || res.url;
       if (downloadUrl) window.open(downloadUrl, "_blank");
-      else toastApiSuccess(res, { title: "Download started", fallbackDescription: "Preparing download." });
+      else toastApiSuccess(res, { title: t("dashboard:downloadStarted"), fallbackDescription: t("dashboard:downloadStartedDesc") });
     } catch (err: any) {
-      toast({ title: "Download not available", description: err.message, variant: "destructive" });
+      toast({ title: t("dashboard:downloadNotAvailable"), description: err.message, variant: "destructive" });
     }
   };
 
@@ -288,7 +300,7 @@ export default function RecordingDetailPage() {
       setPublicLink(link);
       setShareDialogOpen(true);
     } catch (err: any) {
-      toast({ title: "Error", description: err.message, variant: "destructive" });
+      toast({ title: t("common:toast.error"), description: err.message, variant: "destructive" });
     }
   };
 
@@ -309,11 +321,11 @@ export default function RecordingDetailPage() {
           : prev
       );
       toastApiSuccess(wmRes, {
-        title: "Watermark removal",
-        fallbackDescription: "Watermark removal started.",
+        title: t("dashboard:watermarkRemoval"),
+        fallbackDescription: t("dashboard:watermarkRemovalDesc"),
       });
     } catch (err: any) {
-      toast({ title: "Error", description: err.message, variant: "destructive" });
+      toast({ title: t("common:toast.error"), description: err.message, variant: "destructive" });
     }
   };
 
@@ -326,11 +338,11 @@ export default function RecordingDetailPage() {
       const res = await recordingsApi.reprocess(Number(id));
       setRecording((prev: any) => (prev ? { ...prev, status: "processing" } : prev));
       toastApiSuccess(res, {
-        title: "Processing retried",
-        fallbackDescription: "Recording re-queued for processing.",
+        title: t("dashboard:retrySuccess"),
+        fallbackDescription: t("dashboard:retryDesc"),
       });
     } catch (err: any) {
-      toast({ title: "Retry failed", description: err.message, variant: "destructive" });
+      toast({ title: t("dashboard:retryFailed"), description: err.message, variant: "destructive" });
     } finally {
       setReprocessing(false);
     }
@@ -347,14 +359,14 @@ export default function RecordingDetailPage() {
       setRecording((prev: any) => (prev ? { ...prev, status: "processing" } : prev));
       toast({
         variant: "success",
-        title: "Upload resumed",
-        description: "Upload finalization completed. Processing has started.",
+        title: t("dashboard:uploadResumed"),
+        description: t("dashboard:uploadResumedDesc"),
       });
       await loadRecording();
     } catch (err: any) {
       toast({
-        title: "Resume failed",
-        description: err?.message || "Could not resume this upload.",
+        title: t("dashboard:resumeFailed"),
+        description: err?.message || t("dashboard:resumeFailedDesc"),
         variant: "destructive",
       });
     } finally {
@@ -385,17 +397,17 @@ export default function RecordingDetailPage() {
               <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-muted/70">
                 <SearchX className="h-7 w-7 text-muted-foreground" />
               </div>
-              <h1 className="text-2xl font-semibold tracking-tight">Recording not found</h1>
+              <h1 className="text-2xl font-semibold tracking-tight">{t("notFoundTitle")}</h1>
               <p className="mt-2 text-sm text-muted-foreground max-w-md mx-auto">
-                This recording may have been deleted, moved, or is no longer available in your workspace.
+                {t("notFoundDesc")}
               </p>
               <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
                 <Button onClick={() => navigate("/dashboard")} className="gap-2">
                   <LayoutDashboard className="h-4 w-4" />
-                  Back to Dashboard
+                  {t("backToDashboard")}
                 </Button>
                 <Button variant="outline" onClick={() => window.location.reload()}>
-                  Refresh
+                  {t("detail.refresh")}
                 </Button>
               </div>
             </CardContent>
@@ -409,7 +421,7 @@ export default function RecordingDetailPage() {
     <AppLayout>
       <div className="p-6 md:p-8 max-w-7xl mx-auto animate-fade-in">
         <Button variant="ghost" className="mb-4 text-muted-foreground" onClick={() => navigate("/dashboard")}>
-          <ArrowLeft className="h-4 w-4 mr-2" /> Back
+          <ArrowLeft className="h-4 w-4 mr-2" /> {t("detail.back")}
         </Button>
 
         {/* Video player */}
@@ -433,7 +445,9 @@ export default function RecordingDetailPage() {
               <div className="text-center">
                 <Play className="h-16 w-16 text-muted-foreground/30 mx-auto mb-2" />
                 <p className="text-muted-foreground text-sm">
-                  {recording.status === "processing" ? "Video is being processed..." : "Video preview unavailable"}
+                  {recording.status === "processing"
+                    ? t("dashboard:detail.videoProcessing")
+                    : t("dashboard:detail.videoUnavailable")}
                 </p>
               </div>
             )}
@@ -448,8 +462,8 @@ export default function RecordingDetailPage() {
                 {editing ? (
                   <div className="flex gap-2">
                     <Input value={newTitle} onChange={(e) => setNewTitle(e.target.value)} />
-                    <Button size="sm" onClick={handleUpdate}>Save</Button>
-                    <Button size="sm" variant="ghost" onClick={() => setEditing(false)}>Cancel</Button>
+                    <Button size="sm" onClick={handleUpdate}>{t("detail.save")}</Button>
+                    <Button size="sm" variant="ghost" onClick={() => setEditing(false)}>{t("common:actions.cancel")}</Button>
                   </div>
                 ) : (
                   <div className="flex items-center gap-2">
@@ -460,13 +474,13 @@ export default function RecordingDetailPage() {
                   </div>
                 )}
                 <p className="text-sm text-muted-foreground mt-1">
-                  Created {new Date(recording.createdAt).toLocaleString()}
+                  {t("detail.created", { date: new Date(recording.createdAt).toLocaleString() })}
                 </p>
                 <p className="text-sm text-muted-foreground mt-1">
-                  Size: {sizeInMb ? `${sizeInMb} MB` : "-"} • Duration: {durationInMin ? `${durationInMin} min` : "-"}
+                  {t("detail.size")}: {sizeInMb ? `${sizeInMb} ${t("detail.mb")}` : "-"} • {t("detail.duration")}: {durationInMin ? `${durationInMin} ${t("detail.min")}` : "-"}
                 </p>
                 <div className="mt-3 max-w-[180px]">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-1">Visibility</p>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-1">{t("detail.visibility")}</p>
                   <Select
                     value={(recording.visibility || "public") as "public" | "private"}
                     onValueChange={(v: "public" | "private") => handleUpdateVisibility(v)}
@@ -475,8 +489,8 @@ export default function RecordingDetailPage() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="public">Public</SelectItem>
-                      <SelectItem value="private">Private</SelectItem>
+                      <SelectItem value="public">{t("detail.public")}</SelectItem>
+                      <SelectItem value="private">{t("detail.private")}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -485,10 +499,10 @@ export default function RecordingDetailPage() {
                 {recording.status === "processing" ? (
                   <>
                     <Loader2 className="h-3 w-3 mr-1 animate-spin" />
-                    processing
+                    {t("detail.processingStatus")}
                   </>
                 ) : (
-                  recording.status
+                  recordingStatusLabel
                 )}
               </Badge>
             </div>
@@ -496,7 +510,7 @@ export default function RecordingDetailPage() {
             {(resumingUpload || resumeProgress > 0) && (
               <div className="mb-5 rounded-lg border border-amber-500/40 bg-amber-500/10 px-4 py-3">
                 <p className="text-sm font-medium text-amber-600 mb-2">
-                  Resuming upload and finalizing already uploaded parts...
+                  {t("detail.resumingUpload")}
                 </p>
                 <Progress value={resumeProgress} className="h-2" />
               </div>
@@ -510,7 +524,7 @@ export default function RecordingDetailPage() {
                   ) : (
                     <RotateCcw className="h-4 w-4" />
                   )}
-                  Resume Upload
+                  {t("detail.resumeUpload")}
                 </Button>
               )}
               {!canDownloadVideo ? (
@@ -518,30 +532,30 @@ export default function RecordingDetailPage() {
                   <TooltipTrigger asChild>
                     <span className="inline-flex" tabIndex={0}>
                       <Button variant="outline" className="gap-2" disabled>
-                        <Download className="h-4 w-4" /> Download
+                        <Download className="h-4 w-4" /> {t("detail.download")}
                       </Button>
                     </span>
                   </TooltipTrigger>
                   <TooltipContent side="top" className="z-[100] max-w-[260px] whitespace-normal text-center">
-                    Your current plan does not allow video downloads.
+                    {t("detail.planNoDownload")}
                   </TooltipContent>
                 </Tooltip>
               ) : (
                 <Button variant="outline" onClick={handleDownload} className="gap-2">
-                  <Download className="h-4 w-4" /> Download
+                  <Download className="h-4 w-4" /> {t("detail.download")}
                 </Button>
               )}
               <Tooltip>
                 <TooltipTrigger asChild>
                   <span tabIndex={0}>
                     <Button variant="outline" onClick={handleGetPublicLink} className="gap-2" disabled={isPrivate}>
-                      <Link2 className="h-4 w-4" /> Share Link
+                      <Link2 className="h-4 w-4" /> {t("detail.shareLink")}
                     </Button>
                   </span>
                 </TooltipTrigger>
                 {isPrivate && (
                   <TooltipContent>
-                    Video cannot be shared because it is private. Make it public first.
+                    {t("detail.privateShareBlocked")}
                   </TooltipContent>
                 )}
               </Tooltip>
@@ -550,17 +564,17 @@ export default function RecordingDetailPage() {
                   <TooltipTrigger asChild>
                     <span className="inline-flex" tabIndex={0}>
                       <Button variant="outline" className="gap-2" disabled>
-                        <Droplets className="h-4 w-4" /> Remove Watermark
+                        <Droplets className="h-4 w-4" /> {t("detail.removeWatermark")}
                       </Button>
                     </span>
                   </TooltipTrigger>
                   <TooltipContent side="top" className="z-[100] max-w-[260px] whitespace-normal text-center">
-                    Your current plan does not allow watermark removal.
+                    {t("detail.planNoWatermark")}
                   </TooltipContent>
                 </Tooltip>
               ) : (
                 <Button variant="outline" onClick={handleRemoveWatermark} className="gap-2">
-                  <Droplets className="h-4 w-4" /> Remove Watermark
+                  <Droplets className="h-4 w-4" /> {t("detail.removeWatermark")}
                 </Button>
               )}
               {(recording.status === "failed" || recording.status === "uploaded") && (
@@ -570,7 +584,7 @@ export default function RecordingDetailPage() {
                   ) : (
                     <RotateCcw className="h-4 w-4" />
                   )}
-                  Retry Processing
+                  {t("detail.retryProcessing")}
                 </Button>
               )}
               <Button
@@ -584,7 +598,7 @@ export default function RecordingDetailPage() {
                 ) : (
                   <Trash2 className="h-4 w-4" />
                 )}{" "}
-                Move to Trash
+                {t("detail.moveToTrash")}
               </Button>
               <Button
                 variant="outline"
@@ -592,11 +606,11 @@ export default function RecordingDetailPage() {
                 onClick={handleDeletePermanently}
                 disabled={deleting}
               >
-                <Trash2 className="h-4 w-4" /> Delete Permanently
+                <Trash2 className="h-4 w-4" /> {t("detail.deletePermanently")}
               </Button>
             </div>
             <p className="mt-3 text-xs text-muted-foreground">
-              Items in Trash are permanently deleted after 30 days.
+              {t("trashNote")}
             </p>
 
           </CardContent>
@@ -605,8 +619,8 @@ export default function RecordingDetailPage() {
         <Dialog open={shareDialogOpen} onOpenChange={setShareDialogOpen}>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Share Recording</DialogTitle>
-              <DialogDescription>Copy and share this public link.</DialogDescription>
+              <DialogTitle>{t("detail.shareTitle")}</DialogTitle>
+              <DialogDescription>{t("detail.shareDesc")}</DialogDescription>
             </DialogHeader>
             <div className="flex gap-2">
               <a

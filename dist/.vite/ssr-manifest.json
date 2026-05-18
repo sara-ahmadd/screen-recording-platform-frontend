@@ -18,7 +18,7 @@
     "/assets/logo-Bbe7nbNw.png"
   ],
   "\u0000/Users/saraahmad/Documents/screen-recorder-frontend-lovable/node_modules/react-dom/client.js?commonjs-exports": [
-    "/assets/client-hnFtTLT7.js"
+    "/assets/client-CyR9pGxy.js"
   ],
   "\u0000/Users/saraahmad/Documents/screen-recorder-frontend-lovable/node_modules/react-dom/index.js?commonjs-module": [
     "/assets/logo-Bbe7nbNw.png"
@@ -47,6 +47,12 @@
   "\u0000/Users/saraahmad/Documents/screen-recorder-frontend-lovable/node_modules/scheduler/index.js?commonjs-module": [
     "/assets/logo-Bbe7nbNw.png"
   ],
+  "\u0000/Users/saraahmad/Documents/screen-recorder-frontend-lovable/node_modules/use-sync-external-store/cjs/use-sync-external-store-shim.production.js?commonjs-exports": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
+  "\u0000/Users/saraahmad/Documents/screen-recorder-frontend-lovable/node_modules/use-sync-external-store/shim/index.js?commonjs-module": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
   "\u0000commonjsHelpers.js": [
     "/assets/logo-Bbe7nbNw.png"
   ],
@@ -54,9 +60,6 @@
     "/assets/logo-Bbe7nbNw.png"
   ],
   "\u0000vite/preload-helper.js": [
-    "/assets/logo-Bbe7nbNw.png"
-  ],
-  "../../../../@vite-plugin-pwa/virtual:pwa-register": [
     "/assets/logo-Bbe7nbNw.png"
   ],
   "index.html": [
@@ -860,6 +863,15 @@
   "node_modules/get-nonce/dist/es2015/index.js": [
     "/assets/logo-Bbe7nbNw.png"
   ],
+  "node_modules/html-parse-stringify/dist/html-parse-stringify.module.js": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
+  "node_modules/i18next-browser-languagedetector/dist/esm/i18nextBrowserLanguageDetector.js": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
+  "node_modules/i18next/dist/esm/i18next.js": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
   "node_modules/input-format/modules/closeBraces.js": [
     "/assets/logo-Bbe7nbNw.png"
   ],
@@ -1646,6 +1658,9 @@
   "node_modules/lucide-react/dist/esm/icons/arrow-up-down.js": [
     "/assets/logo-Bbe7nbNw.png"
   ],
+  "node_modules/lucide-react/dist/esm/icons/arrow-up-right.js": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
   "node_modules/lucide-react/dist/esm/icons/bell.js": [
     "/assets/logo-Bbe7nbNw.png"
   ],
@@ -1679,6 +1694,9 @@
   "node_modules/lucide-react/dist/esm/icons/circle-check.js": [
     "/assets/logo-Bbe7nbNw.png"
   ],
+  "node_modules/lucide-react/dist/esm/icons/circle-help.js": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
   "node_modules/lucide-react/dist/esm/icons/circle-pause.js": [
     "/assets/logo-Bbe7nbNw.png"
   ],
@@ -1694,7 +1712,19 @@
   "node_modules/lucide-react/dist/esm/icons/clock.js": [
     "/assets/logo-Bbe7nbNw.png"
   ],
+  "node_modules/lucide-react/dist/esm/icons/cloud-upload.js": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
+  "node_modules/lucide-react/dist/esm/icons/cpu.js": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
   "node_modules/lucide-react/dist/esm/icons/credit-card.js": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
+  "node_modules/lucide-react/dist/esm/icons/database.js": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
+  "node_modules/lucide-react/dist/esm/icons/dollar-sign.js": [
     "/assets/logo-Bbe7nbNw.png"
   ],
   "node_modules/lucide-react/dist/esm/icons/download.js": [
@@ -1718,13 +1748,28 @@
   "node_modules/lucide-react/dist/esm/icons/file-video.js": [
     "/assets/logo-Bbe7nbNw.png"
   ],
+  "node_modules/lucide-react/dist/esm/icons/fingerprint.js": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
   "node_modules/lucide-react/dist/esm/icons/globe.js": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
+  "node_modules/lucide-react/dist/esm/icons/heart-handshake.js": [
     "/assets/logo-Bbe7nbNw.png"
   ],
   "node_modules/lucide-react/dist/esm/icons/info.js": [
     "/assets/logo-Bbe7nbNw.png"
   ],
+  "node_modules/lucide-react/dist/esm/icons/languages.js": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
+  "node_modules/lucide-react/dist/esm/icons/layers.js": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
   "node_modules/lucide-react/dist/esm/icons/layout-dashboard.js": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
+  "node_modules/lucide-react/dist/esm/icons/layout-grid.js": [
     "/assets/logo-Bbe7nbNw.png"
   ],
   "node_modules/lucide-react/dist/esm/icons/link-2.js": [
@@ -1733,10 +1778,16 @@
   "node_modules/lucide-react/dist/esm/icons/loader-circle.js": [
     "/assets/logo-Bbe7nbNw.png"
   ],
+  "node_modules/lucide-react/dist/esm/icons/lock.js": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
   "node_modules/lucide-react/dist/esm/icons/log-out.js": [
     "/assets/logo-Bbe7nbNw.png"
   ],
   "node_modules/lucide-react/dist/esm/icons/mail.js": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
+  "node_modules/lucide-react/dist/esm/icons/map-pin.js": [
     "/assets/logo-Bbe7nbNw.png"
   ],
   "node_modules/lucide-react/dist/esm/icons/message-square.js": [
@@ -1746,6 +1797,9 @@
     "/assets/logo-Bbe7nbNw.png"
   ],
   "node_modules/lucide-react/dist/esm/icons/mic.js": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
+  "node_modules/lucide-react/dist/esm/icons/monitor-play.js": [
     "/assets/logo-Bbe7nbNw.png"
   ],
   "node_modules/lucide-react/dist/esm/icons/monitor.js": [
@@ -1769,6 +1823,9 @@
   "node_modules/lucide-react/dist/esm/icons/pencil.js": [
     "/assets/logo-Bbe7nbNw.png"
   ],
+  "node_modules/lucide-react/dist/esm/icons/phone.js": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
   "node_modules/lucide-react/dist/esm/icons/play.js": [
     "/assets/logo-Bbe7nbNw.png"
   ],
@@ -1787,10 +1844,19 @@
   "node_modules/lucide-react/dist/esm/icons/search-x.js": [
     "/assets/logo-Bbe7nbNw.png"
   ],
+  "node_modules/lucide-react/dist/esm/icons/share-2.js": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
   "node_modules/lucide-react/dist/esm/icons/shield-check.js": [
     "/assets/logo-Bbe7nbNw.png"
   ],
   "node_modules/lucide-react/dist/esm/icons/shield.js": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
+  "node_modules/lucide-react/dist/esm/icons/sparkles.js": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
+  "node_modules/lucide-react/dist/esm/icons/square-play.js": [
     "/assets/logo-Bbe7nbNw.png"
   ],
   "node_modules/lucide-react/dist/esm/icons/square.js": [
@@ -1838,6 +1904,9 @@
   "node_modules/lucide-react/dist/esm/icons/zap.js": [
     "/assets/logo-Bbe7nbNw.png"
   ],
+  "node_modules/lucide-react/dist/esm/icons/zoom-in.js": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
   "node_modules/lucide-react/dist/esm/shared/src/utils.js": [
     "/assets/logo-Bbe7nbNw.png"
   ],
@@ -1860,7 +1929,7 @@
     "/assets/logo-Bbe7nbNw.png"
   ],
   "node_modules/react-dom/client.js": [
-    "/assets/client-hnFtTLT7.js"
+    "/assets/client-CyR9pGxy.js"
   ],
   "node_modules/react-dom/index.js": [
     "/assets/logo-Bbe7nbNw.png"
@@ -1872,6 +1941,33 @@
     "/assets/logo-Bbe7nbNw.png"
   ],
   "node_modules/react-hook-form/dist/index.esm.mjs": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
+  "node_modules/react-i18next/dist/es/Trans.js": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
+  "node_modules/react-i18next/dist/es/TransWithoutContext.js": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
+  "node_modules/react-i18next/dist/es/context.js": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
+  "node_modules/react-i18next/dist/es/defaults.js": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
+  "node_modules/react-i18next/dist/es/i18nInstance.js": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
+  "node_modules/react-i18next/dist/es/initReactI18next.js": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
+  "node_modules/react-i18next/dist/es/unescape.js": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
+  "node_modules/react-i18next/dist/es/useTranslation.js": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
+  "node_modules/react-i18next/dist/es/utils.js": [
     "/assets/logo-Bbe7nbNw.png"
   ],
   "node_modules/react-phone-number-input/locale/en.json.js": [
@@ -2300,6 +2396,12 @@
   "node_modules/use-sidecar/dist/es2015/medium.js": [
     "/assets/logo-Bbe7nbNw.png"
   ],
+  "node_modules/use-sync-external-store/cjs/use-sync-external-store-shim.production.js": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
+  "node_modules/use-sync-external-store/shim/index.js": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
   "node_modules/victory-vendor/es/d3-scale.js": [
     "/assets/logo-Bbe7nbNw.png"
   ],
@@ -2318,8 +2420,8 @@
   "node_modules/vite-react-ssg/node_modules/react-helmet-async/lib/index.module.js": [
     "/assets/logo-Bbe7nbNw.png"
   ],
-  "node_modules/workbox-window/build/workbox-window.prod.es5.mjs": [
-    "/assets/workbox-window.prod.es5-vqzQaGvo.js"
+  "node_modules/void-elements/index.js": [
+    "/assets/logo-Bbe7nbNw.png"
   ],
   "node_modules/zod/v3/ZodError.js": [
     "/assets/logo-Bbe7nbNw.png"
@@ -2354,6 +2456,21 @@
   "src/components/AppLayout.tsx": [
     "/assets/logo-Bbe7nbNw.png"
   ],
+  "src/components/AuthPageShell.tsx": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
+  "src/components/Badge.tsx": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
+  "src/components/Footer.tsx": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
+  "src/components/HowItWorks.tsx": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
+  "src/components/LanguageSwitcher.tsx": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
   "src/components/Logo.tsx": [
     "/assets/logo-Bbe7nbNw.png"
   ],
@@ -2369,10 +2486,16 @@
   "src/components/PublicPageLayout.tsx": [
     "/assets/logo-Bbe7nbNw.png"
   ],
+  "src/components/Reveal.tsx": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
   "src/components/SeoManager.tsx": [
     "/assets/logo-Bbe7nbNw.png"
   ],
   "src/components/StarRating.tsx": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
+  "src/components/SubscriptionFlow.tsx": [
     "/assets/logo-Bbe7nbNw.png"
   ],
   "src/components/ThemeToggle.tsx": [
@@ -2471,7 +2594,103 @@
   "src/hooks/useAvatarSrc.ts": [
     "/assets/logo-Bbe7nbNw.png"
   ],
+  "src/hooks/useHomePageSiteReset.ts": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
   "src/hooks/usePaidToFreeSubscribe.ts": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
+  "src/i18n/config.ts": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
+  "src/i18n/constants.ts": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
+  "src/i18n/locales/ar/admin.json": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
+  "src/i18n/locales/ar/auth.json": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
+  "src/i18n/locales/ar/billing.json": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
+  "src/i18n/locales/ar/common.json": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
+  "src/i18n/locales/ar/dashboard.json": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
+  "src/i18n/locales/ar/errors.json": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
+  "src/i18n/locales/ar/home.json": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
+  "src/i18n/locales/ar/layout.json": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
+  "src/i18n/locales/ar/legal.json": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
+  "src/i18n/locales/ar/marketing.json": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
+  "src/i18n/locales/ar/profile.json": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
+  "src/i18n/locales/ar/recording.json": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
+  "src/i18n/locales/ar/seo.json": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
+  "src/i18n/locales/ar/workspaces.json": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
+  "src/i18n/locales/en/admin.json": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
+  "src/i18n/locales/en/auth.json": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
+  "src/i18n/locales/en/billing.json": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
+  "src/i18n/locales/en/common.json": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
+  "src/i18n/locales/en/dashboard.json": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
+  "src/i18n/locales/en/errors.json": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
+  "src/i18n/locales/en/home.json": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
+  "src/i18n/locales/en/layout.json": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
+  "src/i18n/locales/en/legal.json": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
+  "src/i18n/locales/en/marketing.json": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
+  "src/i18n/locales/en/profile.json": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
+  "src/i18n/locales/en/recording.json": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
+  "src/i18n/locales/en/seo.json": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
+  "src/i18n/locales/en/workspaces.json": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
+  "src/i18n/syncDocumentLanguage.ts": [
     "/assets/logo-Bbe7nbNw.png"
   ],
   "src/index.css": [
@@ -2534,16 +2753,28 @@
   "src/pages/Blogs.tsx": [
     "/assets/logo-Bbe7nbNw.png"
   ],
+  "src/pages/CheckoutReview.tsx": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
   "src/pages/Contact.tsx": [
     "/assets/logo-Bbe7nbNw.png"
   ],
   "src/pages/Dashboard.tsx": [
     "/assets/logo-Bbe7nbNw.png"
   ],
+  "src/pages/Demo.tsx": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
+  "src/pages/ErrorPage.tsx": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
   "src/pages/Feedback.tsx": [
     "/assets/logo-Bbe7nbNw.png"
   ],
   "src/pages/ForgotPassword.tsx": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
+  "src/pages/HowItWorks.tsx": [
     "/assets/logo-Bbe7nbNw.png"
   ],
   "src/pages/Index.tsx": [

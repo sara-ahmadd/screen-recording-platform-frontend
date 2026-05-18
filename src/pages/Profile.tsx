@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { Trans, useTranslation } from "react-i18next";
 import AppLayout from "@/components/AppLayout";
 import { authApi, workspaceApi } from "@/lib/api";
 import { toastApiSuccess } from "@/lib/appToast";
@@ -14,9 +15,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Eraser, Loader2, UserCircle2 } from "lucide-react";
 import { clearBrowserSiteData } from "@/lib/clearSiteData";
+import { PRESERVED_STORAGE_KEYS } from "@/i18n/constants";
 import { useAvatarSrc } from "@/hooks/useAvatarSrc";
 
 export default function ProfilePage() {
+  const { t } = useTranslation(["profile", "common"]);
   const { user, refreshUser, selectedWorkspaceId, logout } = useAuth();
   const navigate = useNavigate();
   const confirm = useConfirmDialog();
@@ -116,17 +119,17 @@ export default function ProfilePage() {
         setOtp("");
         setOtpDialogOpen(true);
         toastApiSuccess(profileRes, {
-          title: "OTP required",
-          fallbackDescription: "Enter the OTP sent to your new email to complete the update.",
+          title: t("otpRequired"),
+          fallbackDescription: t("otpRequired"),
         });
       } else {
         toastApiSuccess(profileRes, {
-          title: "Profile updated",
-          fallbackDescription: "Profile updated successfully.",
+          title: t("profileUpdated"),
+          fallbackDescription: t("profileUpdated"),
         });
       }
     } catch (err: any) {
-      toast({ title: "Failed to update profile", description: err.message, variant: "destructive" });
+      toast({ title: t("updateFailed"), description: err.message, variant: "destructive" });
     } finally {
       setSaving(false);
     }
@@ -142,11 +145,11 @@ export default function ProfilePage() {
       setOtp("");
       await refreshUser();
       toastApiSuccess(emailRes, {
-        title: "Email updated",
-        fallbackDescription: "Your email was updated successfully.",
+        title: t("emailUpdated"),
+        fallbackDescription: t("emailUpdated"),
       });
     } catch (err: any) {
-      toast({ title: "Email verification failed", description: err.message, variant: "destructive" });
+      toast({ title: t("emailVerifyFailed"), description: err.message, variant: "destructive" });
     } finally {
       setVerifyingEmail(false);
     }
@@ -155,11 +158,10 @@ export default function ProfilePage() {
   const handleClearSiteData = async () => {
     if (clearingSiteData) return;
     const confirmed = await confirm({
-      title: "Clear site data and cache?",
-      description:
-        "This removes the offline shell, cached assets, local and session storage, and cookies that this page can see. You will be signed out and must log in again. Server-only (HttpOnly) session cookies may remain until they expire—use this after signing out if something still looks stuck.",
-      confirmText: "Clear and sign out",
-      cancelText: "Cancel",
+      title: t("clearCacheConfirm"),
+      description: t("cacheDesc"),
+      confirmText: t("cacheDesc"),
+      cancelText: t("common:actions.cancel"),
     });
     if (!confirmed) return;
     setClearingSiteData(true);
@@ -169,12 +171,12 @@ export default function ProfilePage() {
       } catch {
         // still clear local data if the network request fails
       }
-      await clearBrowserSiteData();
+      await clearBrowserSiteData({ preserveKeys: [...PRESERVED_STORAGE_KEYS] });
       window.location.assign("/login");
     } catch (err: any) {
       toast({
-        title: "Could not finish clearing",
-        description: err?.message || "Try again or use your browser’s clear-site-data option.",
+        title: t("clearFailed"),
+        description: err?.message || t("clearFailed"),
         variant: "destructive",
       });
       setClearingSiteData(false);
@@ -184,25 +186,24 @@ export default function ProfilePage() {
   const handleDeleteAccount = async () => {
     if (deletingAccount) return;
     const confirmed = await confirm({
-      title: "Delete your account?",
-      description:
-        "This will permanently remove your account and cannot be undone.",
-      confirmText: "Delete account",
-      cancelText: "Keep account",
+      title: t("deleteAccountConfirm"),
+      description: t("deleteAccountConfirm"),
+      confirmText: t("deleteAccount"),
+      cancelText: t("common:actions.cancel"),
     });
     if (!confirmed) return;
     setDeletingAccount(true);
     try {
       const res = await authApi.deleteMe();
       toastApiSuccess(res, {
-        title: "Account deleted",
-        fallbackDescription: "Your account has been deleted.",
+        title: t("accountDeleted"),
+        fallbackDescription: t("accountDeleted"),
       });
       await logout();
       navigate("/login", { replace: true });
     } catch (err: any) {
       toast({
-        title: "Delete account failed",
+        title: t("deleteFailed"),
         description: err.message,
         variant: "destructive",
       });
@@ -214,13 +215,13 @@ export default function ProfilePage() {
   return (
     <AppLayout>
       <div className="p-6 md:p-8 max-w-7xl mx-auto">
-        <h1 className="text-2xl font-bold mb-2">Profile Details</h1>
-        <p className="text-muted-foreground mb-8">Manage your account information</p>
+        <h1 className="text-2xl font-bold mb-2">{t("title")}</h1>
+        <p className="text-muted-foreground mb-8">{t("subtitle")}</p>
 
         <Card className="glass">
           <CardHeader>
-            <CardTitle>Edit Profile</CardTitle>
-            <CardDescription>Update your name, email, and avatar.</CardDescription>
+            <CardTitle>{t("editProfile")}</CardTitle>
+            <CardDescription>{t("editDesc")}</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSave} className="space-y-5">
@@ -230,11 +231,11 @@ export default function ProfilePage() {
                     type="button"
                     className="rounded-full"
                     onClick={() => setAvatarPreviewOpen(true)}
-                    title="Preview avatar"
+                    title={t("avatarPreview")}
                   >
                     <img
                       src={avatarPreview}
-                      alt="Avatar preview"
+                      alt={t("avatarPreview")}
                       className="h-16 w-16 rounded-full object-cover border border-border"
                       onError={() => setAvatarLoadFailed(true)}
                     />
@@ -245,7 +246,7 @@ export default function ProfilePage() {
                   </div>
                 )}
                 <div className="space-y-1">
-                  <Label htmlFor="avatar">Avatar</Label>
+                  <Label htmlFor="avatar">{t("avatar")}</Label>
                   <Input
                     id="avatar"
                     type="file"
@@ -259,7 +260,7 @@ export default function ProfilePage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="user_name">Username</Label>
+                <Label htmlFor="user_name">{t("common:labels.username")}</Label>
                 <Input
                   id="user_name"
                   value={userName}
@@ -271,7 +272,7 @@ export default function ProfilePage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">{t("common:labels.email")}</Label>
                 <Input
                   id="email"
                   type="email"
@@ -283,7 +284,7 @@ export default function ProfilePage() {
               <div className="flex flex-wrap gap-3 pt-2">
 
               <Button type="submit" className="gradient-primary" disabled={saving}>
-                {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save changes"}
+                {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : t("saveChanges")}
               </Button>
               <div className="flex flex-wrap gap-3">
                 <Button
@@ -293,7 +294,7 @@ export default function ProfilePage() {
                   disabled={deletingAccount}
                 >
                   {deletingAccount ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : null}
-                  Delete account
+                  {t("deleteAccount")}
                 </Button>
               </div>
               </div>
@@ -303,11 +304,8 @@ export default function ProfilePage() {
 
         <Card className="glass mt-6">
           <CardHeader>
-            <CardTitle>Cache &amp; site data</CardTitle>
-            <CardDescription>
-              Clear downloaded bundles, the service worker, IndexedDB, storage, and cookies readable by this site—without
-              opening browser settings. You will be signed out.
-            </CardDescription>
+            <CardTitle>{t("cacheTitle")}</CardTitle>
+            <CardDescription>{t("cacheDesc")}</CardDescription>
           </CardHeader>
           <CardContent>
             <Button
@@ -322,7 +320,7 @@ export default function ProfilePage() {
               ) : (
                 <Eraser className="h-4 w-4" />
               )}
-              Clear cache and site data
+              {t("cacheDesc")}
             </Button>
           </CardContent>
         </Card>
@@ -332,8 +330,8 @@ export default function ProfilePage() {
             workspace={mergedSelectedWorkspace}
             allWorkspaces={user?.workspaces}
             loading={subscriptionDetailsLoading}
-            title="Active subscription"
-            description="Current plan for the workspace you have selected in the app."
+            title={t("activeSubscription")}
+            description={t("subtitle")}
           />
         </div>
       </div>
@@ -341,23 +339,28 @@ export default function ProfilePage() {
       <Dialog open={otpDialogOpen} onOpenChange={setOtpDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Verify Email Update</DialogTitle>
+            <DialogTitle>{t("verifyEmailTitle")}</DialogTitle>
             <DialogDescription>
-              Enter the OTP sent to <span className="font-medium">{pendingEmail}</span>.
+              <Trans
+                i18nKey="otpSentTo"
+                ns="profile"
+                values={{ email: pendingEmail }}
+                components={{ 1: <span className="font-medium" /> }}
+              />
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="otp">OTP</Label>
+              <Label htmlFor="otp">{t("common:labels.otp")}</Label>
               <Input
                 id="otp"
                 value={otp}
                 onChange={(e) => setOtp(e.target.value)}
-                placeholder="Enter OTP"
+                placeholder={t("common:placeholders.otp")}
               />
             </div>
             <Button className="w-full gradient-primary" onClick={handleConfirmEmailUpdate} disabled={verifyingEmail || !otp}>
-              {verifyingEmail ? <Loader2 className="h-4 w-4 animate-spin" /> : "Confirm Email"}
+              {verifyingEmail ? <Loader2 className="h-4 w-4 animate-spin" /> : t("confirmEmail")}
             </Button>
           </div>
         </DialogContent>
@@ -366,18 +369,18 @@ export default function ProfilePage() {
       <Dialog open={avatarPreviewOpen} onOpenChange={setAvatarPreviewOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Avatar Preview</DialogTitle>
-            <DialogDescription>Current avatar image preview.</DialogDescription>
+            <DialogTitle>{t("avatarPreview")}</DialogTitle>
+            <DialogDescription>{t("avatarPreview")}</DialogDescription>
           </DialogHeader>
           {avatarPreview && !avatarLoadFailed ? (
             <img
               src={avatarPreview}
-              alt="Current avatar"
+              alt={t("avatarPreview")}
               className="w-full max-h-[70vh] object-contain rounded-md border border-border"
             />
           ) : (
             <div className="h-48 rounded-md border border-border bg-secondary/40 flex items-center justify-center text-muted-foreground">
-              No avatar available
+              {t("noAvatar")}
             </div>
           )}
         </DialogContent>

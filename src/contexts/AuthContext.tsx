@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState, useCallback, useRef } from "react";
 import { authApi, setAccessToken, setRefreshToken, getAccessToken, getRefreshToken, getSelectedWorkspaceId, setSelectedWorkspaceId as persistSelectedWorkspaceId } from "@/lib/api";
 import { connectSocket, disconnectSocket, reconnectSocketWithLatestToken } from "@/lib/socket";
+import i18n from "@/i18n/config";
 
 interface Workspace {
   id: number;
@@ -59,7 +60,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       connectSocket();
       return true;
     } catch (err: any) {
-      setLastAuthError(err?.message || "Could not verify login session.");
+      setLastAuthError(err?.message || i18n.t("auth:sessionVerifyFailed"));
       setUser(null);
       setAccessToken(null);
       setRefreshToken(null);

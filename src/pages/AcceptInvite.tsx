@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useEffect, useRef, useState } from "react";
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { workspaceApi } from "@/lib/api";
@@ -20,6 +21,7 @@ import {
 } from "@/lib/inviteFlow";
 
 export default function AcceptInvitePage() {
+  const { t } = useTranslation(["errors", "common", "auth"]);
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -33,7 +35,7 @@ export default function AcceptInvitePage() {
     async function accept() {
       const token = searchParams.get("token");
       if (!token) {
-        toast({ title: "Invalid invitation link", variant: "destructive" });
+        toast({ title: t("invalidInvite"), variant: "destructive" });
         setLoading(false);
         return;
       }
@@ -59,7 +61,7 @@ export default function AcceptInvitePage() {
         setShowSuccessDialog(true);
       } catch (err: any) {
         toast({
-          title: "Invitation not accepted",
+          title: t("inviteNotAccepted"),
           description: err.message,
           variant: "destructive",
         });
@@ -84,21 +86,21 @@ export default function AcceptInvitePage() {
           {loading ? (
             <>
               <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto" />
-              <p className="text-sm text-muted-foreground mt-3">Processing invitation...</p>
+              <p className="text-sm text-muted-foreground mt-3">{t("inviteProcessing")}</p>
             </>
           ) : (
             !showSuccessDialog && (
               <>
-                <p className="text-lg font-semibold">Invitation Pending</p>
+                <p className="text-lg font-semibold">{t("invitePending")}</p>
                 <p className="text-sm text-muted-foreground mt-2">
-                  Complete signup/login to accept this workspace invitation.
+                  {t("inviteComplete")}
                 </p>
                 <div className="flex items-center justify-center gap-2 mt-4">
                   <Link to="/register">
-                    <Button className="gradient-primary">Sign up</Button>
+                    <Button className="gradient-primary">{t("common:actions.signUp")}</Button>
                   </Link>
                   <Link to="/login">
-                    <Button variant="outline">Login</Button>
+                    <Button variant="outline">{t("common:actions.signIn")}</Button>
                   </Link>
                 </div>
               </>
@@ -110,14 +112,13 @@ export default function AcceptInvitePage() {
       <AlertDialog open={showSignupDialog} onOpenChange={setShowSignupDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Signup required first</AlertDialogTitle>
+            <AlertDialogTitle>{t("signupRequired")}</AlertDialogTitle>
             <AlertDialogDescription>
-              You need to create an account first to accept this invitation. After signup and login,
-              you will be redirected back to this invitation automatically.
+              {t("signupDialogDesc")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogAction onClick={() => navigate("/register")}>Go to Sign up</AlertDialogAction>
+            <AlertDialogAction onClick={() => navigate("/register")}>{t("goSignup")}</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
@@ -132,15 +133,14 @@ export default function AcceptInvitePage() {
             <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-emerald-500/15">
               <CheckCircle2 className="h-7 w-7 text-emerald-600 dark:text-emerald-400" aria-hidden />
             </div>
-            <AlertDialogTitle className="text-center">Invitation accepted</AlertDialogTitle>
+            <AlertDialogTitle className="text-center">{t("inviteAccepted")}</AlertDialogTitle>
             <AlertDialogDescription className="text-center">
-              You have joined the workspace successfully. Continue to the homepage &mdash; sign in any time to open
-              your dashboard and workspaces.
+              {t("inviteAcceptedDesc")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="sm:justify-center">
             <AlertDialogAction className="gradient-primary w-full sm:w-auto" onClick={goHome}>
-              Go to homepage
+              {t("goHomepage")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

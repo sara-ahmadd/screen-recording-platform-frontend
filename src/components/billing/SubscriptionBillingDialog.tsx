@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 import { useForm, Controller } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -24,6 +25,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Loader2 } from "lucide-react";
+import i18n from "@/i18n/config";
 
 type CountryOption = {
   label: string;
@@ -38,31 +40,34 @@ type CityResponse = {
 };
 
 const englishOnly = /^[A-Za-z0-9\s.,'()-]+$/;
-const formSchema = z.object({
-  first_name: z.string().trim().min(1, "First name is required"),
-  last_name: z.string().trim().min(1, "Last name is required"),
-  email: z.string().trim().email("Enter a valid email"),
-  phone_number: z
-    .string()
-    .trim()
-    .min(1, "Phone number is required")
-    .refine((value) => isValidPhoneNumber(value), "Enter a valid international phone number"),
-  street: z.string().trim().min(1, "Street is required"),
-  postal_code: z.string().trim().min(1, "Postal code is required"),
-  country: z.string().trim().length(2, "Select a country"),
-  city: z
-    .string()
-    .trim()
-    .min(1, "City is required")
-    .regex(englishOnly, "City must be English only"),
-  state: z
-    .string()
-    .trim()
-    .min(1, "State is required")
-    .regex(englishOnly, "State must be English only"),
-});
 
-type FormValues = z.infer<typeof formSchema>;
+function buildFormSchema(t: (key: string) => string) {
+  return z.object({
+    first_name: z.string().trim().min(1, t("billingDialog.validation.firstNameRequired")),
+    last_name: z.string().trim().min(1, t("billingDialog.validation.lastNameRequired")),
+    email: z.string().trim().email(t("billingDialog.validation.emailInvalid")),
+    phone_number: z
+      .string()
+      .trim()
+      .min(1, t("billingDialog.validation.phoneRequired"))
+      .refine((value) => isValidPhoneNumber(value), t("billingDialog.validation.phoneInvalid")),
+    street: z.string().trim().min(1, t("billingDialog.validation.streetRequired")),
+    postal_code: z.string().trim().min(1, t("billingDialog.validation.postalRequired")),
+    country: z.string().trim().length(2, t("billingDialog.validation.countryRequired")),
+    city: z
+      .string()
+      .trim()
+      .min(1, t("billingDialog.validation.cityRequired"))
+      .regex(englishOnly, t("billingDialog.validation.cityEnglishOnly")),
+    state: z
+      .string()
+      .trim()
+      .min(1, t("billingDialog.validation.stateRequired"))
+      .regex(englishOnly, t("billingDialog.validation.stateEnglishOnly")),
+  });
+}
+
+type FormValues = z.infer<ReturnType<typeof buildFormSchema>>;
 
 export type BillingSubmitPayload = {
   country: string;
@@ -103,7 +108,7 @@ async function fetchCountries(): Promise<CountryOption[]> {
   if (!countryFetchPromise) {
     countryFetchPromise = fetch("https://restcountries.com/v3.1/all?fields=name,cca2,flags")
       .then(async (response) => {
-        if (!response.ok) throw new Error("Failed to load countries");
+        if (!response.ok) throw new Error(i18n.t("billing:billingDialog.errors.countriesLoadFailed"));
         const raw = (await response.json()) as Array<{
           name?: { common?: string };
           cca2?: string;
@@ -137,6 +142,8 @@ export function SubscriptionBillingDialog({
   onPromoCodeChange,
   onSubmit,
 }: SubscriptionBillingDialogProps) {
+  const { t } = useTranslation(["billing", "common"]);
+  const formSchema = useMemo(() => buildFormSchema(t), [t]);
   const [countries, setCountries] = useState<CountryOption[]>([]);
   const [countriesLoading, setCountriesLoading] = useState(false);
   const [cities, setCities] = useState<string[]>([]);
@@ -177,10 +184,12 @@ export function SubscriptionBillingDialog({
     void fetchCountries()
       .then((items) => setCountries(items))
       .catch((error: unknown) => {
-        setCountryError(error instanceof Error ? error.message : "Could not load countries");
+        setCountryError(
+          error instanceof Error ? error.message : t("billingDialog.errors.countriesLoadFailed"),
+        );
       })
       .finally(() => setCountriesLoading(false));
-  }, [open]);
+  }, [open, t]);
 
   useEffect(() => {
     if (!open) {
@@ -226,10 +235,10 @@ export function SubscriptionBillingDialog({
       body: JSON.stringify({ country: selectedCountryName }),
     })
       .then(async (response) => {
-        if (!response.ok) throw new Error("Failed to load cities");
+        if (!response.ok) throw new Error(t("billingDialog.errors.citiesLoadFailed"));
         const data = (await response.json()) as CityResponse;
         if (data.error || !Array.isArray(data.data)) {
-          throw new Error(data.msg || "Invalid cities response");
+          throw new Error(data.msg || t("billingDialog.errors.invalidCitiesResponse"));
         }
         const englishCities = data.data
           .filter((city) => englishOnly.test(city))
@@ -240,7 +249,7 @@ export function SubscriptionBillingDialog({
         setCities([]);
       })
       .finally(() => setCitiesLoading(false));
-  }, [selectedCountryCode, setValue, countryNameByCode]);
+  }, [selectedCountryCode, setValue, countryNameByCode, t]);
 
   const submitHandler = handleSubmit(async (values) => {
     const normalizedCountry = values.country.toUpperCase();
@@ -275,28 +284,26 @@ export function SubscriptionBillingDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="w-[95vw] max-w-2xl p-0 overflow-hidden">
         <DialogHeader className="px-6 pt-6">
-          <DialogTitle>Billing Details</DialogTitle>
-          <DialogDescription>
-            Fill your billing information to continue creating the subscription.
-          </DialogDescription>
+          <DialogTitle>{t("billingDialog.title")}</DialogTitle>
+          <DialogDescription>{t("billingDialog.description")}</DialogDescription>
         </DialogHeader>
 
         <form onSubmit={submitHandler} className="px-6 pb-6">
           <div className="max-h-[65vh] overflow-y-auto pr-1">
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2 p-4">
-              <Field label="First Name" error={errors.first_name?.message}>
-                <Input {...register("first_name")} placeholder="John" />
+              <Field label={t("billingDialog.firstName")} error={errors.first_name?.message}>
+                <Input {...register("first_name")} placeholder={t("billingDialog.placeholderFirstName")} />
               </Field>
 
-              <Field label="Last Name" error={errors.last_name?.message}>
-                <Input {...register("last_name")} placeholder="Doe" />
+              <Field label={t("billingDialog.lastName")} error={errors.last_name?.message}>
+                <Input {...register("last_name")} placeholder={t("billingDialog.placeholderLastName")} />
               </Field>
 
-              <Field label="Email" error={errors.email?.message}>
-                <Input {...register("email")} type="email" placeholder="john@company.com" />
+              <Field label={t("common:labels.email")} error={errors.email?.message}>
+                <Input {...register("email")} type="email" placeholder={t("billingDialog.placeholderEmail")} />
               </Field>
 
-              <Field label="Phone Number" error={errors.phone_number?.message}>
+              <Field label={t("billingDialog.phoneNumber")} error={errors.phone_number?.message}>
                 <Controller
                   control={control}
                   name="phone_number"
@@ -312,15 +319,15 @@ export function SubscriptionBillingDialog({
                 />
               </Field>
 
-              <Field label="Street" error={errors.street?.message}>
-                <Input {...register("street")} placeholder="Street 12" />
+              <Field label={t("billingDialog.street")} error={errors.street?.message}>
+                <Input {...register("street")} placeholder={t("billingDialog.placeholderStreet")} />
               </Field>
 
-              <Field label="Postal Code" error={errors.postal_code?.message}>
-                <Input {...register("postal_code")} placeholder="12345" />
+              <Field label={t("billingDialog.postalCode")} error={errors.postal_code?.message}>
+                <Input {...register("postal_code")} placeholder={t("billingDialog.placeholderPostalCode")} />
               </Field>
 
-              <Field label="Country" error={errors.country?.message || countryError || undefined}>
+              <Field label={t("billingDialog.country")} error={errors.country?.message || countryError || undefined}>
                 <Select
                   value={selectedCountryCode}
                   onValueChange={(value) => {
@@ -330,7 +337,9 @@ export function SubscriptionBillingDialog({
                 >
                   <SelectTrigger>
                     <SelectValue
-                      placeholder={countriesLoading ? "Loading countries..." : "Select a country"}
+                      placeholder={
+                        countriesLoading ? t("billingDialog.loadingCountries") : t("billingDialog.selectCountry")
+                      }
                     />
                   </SelectTrigger>
                   <SelectContent>
@@ -349,7 +358,7 @@ export function SubscriptionBillingDialog({
                 </Select>
               </Field>
 
-              <Field label="City" error={errors.city?.message}>
+              <Field label={t("billingDialog.city")} error={errors.city?.message}>
                 <Select
                   value={watch("city")}
                   onValueChange={(value) => setValue("city", value, { shouldValidate: true, shouldDirty: true })}
@@ -359,10 +368,10 @@ export function SubscriptionBillingDialog({
                     <SelectValue
                       placeholder={
                         !selectedCountryCode
-                          ? "Select country first"
+                          ? t("billingDialog.selectCountryFirst")
                           : citiesLoading
-                            ? "Loading cities..."
-                            : "Select city"
+                            ? t("billingDialog.loadingCities")
+                            : t("billingDialog.selectCity")
                       }
                     />
                   </SelectTrigger>
@@ -376,7 +385,7 @@ export function SubscriptionBillingDialog({
                 </Select>
               </Field>
 
-              <Field label="State" error={errors.state?.message}>
+              <Field label={t("billingDialog.state")} error={errors.state?.message}>
                 <Select
                   value={watch("state")}
                   onValueChange={(value) => setValue("state", value, { shouldValidate: true, shouldDirty: true })}
@@ -386,10 +395,10 @@ export function SubscriptionBillingDialog({
                     <SelectValue
                       placeholder={
                         !selectedCountryCode
-                          ? "Select country first"
+                          ? t("billingDialog.selectCountryFirst")
                           : citiesLoading
-                            ? "Loading states..."
-                            : "Select state"
+                            ? t("billingDialog.loadingStates")
+                            : t("billingDialog.selectState")
                       }
                     />
                   </SelectTrigger>
@@ -403,11 +412,11 @@ export function SubscriptionBillingDialog({
                 </Select>
               </Field>
 
-              <Field label="Promo Code" error={promoError || undefined}>
+              <Field label={t("billingDialog.promoCode")} error={promoError || undefined}>
                 <Input
                   value={promoCode}
                   onChange={(event) => onPromoCodeChange(event.target.value)}
-                  placeholder="Enter promo code (optional)"
+                  placeholder={t("billingDialog.placeholderPromo")}
                 />
               </Field>
             </div>
@@ -415,10 +424,14 @@ export function SubscriptionBillingDialog({
 
           <DialogFooter className="mt-6">
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={submitting || formSubmitting}>
-              Cancel
+              {t("common:actions.cancel")}
             </Button>
             <Button type="submit" className="gradient-primary" disabled={!isValid || submitting || formSubmitting || countriesLoading || citiesLoading}>
-              {submitting || formSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : "Continue to payment"}
+              {submitting || formSubmitting ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                t("billingDialog.continueToPayment")
+              )}
             </Button>
           </DialogFooter>
         </form>

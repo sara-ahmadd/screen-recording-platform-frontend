@@ -1,4 +1,5 @@
 import { createContext, useCallback, useContext, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -22,27 +23,28 @@ type ConfirmFn = (options: ConfirmOptions) => Promise<boolean>;
 const ConfirmDialogContext = createContext<ConfirmFn | null>(null);
 
 export function ConfirmDialogProvider({ children }: { children: React.ReactNode }) {
+  const { t } = useTranslation("common");
   const [open, setOpen] = useState(false);
   const [opts, setOpts] = useState<Required<ConfirmOptions>>({
-    title: "Are you sure?",
-    description: "This action cannot be undone.",
-    confirmText: "Continue",
-    cancelText: "Cancel",
+    title: t("confirm.title"),
+    description: t("confirm.description"),
+    confirmText: t("confirm.confirm"),
+    cancelText: t("confirm.cancel"),
   });
   const [resolver, setResolver] = useState<((value: boolean) => void) | null>(null);
 
   const confirm = useCallback<ConfirmFn>((options) => {
     setOpts({
-      title: options.title || "Are you sure?",
-      description: options.description || "This action cannot be undone.",
-      confirmText: options.confirmText || "Continue",
-      cancelText: options.cancelText || "Cancel",
+      title: options.title || t("confirm.title"),
+      description: options.description || t("confirm.description"),
+      confirmText: options.confirmText || t("confirm.confirm"),
+      cancelText: options.cancelText || t("confirm.cancel"),
     });
     setOpen(true);
     return new Promise<boolean>((resolve) => {
       setResolver(() => resolve);
     });
-  }, []);
+  }, [t]);
 
   const handleOpenChange = (nextOpen: boolean) => {
     setOpen(nextOpen);

@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Loader2 } from "lucide-react";
 import {
   AlertDialog,
@@ -28,7 +29,6 @@ type PaidToFreeDialogsProps = {
   periodDialogOpen: boolean;
   onPeriodDialogOpenChange: (open: boolean) => void;
   periodEndLabel: string | null;
-  /** Server message from subscription cancel/update (shown when present). */
   cancelSuccessMessage?: string | null;
   onPeriodAcknowledge: () => void | Promise<void>;
 };
@@ -46,30 +46,32 @@ export function PaidToFreeDialogs({
   cancelSuccessMessage,
   onPeriodAcknowledge,
 }: PaidToFreeDialogsProps) {
+  const { t } = useTranslation(["layout", "common"]);
+
   return (
     <>
       <AlertDialog open={confirmOpen} onOpenChange={onConfirmOpenChange}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Cancel current subscription?</AlertDialogTitle>
-            <AlertDialogDescription className="text-left space-y-2">
-              <span>
-                You are on the <span className="font-medium text-foreground capitalize">{paidPlanLabel}</span> plan.
-                To move to Free, your current subscription will be cancelled first.
-              </span>
-              <span className="block">Do you want to continue?</span>
+            <AlertDialogTitle>{t("layout:paidToFree.cancelTitle")}</AlertDialogTitle>
+            <AlertDialogDescription className="text-left">
+              {t("layout:paidToFree.cancelDescription", { plan: paidPlanLabel })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel disabled={confirmLoading} onClick={() => onDismissConfirm()}>
-              Keep current plan
+              {t("layout:paidToFree.keepPlan")}
             </AlertDialogCancel>
             <Button
               className="gradient-primary sm:mt-0"
               disabled={confirmLoading}
               onClick={() => void onConfirmCancelSubscription()}
             >
-              {confirmLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Yes, cancel and switch to Free"}
+              {confirmLoading ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                t("layout:paidToFree.confirmSwitch")
+              )}
             </Button>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -82,26 +84,20 @@ export function PaidToFreeDialogs({
           onEscapeKeyDown={(e) => e.preventDefault()}
         >
           <DialogHeader>
-            <DialogTitle>Subscription cancelled</DialogTitle>
+            <DialogTitle>{t("layout:paidToFree.cancelledTitle")}</DialogTitle>
             <DialogDescription className="text-left space-y-3 pt-1">
               {cancelSuccessMessage ? (
                 <span className="block text-sm text-foreground whitespace-pre-wrap">{cancelSuccessMessage}</span>
+              ) : periodEndLabel ? (
+                <span>{t("layout:paidToFree.cancelledDescription", { date: periodEndLabel })}</span>
               ) : (
-                <span>
-                  Your paid plan has been cancelled. You will keep your current plan benefits until{" "}
-                  {periodEndLabel ? (
-                    <span className="font-medium text-foreground">{periodEndLabel}</span>
-                  ) : (
-                    "the end of your current billing period"
-                  )}
-                  . After that, your workspace will follow the Free plan limits once you finish switching to Free.
-                </span>
+                <span>{t("layout:paidToFree.cancelledDescriptionEnd")}</span>
               )}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <Button className="gradient-primary" onClick={() => void onPeriodAcknowledge()}>
-              Close
+              {t("common:actions.close")}
             </Button>
           </DialogFooter>
         </DialogContent>

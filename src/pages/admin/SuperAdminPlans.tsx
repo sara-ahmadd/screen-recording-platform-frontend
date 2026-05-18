@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useCallback, useEffect, useState } from "react";
 import AppLayout from "@/components/AppLayout";
 import { superAdminApi } from "@/lib/api";
@@ -73,6 +74,7 @@ const emptyForm = (): PlanForm => ({
 });
 
 export default function SuperAdminPlansPage() {
+  const { t } = useTranslation(["admin", "common"]);
   const { toast } = useToast();
   const confirm = useConfirmDialog();
   const [rows, setRows] = useState<any[]>([]);
@@ -100,7 +102,7 @@ export default function SuperAdminPlansPage() {
       const res = await superAdminApi.plans.list();
       setRows(res?.plans || res?.data || res || []);
     } catch (err: any) {
-      toast({ title: "Error loading plans", description: err.message, variant: "destructive" });
+      toast({ title: t("errorLoadingPlans"), description: err?.message || t("common:errors.tryAgain"), variant: "destructive" });
     } finally {
       setLoading(false);
     }
@@ -184,8 +186,8 @@ export default function SuperAdminPlansPage() {
       };
       if (normalizedForm.monthlyPrice < 0 || normalizedForm.yearlyPrice < 0) {
         toast({
-          title: "Invalid price",
-          description: "monthlyPriceUSD and yearlyPriceUSD must be numbers >= 0.",
+          title: t("invalidPrice"),
+          description: t("plans.invalidPriceDesc"),
           variant: "destructive",
         });
         return;
@@ -216,7 +218,7 @@ export default function SuperAdminPlansPage() {
         payload.append("teamAccess", String(normalizedForm.teamAccess));
         if (logoFile) payload.append("logo", logoFile);
         await superAdminApi.plans.create(payload);
-        toast({ title: "Plan created", description: "Plan was created successfully." });
+        toast({ title: t("planCreated"), description: t("planCreatedDesc") });
       } else {
         const baseForm: PlanForm = originalEditForm
           ? {
@@ -258,17 +260,17 @@ export default function SuperAdminPlansPage() {
         }
 
         if (!hasChanges) {
-          toast({ title: "No changes to update", description: "Edit at least one field before saving." });
+          toast({ title: t("plans.noChangesTitle"), description: t("noChangesDesc") });
           return;
         }
 
         await superAdminApi.plans.update(editingPlanId, payload);
-        toast({ title: "Plan updated", description: "Plan was updated successfully." });
+        toast({ title: t("planUpdated"), description: t("planUpdatedDesc") });
       }
       setDialogOpen(false);
       await load();
     } catch (err: any) {
-      toast({ title: "Failed to save plan", description: err.message, variant: "destructive" });
+      toast({ title: t("failedSavePlan"), description: err?.message || t("common:errors.tryAgain"), variant: "destructive" });
     } finally {
       setSubmitting(false);
     }
@@ -276,17 +278,17 @@ export default function SuperAdminPlansPage() {
 
   const handleDelete = async (id: number) => {
     const ok = await confirm({
-      title: "Delete plan?",
-      description: "This action cannot be undone.",
-      confirmText: "Delete",
-      cancelText: "Cancel",
+      title: t("deletePlanTitle"),
+      description: t("plans.deleteConfirmDesc"),
+      confirmText: t("crud.delete"),
+      cancelText: t("common:actions.cancel"),
     });
     if (!ok) return;
     try {
       await superAdminApi.plans.delete(id);
       await load();
     } catch (err: any) {
-      toast({ title: "Failed to delete plan", description: err.message, variant: "destructive" });
+      toast({ title: t("failedDeletePlan"), description: err?.message || t("common:errors.tryAgain"), variant: "destructive" });
     }
   };
 
@@ -311,9 +313,9 @@ export default function SuperAdminPlansPage() {
     <AppLayout>
       <div className="mx-auto flex h-[90vh] max-h-[90vh] min-h-0 w-full max-w-7xl flex-col gap-4 overflow-hidden p-6 md:p-8">
         <div className="flex shrink-0 flex-wrap items-center justify-between gap-3">
-          <h1 className="text-3xl font-bold">All Plans</h1>
+          <h1 className="text-3xl font-bold">{t("allPlans")}</h1>
           <Button className="gradient-primary" onClick={openCreateDialog}>
-            <Plus className="h-4 w-4 mr-2" /> Create New Plan
+            <Plus className="h-4 w-4 mr-2" /> {t("createNewPlan")}
           </Button>
         </div>
 
@@ -321,13 +323,13 @@ export default function SuperAdminPlansPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Billing</TableHead>
-                <TableHead>Monthly</TableHead>
-                <TableHead>Yearly</TableHead>
-                <TableHead>Limits</TableHead>
-                <TableHead>Features</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+                <TableHead>{t("table.name")}</TableHead>
+                <TableHead>{t("table.billing")}</TableHead>
+                <TableHead>{t("table.monthly")}</TableHead>
+                <TableHead>{t("table.yearly")}</TableHead>
+                <TableHead>{t("table.limits")}</TableHead>
+                <TableHead>{t("table.features")}</TableHead>
+                <TableHead className="text-right">{t("table.actions")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -340,38 +342,41 @@ export default function SuperAdminPlansPage() {
               ) : rows.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={7} className="py-10 text-center text-muted-foreground">
-                    No plans found.
+                    {t("plans.noPlansFound")}
                   </TableCell>
                 </TableRow>
               ) : (
                 rows.map((plan: any) => (
                   <TableRow key={plan.id}>
-                    <TableCell className="capitalize font-medium">{plan.name || `Plan ${plan.id}`}</TableCell>
+                    <TableCell className="capitalize font-medium">{plan.name || t("plans.planFallback", { id: plan.id })}</TableCell>
                     <TableCell className="text-xs text-muted-foreground capitalize">
                       {plan.billingProvider || "—"}
                     </TableCell>
                     <TableCell>
                       EGP {Number(plan.monthlyPriceEGP || 0).toLocaleString()}
                       <div className="text-xs text-muted-foreground">
-                        ≈ {Number(plan.monthlyPriceUSD ?? plan.monthlyPrice ?? 0)} USD
+                        {t("plans.approxUsd", { amount: Number(plan.monthlyPriceUSD ?? plan.monthlyPrice ?? 0) })}
                       </div>
                     </TableCell>
                     <TableCell>
                       EGP {Number(plan.yearlyPriceEGP || 0).toLocaleString()}
                       <div className="text-xs text-muted-foreground">
-                        ≈ {Number(plan.yearlyPriceUSD ?? plan.yearlyPrice ?? 0)} USD
+                        {t("plans.approxUsd", { amount: Number(plan.yearlyPriceUSD ?? plan.yearlyPrice ?? 0) })}
                       </div>
                     </TableCell>
                     <TableCell className="text-xs text-muted-foreground">
-                      {Number(plan.maxVideosPerMonth || 0)} videos/mo, {Number(plan.maxStorageGB || 0)} GB,{" "}
-                      {Number(plan.maxTeamMembers || 0)} members
+                      {t("plans.limitsSummary", {
+                        videos: Number(plan.maxVideosPerMonth || 0),
+                        storage: Number(plan.maxStorageGB || 0),
+                        members: Number(plan.maxTeamMembers || 0),
+                      })}
                     </TableCell>
                     <TableCell className="text-xs text-muted-foreground">
                       {[
-                        plan.canDownloadVideos && "Downloads",
-                        plan.canRemoveWaterMark && "No watermark",
-                        plan.canSharePublicLink && "Public sharing",
-                        plan.teamAccess && "Team access",
+                        plan.canDownloadVideos && t("downloads"),
+                        plan.canRemoveWaterMark && t("noWatermark"),
+                        plan.canSharePublicLink && t("publicSharing"),
+                        plan.teamAccess && t("teamAccess"),
                       ]
                         .filter(Boolean)
                         .join(" | ") || "—"}
@@ -406,17 +411,15 @@ export default function SuperAdminPlansPage() {
         <DialogContent className="flex max-h-[90vh] max-w-2xl flex-col gap-0 overflow-hidden p-0">
           <div className="shrink-0 border-b border-border/60 px-6 pb-3 pt-6 pr-12">
             <DialogHeader>
-              <DialogTitle>{editingPlanId == null ? "Create New Plan" : "Update Plan"}</DialogTitle>
-              <DialogDescription>
-                Choose Stripe or Paymob for paid plans. The backend creates prices or Paymob subscription plans automatically. Paymob amounts use USD list prices and are converted to EGP for Paymob.
-              </DialogDescription>
+              <DialogTitle>{editingPlanId == null ? t("createNewPlan") : t("updatePlan")}</DialogTitle>
+              <DialogDescription>{t("plans.dialogCreateDesc")}</DialogDescription>
             </DialogHeader>
           </div>
 
           <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-6 py-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div className="space-y-2 md:col-span-2">
-              <label className="text-sm font-medium">Payment provider (paid plans)</label>
+              <label className="text-sm font-medium">{t("plans.paymentProvider")}</label>
               <div className="flex flex-wrap gap-2">
                 <Button
                   type="button"
@@ -444,11 +447,11 @@ export default function SuperAdminPlansPage() {
                 </Button>
               </div>
               <p className="text-xs text-muted-foreground">
-                This controls how checkout and renewals run for subscribers on this plan.
+                {t("plans.paymentProviderHint")}
               </p>
             </div>
             <div className="space-y-1 md:col-span-2">
-              <label className="text-sm font-medium">Default billing cycle (optional)</label>
+              <label className="text-sm font-medium">{t("plans.billingCycleDefault")}</label>
               <select
                 value={form.defaultBillingCycle}
                 onChange={(e) =>
@@ -459,17 +462,17 @@ export default function SuperAdminPlansPage() {
                 }
                 className="w-full max-w-md rounded-md border border-input bg-background px-3 py-2 text-sm"
               >
-                <option value="">No default</option>
-                <option value="monthly">Monthly</option>
-                <option value="yearly">Yearly</option>
+                <option value="">{t("plans.noDefault")}</option>
+                <option value="monthly">{t("plans.monthly")}</option>
+                <option value="yearly">{t("plans.yearly")}</option>
               </select>
             </div>
             <div className="space-y-1">
-              <label className="text-sm font-medium">Plan name</label>
+              <label className="text-sm font-medium">{t("plans.planName")}</label>
               <Input value={form.name} onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))} />
             </div>
             <div className="space-y-1 md:col-span-2">
-              <label className="text-sm font-medium">Description</label>
+              <label className="text-sm font-medium">{t("plans.description")}</label>
               <textarea
                 value={form.description}
                 onChange={(e) => setForm((p) => ({ ...p, description: e.target.value }))}
@@ -478,7 +481,7 @@ export default function SuperAdminPlansPage() {
               />
             </div>
             <div className="space-y-1 md:col-span-2">
-              <label className="text-sm font-medium">Plan logo</label>
+              <label className="text-sm font-medium">{t("plans.planLogo")}</label>
               <Input
                 type="file"
                 accept="image/*"
@@ -493,13 +496,13 @@ export default function SuperAdminPlansPage() {
               {logoPreview && (
                 <img
                   src={logoPreview}
-                  alt="Plan logo preview"
+                  alt={t("planLogoPreview")}
                   className="h-12 w-12 rounded-md border border-border object-cover mt-2"
                 />
               )}
             </div>
             <div className="space-y-1">
-              <label className="text-sm font-medium">monthlyPriceUSD (required)</label>
+              <label className="text-sm font-medium">{t("plans.monthlyPriceUsd")}</label>
               <Input
                 type="number"
                 value={form.monthlyPrice}
@@ -511,11 +514,11 @@ export default function SuperAdminPlansPage() {
                 }}
               />
               {(form.billingProvider === "paymob" || form.billingProvider === "geidea") && (
-                <p className="text-xs text-muted-foreground">Converted to EGP for Paymob plan amounts.</p>
+                <p className="text-xs text-muted-foreground">{t("plans.egpConversionHint")}</p>
               )}
             </div>
             <div className="space-y-1">
-              <label className="text-sm font-medium">yearlyPriceUSD (required)</label>
+              <label className="text-sm font-medium">{t("plans.yearlyPriceUsd")}</label>
               <Input
                 type="number"
                 value={form.yearlyPrice}
@@ -527,11 +530,11 @@ export default function SuperAdminPlansPage() {
                 }}
               />
               {(form.billingProvider === "paymob" || form.billingProvider === "geidea") && (
-                <p className="text-xs text-muted-foreground">Converted to EGP for Paymob plan amounts.</p>
+                <p className="text-xs text-muted-foreground">{t("plans.egpConversionHint")}</p>
               )}
             </div>
             <div className="space-y-1">
-              <label className="text-sm font-medium">monthlyPriceEGP (optional override)</label>
+              <label className="text-sm font-medium">{t("plans.monthlyPriceEgp")}</label>
               <Input
                 type="number"
                 value={form.monthlyPriceEGP ?? ""}
@@ -547,7 +550,7 @@ export default function SuperAdminPlansPage() {
               />
             </div>
             <div className="space-y-1">
-              <label className="text-sm font-medium">yearlyPriceEGP (optional override)</label>
+              <label className="text-sm font-medium">{t("plans.yearlyPriceEgp")}</label>
               <Input
                 type="number"
                 value={form.yearlyPriceEGP ?? ""}
@@ -563,19 +566,19 @@ export default function SuperAdminPlansPage() {
               />
             </div>
             <div className="space-y-1">
-              <label className="text-sm font-medium">Max videos/month</label>
+              <label className="text-sm font-medium">{t("plans.maxVideosMonth")}</label>
               <Input type="number" value={form.maxVideosPerMonth} onChange={(e) => setNum("maxVideosPerMonth", e.target.value)} />
             </div>
             <div className="space-y-1">
-              <label className="text-sm font-medium">Max video duration (min)</label>
+              <label className="text-sm font-medium">{t("plans.maxVideoDuration")}</label>
               <Input type="number" value={form.maxVideoDuration} onChange={(e) => setNum("maxVideoDuration", e.target.value)} />
             </div>
             <div className="space-y-1">
-              <label className="text-sm font-medium">Max storage (GB)</label>
+              <label className="text-sm font-medium">{t("plans.maxStorage")}</label>
               <Input type="number" value={form.maxStorageGB} onChange={(e) => setNum("maxStorageGB", e.target.value)} />
             </div>
             <div className="space-y-1">
-              <label className="text-sm font-medium">Max team members</label>
+              <label className="text-sm font-medium">{t("plans.maxTeamMembers")}</label>
               <Input type="number" value={form.maxTeamMembers} onChange={(e) => setNum("maxTeamMembers", e.target.value)} />
             </div>
           </div>
@@ -586,36 +589,36 @@ export default function SuperAdminPlansPage() {
                 checked={form.canDownloadVideos}
                 onCheckedChange={(v) => setForm((p) => ({ ...p, canDownloadVideos: v === true }))}
               />
-              Can download videos
+              {t("plans.canDownloadVideos")}
             </label>
             <label className="flex items-center gap-2 text-sm">
               <Checkbox
                 checked={form.canRemoveWaterMark}
                 onCheckedChange={(v) => setForm((p) => ({ ...p, canRemoveWaterMark: v === true }))}
               />
-              Can remove watermark
+              {t("plans.canRemoveWatermark")}
             </label>
             <label className="flex items-center gap-2 text-sm">
               <Checkbox
                 checked={form.canSharePublicLink}
                 onCheckedChange={(v) => setForm((p) => ({ ...p, canSharePublicLink: v === true }))}
               />
-              Can share public link
+              {t("plans.canSharePublicLink")}
             </label>
             <label className="flex items-center gap-2 text-sm">
               <Checkbox
                 checked={form.teamAccess}
                 onCheckedChange={(v) => setForm((p) => ({ ...p, teamAccess: v === true }))}
               />
-              Team access
+              {t("plans.teamAccess")}
             </label>
           </div>
           </div>
 
           <div className="flex shrink-0 justify-end gap-2 border-t border-border/60 bg-background px-6 py-4">
-            <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancel</Button>
+            <Button variant="outline" onClick={() => setDialogOpen(false)}>{t("common:actions.cancel")}</Button>
             <Button className="gradient-primary" onClick={() => void handleSave()} disabled={submitting}>
-              {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : editingPlanId == null ? "Create Plan" : "Update Plan"}
+              {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : editingPlanId == null ? t("createPlan") : t("updatePlan")}
             </Button>
           </div>
         </DialogContent>
@@ -626,14 +629,16 @@ export default function SuperAdminPlansPage() {
           <div className="shrink-0 border-b border-border/60 px-6 pb-3 pt-6 pr-12">
             <DialogHeader>
               <DialogTitle>
-                Plan Details {detailsPlan?.id != null ? `#${detailsPlan.id}` : ""}
+                {detailsPlan?.id != null
+                  ? t("plans.planDetailsWithId", { id: detailsPlan.id })
+                  : t("plans.planDetails")}
               </DialogTitle>
-              <DialogDescription>Detailed information for the selected plan.</DialogDescription>
+              <DialogDescription>{t("plans.planDetailsDesc")}</DialogDescription>
             </DialogHeader>
           </div>
           {!detailsPlan ? (
             <div className="px-6 py-4">
-              <p className="text-sm text-muted-foreground">No plan data available.</p>
+              <p className="text-sm text-muted-foreground">{t("plans.noPlanData")}</p>
             </div>
           ) : (
             <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-6 py-4">

@@ -1,0 +1,275 @@
+{
+  "hero": {
+    "title": "Screen Recording Made Simple",
+    "subtitle": "Record your screen, share instantly, and collaborate with your team.",
+    "description": "theRec is a browser-based screen recorder built for modern teams.",
+    "goDashboard": "Go to Dashboard",
+    "startRecording": "Start Recording",
+    "watchDemo": "Watch Demo",
+    "startFree": "Start Recording free",
+    "noDownload": "No download required. Works in Chrome, Edge, and Firefox.",
+    "browserNote": "No download required • Works in your browser • Free plan available",
+    "privacyBlurb": "theRec is the official website for recording your screen, uploading videos, and collaborating with your workspace team. To use core features, we request account/profile information and recording metadata only to authenticate users, organize workspaces, process videos, and enable secure sharing. Read our full policy here:",
+    "privacyLink": "Privacy Policy",
+    "noDownloadLine": "No download required • Works in your browser • Free plan available",
+    "noCreditCard": "No credit card required",
+    "disclaimer": "theRec is the official website for recording your screen, uploading videos, and collaborating with your workspace team. To use core features, we request account/profile information and recording metadata only to authenticate users, organize workspaces, process videos, and enable secure sharing. Read our full policy here:"
+  },
+  "trust": {
+    "badge": "Trust & Security",
+    "title": "Built with transparency,",
+    "titleHighlight": "privacy, and secure collaboration",
+    "subtitle": "theRec is designed for modern teams that need secure video communication, protected workspace collaboration, and reliable recording infrastructure.",
+    "authTitle": "Secure Authentication",
+    "authDesc": "Protected login, workspace access control, and secure account authentication across your organization.",
+    "privateTitle": "Private Video Access",
+    "privateDesc": "Control who can access recordings using workspace permissions or secure shareable links.",
+    "processingTitle": "Automated Video Processing",
+    "processingDesc": "Videos are automatically optimized for playback, streaming, thumbnails, and organization.",
+    "minimalTitle": "Minimal Data Collection",
+    "minimalDesc": "We only collect essential account and recording data necessary to operate the platform.",
+    "titleAccent": "privacy, and secure collaboration",
+    "description": "theRec is designed for modern teams that need secure video communication, protected workspace collaboration, and reliable recording infrastructure.",
+    "items": {
+      "auth": {
+        "title": "Secure Authentication",
+        "desc": "Protected login, workspace access control, and secure account authentication across your organization."
+      },
+      "private": {
+        "title": "Private Video Access",
+        "desc": "Control who can access recordings using workspace permissions or secure shareable links."
+      },
+      "processing": {
+        "title": "Automated Video Processing",
+        "desc": "Videos are automatically optimized for playback, streaming, thumbnails, and organization."
+      },
+      "minimal": {
+        "title": "Minimal Data Collection",
+        "desc": "We only collect essential account and recording data necessary to operate the platform."
+      }
+    }
+  },
+  "overview": {
+    "badge": "Product Overview",
+    "title": "Everything your team needs",
+    "titleHighlight": "to communicate with video",
+    "subtitle": "theRec helps teams record, explain, share, and collaborate asynchronously — without meetings, complicated tools, or downloads.",
+    "instantTitle": "Instant Browser Recording",
+    "instantDesc": "Start recording immediately with no installation required. Capture your screen, tab, or window directly from your browser.",
+    "uploadTitle": "Upload Existing Videos",
+    "uploadDesc": "Already have recordings? Upload and organize them inside your workspace in seconds.",
+    "collabTitle": "Async Team Collaboration",
+    "collabDesc": "Share visual updates instead of scheduling meetings. Keep communication faster and clearer.",
+    "privacyTitle": "Privacy & Access Control",
+    "privacyDesc": "Keep recordings private, workspace-only, or publicly shareable with secure links.",
+    "playbackTitle": "Fast Video Playback",
+    "playbackDesc": "Videos are processed automatically for smooth streaming and instant viewing.",
+    "workspaceTitle": "Workspace Organization",
+    "workspaceDesc": "Manage recordings, teammates, permissions, and collaboration from one central place.",
+    "titleAccent": "to communicate with video",
+    "description": "theRec helps teams record, explain, share, and collaborate asynchronously — without meetings, complicated tools, or downloads.",
+    "features": {
+      "instant": {
+        "title": "Instant Browser Recording",
+        "desc": "Start recording immediately with no installation required. Capture your screen, tab, or window directly from your browser."
+      },
+      "upload": {
+        "title": "Upload Existing Videos",
+        "desc": "Already have recordings? Upload and organize them inside your workspace in seconds."
+      },
+      "async": {
+        "title": "Async Team Collaboration",
+        "desc": "Share visual updates instead of scheduling meetings. Keep communication faster and clearer."
+      },
+      "privacy": {
+        "title": "Privacy & Access Control",
+        "desc": "Keep recordings private, workspace-only, or publicly shareable with secure links."
+      },
+      "playback": {
+        "title": "Fast Video Playback",
+        "desc": "Videos are processed automatically for smooth streaming and instant viewing."
+      },
+      "workspace": {
+        "title": "Workspace Organization",
+        "desc": "Manage recordings, teammates, permissions, and collaboration from one central place."
+      }
+    }
+  },
+  "async": {
+    "badge": "Async Communication",
+    "title": "Replace long meetings",
+    "titleHighlight": "with quick video updates",
+    "subtitle": "Share product demos, bug reports, tutorials, onboarding videos, and team updates without interrupting everyone's schedule.",
+    "tagDemos": "Product demos",
+    "tagBugs": "Bug reporting",
+    "tagUpdates": "Team updates",
+    "tagWalkthroughs": "Client walkthroughs",
+    "tagOnboarding": "Async onboarding"
+  },
+  "pricing": {
+    "title": "Flexible pricing for",
+    "subtitle": "Flexible pricing for",
+    "subtitleHighlight": "individuals and teams",
+    "membersUpTo": "Up to {{count}} members",
+    "yearlySave": "({{egp}} EGP ≈ ${{usd}} USD) /year (save {{percent}}%)",
+    "planFallback": "Plan",
+    "perMonth": "EGP",
+    "egp": "EGP",
+    "usdApprox": "≈ {{amount}} USD /mo",
+    "badge": "Pricing",
+    "titleAccent": "individuals and teams",
+    "perMonthUsd": "USD /mo",
+    "members": "Up to {{count}} members",
+    "signInRequired": "Sign in required",
+    "signInRequiredDesc": "Please sign in to subscribe to the free plan."
+  },
+  "testimonials": {
+    "badge": "Testimonials",
+    "title": "Trusted by modern",
+    "titleHighlight": "remote-first teams",
+    "subtitle": "Teams use theRec to reduce meetings, explain faster, and collaborate more efficiently with video.",
+    "quote1": "theRec completely changed how our product team communicates updates asynchronously.",
+    "name1": "Aya O.",
+    "role1": "Product Manager",
+    "quote2": "We replaced many internal meetings with quick recordings and saved hours every week.",
+    "name2": "Karim M.",
+    "role2": "Engineering Lead",
+    "quote3": "Support explanations became much clearer after switching to video walkthroughs.",
+    "name3": "Lina S.",
+    "role3": "Customer Success",
+    "titleAccent": "remote-first teams",
+    "description": "Teams use theRec to reduce meetings, explain faster, and collaborate more efficiently with video.",
+    "items": {
+      "aya": {
+        "quote": "theRec completely changed how our product team communicates updates asynchronously.",
+        "name": "Aya O.",
+        "role": "Product Manager"
+      },
+      "karim": {
+        "quote": "We replaced many internal meetings with quick recordings and saved hours every week.",
+        "name": "Karim M.",
+        "role": "Engineering Lead"
+      },
+      "lina": {
+        "quote": "Support explanations became much clearer after switching to video walkthroughs.",
+        "name": "Lina S.",
+        "role": "Customer Success"
+      }
+    }
+  },
+  "faq": {
+    "title": "Questions?",
+    "titleHighlight": "We've got answers",
+    "q1": "What is theRec used for?",
+    "a1": "theRec helps individuals and teams record their screen, explain ideas visually, share video updates, and collaborate asynchronously without unnecessary meetings.",
+    "q2": "Do I need to install any software?",
+    "a2": "No. theRec works directly in your browser, so you can start recording instantly without downloading or installing anything.",
+    "q3": "Can I share recordings with people outside my workspace?",
+    "a3": "Yes. You can generate secure public links for external sharing or keep videos private inside your workspace.",
+    "q4": "Is theRec suitable for remote teams?",
+    "a4": "Absolutely. theRec is built for async communication, making it ideal for remote teams, distributed companies, product demos, onboarding, and team updates.",
+    "q5": "How are videos processed after recording?",
+    "a5": "Videos are automatically processed in the background to generate optimized playback formats, thumbnails, and streaming-ready files.",
+    "q6": "Can I upload existing videos?",
+    "a6": "Yes. In addition to screen recording, you can upload existing video files and organize them inside your workspace.",
+    "q7": "Are recordings private and secure?",
+    "a7": "Yes. You control who can access recordings through workspace permissions and secure sharing settings.",
+    "q8": "Is there a free plan available?",
+    "a8": "Yes. You can start with a free plan and upgrade anytime when your team needs more storage, collaboration, and advanced features.",
+    "titleAccent": "We've got answers",
+    "items": {
+      "q1": {
+        "q": "What is theRec used for?",
+        "a": "theRec helps individuals and teams record their screen, explain ideas visually, share video updates, and collaborate asynchronously without unnecessary meetings."
+      },
+      "q2": {
+        "q": "Do I need to install any software?",
+        "a": "No. theRec works directly in your browser, so you can start recording instantly without downloading or installing anything."
+      },
+      "q3": {
+        "q": "Can I share recordings with people outside my workspace?",
+        "a": "Yes. You can generate secure public links for external sharing or keep videos private inside your workspace."
+      },
+      "q4": {
+        "q": "Is theRec suitable for remote teams?",
+        "a": "Absolutely. theRec is built for async communication, making it ideal for remote teams, distributed companies, product demos, onboarding, and team updates."
+      },
+      "q5": {
+        "q": "How are videos processed after recording?",
+        "a": "Videos are automatically processed in the background to generate optimized playback formats, thumbnails, and streaming-ready files."
+      },
+      "q6": {
+        "q": "Can I upload existing videos?",
+        "a": "Yes. In addition to screen recording, you can upload existing video files and organize them inside your workspace."
+      },
+      "q7": {
+        "q": "Are recordings private and secure?",
+        "a": "Yes. You control who can access recordings through workspace permissions and secure sharing settings."
+      },
+      "q8": {
+        "q": "Is there a free plan available?",
+        "a": "Yes. You can start with a free plan and upgrade anytime when your team needs more storage, collaboration, and advanced features."
+      }
+    }
+  },
+  "cta": {
+    "welcomeBack": "Welcome Back",
+    "startFree": "Start Free",
+    "continueCreating": "Continue creating",
+    "continueHighlight": "and collaborating",
+    "continueDesc": "Jump back into your workspace and manage your recordings.",
+    "startRecording": "Start recording",
+    "startHighlight": "in less than a minute",
+    "startDesc": "Create your workspace, record your screen, and collaborate with your team — directly from the browser.",
+    "openDashboard": "Open Dashboard",
+    "manageWorkspaces": "Manage Workspaces",
+    "getStartedFree": "Get Started Free",
+    "signIn": "Sign In",
+    "noCreditCard": "No credit card required",
+    "welcomeBackBadge": "Welcome Back",
+    "welcomeBackTitle": "Continue creating",
+    "welcomeBackTitleAccent": "and collaborating",
+    "welcomeBackDesc": "Jump back into your workspace and manage your recordings.",
+    "startFreeBadge": "Start Free",
+    "startFreeTitle": "Start recording",
+    "startFreeTitleAccent": "in less than a minute",
+    "startFreeDesc": "Create your workspace, record your screen, and collaborate with your team — directly from the browser."
+  },
+  "dialogs": {
+    "paymentSuccess": "Payment successful",
+    "paymentSuccessDesc": "Your payment was completed successfully.",
+    "paymentCancelled": "Payment Cancelled",
+    "paymentCancelledDesc": "Your payment was cancelled.",
+    "workspaceRequired": "Select a workspace first",
+    "createWorkspaceRequired": "Create a workspace first",
+    "selectWorkspaceDesc": "To continue with the free plan, please select a workspace.",
+    "createWorkspaceDesc": "You do not have any workspaces yet. Create one to continue with the free plan.",
+    "workspaceRequiredSelect": "Select a workspace first",
+    "workspaceRequiredCreate": "Create a workspace first",
+    "workspaceRequiredSelectDesc": "To continue with the free plan, please select a workspace.",
+    "workspaceRequiredCreateDesc": "You do not have any workspaces yet. Create one to continue with the free plan."
+  },
+  "toast": {
+    "plansLoadError": "Error loading plans",
+    "signedIn": "Signed in",
+    "freePlanSignIn": "Please sign in to subscribe to the free plan."
+  },
+  "asyncCta": {
+    "badge": "Async Communication",
+    "title": "Replace long meetings",
+    "titleAccent": "with quick video updates",
+    "description": "Share product demos, bug reports, tutorials, onboarding videos, and team updates without interrupting everyone's schedule.",
+    "tags": {
+      "demos": "Product demos",
+      "bugs": "Bug reporting",
+      "updates": "Team updates",
+      "walkthroughs": "Client walkthroughs",
+      "onboarding": "Async onboarding"
+    }
+  },
+  "footer": {
+    "contact": "Contact",
+    "about": "About",
+    "blogs": "Blogs"
+  }
+}

@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useCallback, useEffect, useState } from "react";
 import AppLayout from "@/components/AppLayout";
 import { feedbackApi } from "@/lib/api";
@@ -26,6 +27,7 @@ const defaultForm: FeedbackForm = {
 };
 
 export default function FeedbackPage() {
+  const { t } = useTranslation("common");
   const { toast } = useToast();
   const confirm = useConfirmDialog();
   const [form, setForm] = useState<FeedbackForm>(defaultForm);
@@ -41,7 +43,7 @@ export default function FeedbackPage() {
       const res = await feedbackApi.getMy({ page: 1, limit: 20, order: "DESC" });
       setRows(res?.data || res?.feedback || res?.feedbacks || []);
     } catch (err: any) {
-      toast({ title: "Failed to load feedback", description: err?.message || "Please try again.", variant: "destructive" });
+      toast({ title: t("feedback.loadFailed"), description: err?.message, variant: "destructive" });
     } finally {
       setLoadingList(false);
     }
@@ -53,7 +55,7 @@ export default function FeedbackPage() {
 
   const handleCreate = async () => {
     if (form.comment.trim().length < 5) {
-      toast({ title: "Comment too short", description: "Comment must be at least 5 characters.", variant: "destructive" });
+      toast({ title: t("feedback.commentTooShort"), description: t("feedback.commentTooShortDesc"), variant: "destructive" });
       return;
     }
     setSubmitting(true);
@@ -64,10 +66,10 @@ export default function FeedbackPage() {
         isWebsiteSuccessful: form.isWebsiteSuccessful,
       });
       setForm(defaultForm);
-      toast({ title: "Feedback submitted", description: "Thanks for your feedback." });
+      toast({ title: t("feedback.submitted"), description: t("feedback.submittedDesc") });
       await loadMyFeedback();
     } catch (err: any) {
-      toast({ title: "Failed to submit feedback", description: err?.message || "Please try again.", variant: "destructive" });
+      toast({ title: t("feedback.submitFailed"), description: err?.message, variant: "destructive" });
     } finally {
       setSubmitting(false);
     }
@@ -86,50 +88,50 @@ export default function FeedbackPage() {
     if (!editing?.id) return;
     try {
       await feedbackApi.update(Number(editing.id), editForm);
-      toast({ title: "Feedback updated", description: "Your feedback has been updated." });
+      toast({ title: t("feedback.updated"), description: t("feedback.updatedDesc") });
       setEditing(null);
       await loadMyFeedback();
     } catch (err: any) {
-      toast({ title: "Failed to update feedback", description: err?.message || "Please try again.", variant: "destructive" });
+      toast({ title: t("feedback.updateFailed"), description: err?.message, variant: "destructive" });
     }
   };
 
   const handleDelete = async (id: number) => {
     const ok = await confirm({
-      title: "Delete feedback?",
-      description: "This action cannot be undone.",
-      confirmText: "Delete",
-      cancelText: "Cancel",
+      title: t("feedback.deleteConfirm"),
+      description: t("confirm.description"),
+      confirmText: t("actions.delete"),
+      cancelText: t("actions.cancel"),
     });
     if (!ok) return;
     try {
       await feedbackApi.delete(id);
-      toast({ title: "Feedback deleted" });
+      toast({ title: t("feedback.deleted") });
       await loadMyFeedback();
     } catch (err: any) {
-      toast({ title: "Failed to delete feedback", description: err?.message || "Please try again.", variant: "destructive" });
+      toast({ title: t("feedback.deleteFailed"), description: err?.message, variant: "destructive" });
     }
   };
 
   return (
     <AppLayout>
       <div className="p-6 md:p-8 max-w-6xl mx-auto space-y-6">
-        <h1 className="text-3xl font-bold">Feedback</h1>
+        <h1 className="text-3xl font-bold">{t("feedback.title")}</h1>
 
         <Card>
           <CardHeader>
-            <CardTitle>Submit Feedback</CardTitle>
-            <CardDescription>Share your experience with the app.</CardDescription>
+            <CardTitle>{t("feedback.submitTitle")}</CardTitle>
+            <CardDescription>{t("feedback.submitDesc")}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>Rating</Label>
+                <Label>{t("feedback.rating")}</Label>
                 <Select
                   value={String(form.rating)}
                   onValueChange={(value) => setForm((prev) => ({ ...prev, rating: Number(value) }))}
                 >
-                  <SelectTrigger><SelectValue placeholder="Select rating" /></SelectTrigger>
+                  <SelectTrigger><SelectValue placeholder={t("feedback.selectRating")} /></SelectTrigger>
                   <SelectContent>
                     {[1, 2, 3, 4, 5].map((value) => (
                       <SelectItem key={value} value={String(value)}>
@@ -140,7 +142,7 @@ export default function FeedbackPage() {
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label>Was the website successful for you?</Label>
+                <Label>{t("feedback.websiteSuccessful")}</Label>
                 <Select
                   value={form.isWebsiteSuccessful ? "true" : "false"}
                   onValueChange={(value) =>
@@ -149,40 +151,40 @@ export default function FeedbackPage() {
                 >
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="true">Yes</SelectItem>
-                    <SelectItem value="false">No</SelectItem>
+                    <SelectItem value="true">{t("feedback.yes")}</SelectItem>
+                    <SelectItem value="false">{t("feedback.no")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
             </div>
             <div className="space-y-2">
-              <Label>Comment</Label>
+              <Label>{t("feedback.comment")}</Label>
               <Textarea
                 value={form.comment}
                 onChange={(e) => setForm((prev) => ({ ...prev, comment: e.target.value }))}
                 rows={5}
-                placeholder="Tell us what worked and what can be improved..."
+                placeholder={t("feedback.commentPlaceholder")}
               />
             </div>
             <Button className="gradient-primary" onClick={() => void handleCreate()} disabled={submitting}>
-              {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : "Submit Feedback"}
+              {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : t("feedback.submit")}
             </Button>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle>My Feedback</CardTitle>
+            <CardTitle>{t("feedback.myFeedback")}</CardTitle>
           </CardHeader>
           <CardContent className="p-0">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Rating</TableHead>
-                  <TableHead>Successful</TableHead>
-                  <TableHead>Comment</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead>{t("feedback.rating")}</TableHead>
+                  <TableHead>{t("feedback.successful")}</TableHead>
+                  <TableHead>{t("feedback.comment")}</TableHead>
+                  <TableHead>{t("feedback.date")}</TableHead>
+                  <TableHead className="text-right">{t("feedback.actionsCol")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -195,7 +197,7 @@ export default function FeedbackPage() {
                 ) : rows.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={5} className="py-8 text-center text-muted-foreground">
-                      No feedback submitted yet.
+                      {t("feedback.empty")}
                     </TableCell>
                   </TableRow>
                 ) : (
@@ -204,7 +206,7 @@ export default function FeedbackPage() {
                       <TableCell>
                         <StarRating value={Number(row.rating) || 0} size="sm" />
                       </TableCell>
-                      <TableCell>{row.isWebsiteSuccessful ? "Yes" : "No"}</TableCell>
+                      <TableCell>{row.isWebsiteSuccessful ? t("feedback.yes") : t("feedback.no")}</TableCell>
                       <TableCell className="max-w-sm truncate">{row.comment}</TableCell>
                       <TableCell>{row.createdAt ? new Date(row.createdAt).toLocaleString() : "-"}</TableCell>
                       <TableCell>
@@ -234,11 +236,11 @@ export default function FeedbackPage() {
       <Dialog open={Boolean(editing)} onOpenChange={(open) => !open && setEditing(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Edit Feedback</DialogTitle>
+            <DialogTitle>{t("feedback.editTitle")}</DialogTitle>
           </DialogHeader>
           <div className="space-y-3">
             <div className="space-y-2">
-              <Label>Rating</Label>
+              <Label>{t("feedback.rating")}</Label>
               <Select
                 value={String(editForm.rating)}
                 onValueChange={(value) =>
@@ -256,7 +258,7 @@ export default function FeedbackPage() {
               </Select>
             </div>
             <div className="space-y-2">
-              <Label>Website successful</Label>
+              <Label>{t("feedback.websiteSuccessfulShort")}</Label>
               <Select
                 value={editForm.isWebsiteSuccessful ? "true" : "false"}
                 onValueChange={(value) =>
@@ -268,13 +270,13 @@ export default function FeedbackPage() {
               >
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="true">Yes</SelectItem>
-                  <SelectItem value="false">No</SelectItem>
+                  <SelectItem value="true">{t("feedback.yes")}</SelectItem>
+                  <SelectItem value="false">{t("feedback.no")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-2">
-              <Label>Comment</Label>
+              <Label>{t("feedback.comment")}</Label>
               <Textarea
                 value={editForm.comment}
                 onChange={(e) =>
@@ -284,9 +286,9 @@ export default function FeedbackPage() {
               />
             </div>
             <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={() => setEditing(null)}>Cancel</Button>
+              <Button variant="outline" onClick={() => setEditing(null)}>{t("actions.cancel")}</Button>
               <Button className="gradient-primary" onClick={() => void handleUpdate()}>
-                Save Changes
+                {t("actions.save")}
               </Button>
             </div>
           </div>

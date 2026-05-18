@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState, type ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "@/contexts/AuthContext";
 import { getSocket } from "@/lib/socket";
 import { notificationsApi } from "@/lib/api";
@@ -25,7 +26,11 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 
+/** Server default title — kept in English for API matching, not shown as UI copy. */
+const PAYMENT_REQUIRED_SERVER_TITLE = "Payment required";
+
 export function SubscriptionRenewal3dsProvider({ children }: { children: ReactNode }) {
+  const { t } = useTranslation("layout");
   const { user, loading } = useAuth();
   const [open, setOpen] = useState(false);
   const [gate, setGate] = useState<ParsedSubscription3ds | null>(null);
@@ -93,17 +98,15 @@ export function SubscriptionRenewal3dsProvider({ children }: { children: ReactNo
     setGate(null);
   }, [gate]);
 
-  const headline = "Complete payment to keep your subscription.";
-
   return (
     <>
       {children}
       <AlertDialog open={open} onOpenChange={(next) => !next && handleRemindLater()}>
         <AlertDialogContent className="z-[100] max-w-md border-destructive/30 bg-background shadow-xl">
           <AlertDialogHeader>
-            <AlertDialogTitle>{headline}</AlertDialogTitle>
+            <AlertDialogTitle>{t("renewal3ds.headline")}</AlertDialogTitle>
             <AlertDialogDescription className="space-y-2 text-left">
-              {gate?.title && gate.title !== "Payment required" ? (
+              {gate?.title && gate.title !== PAYMENT_REQUIRED_SERVER_TITLE ? (
                 <span className="block font-medium text-foreground">{gate.title}</span>
               ) : null}
               {gate?.message ? <span className="block text-muted-foreground">{gate.message}</span> : null}
@@ -114,7 +117,7 @@ export function SubscriptionRenewal3dsProvider({ children }: { children: ReactNo
               <>
                 <Button className="w-full" asChild>
                   <a href={gate.actionUrl} target="_blank" rel="noopener noreferrer">
-                    Complete payment (secure window)
+                    {t("renewal3ds.completePaymentSecure")}
                   </a>
                 </Button>
                 <Button
@@ -125,12 +128,12 @@ export function SubscriptionRenewal3dsProvider({ children }: { children: ReactNo
                     if (gate.actionUrl) window.location.assign(gate.actionUrl);
                   }}
                 >
-                  Continue in this tab
+                  {t("renewal3ds.continueInTab")}
                 </Button>
               </>
             ) : null}
             <AlertDialogCancel type="button" className="w-full sm:w-full" onClick={handleRemindLater}>
-              Remind me later
+              {t("renewal3ds.remindLater")}
             </AlertDialogCancel>
           </AlertDialogFooter>
         </AlertDialogContent>

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { getSelectedWorkspaceId, recordingsApi } from "@/lib/api";
 import AppLayout from "@/components/AppLayout";
@@ -34,6 +35,7 @@ const CHUNK_TIMESLICE_MS = 1000;
 const TARGET_UPLOAD_CHUNK_SIZE = 5 * 1024 * 1024;
 
 export default function RecordScreenCopy() {
+  const { t } = useTranslation(["recording", "common"]);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -163,7 +165,7 @@ export default function RecordScreenCopy() {
     };
     const url = extractUrl(res);
     if (url) return url;
-    throw new Error("Could not get presigned URL for upload part.");
+    throw new Error(t("errors.presignedUrlFailed"));
   };
 
   const recordingMimeType = useMemo(
@@ -277,8 +279,8 @@ export default function RecordScreenCopy() {
       });
       setState("processing");
       toastApiSuccess(completeRes, {
-        title: "Upload complete",
-        fallbackDescription: "Your recording is being processed.",
+        title: t("uploadComplete"),
+        fallbackDescription: t("processingFallback"),
       });
       trackClientEvent({
         eventType: "recording_completed",
@@ -288,7 +290,7 @@ export default function RecordScreenCopy() {
       stopAllStreams();
       setTimeout(() => navigate(`/recording/${recordingId}`), 1200);
     },
-    [navigate],
+    [navigate, t],
   );
 
   const startRecording = async () => {
@@ -296,7 +298,7 @@ export default function RecordScreenCopy() {
     setPreparing(true);
     try {
       if (!navigator.mediaDevices?.getDisplayMedia || typeof MediaRecorder === "undefined") {
-        throw new Error("This browser does not support screen recording.");
+        throw new Error(t("browserUnsupported"));
       }
       const selectedWorkspaceId = getSelectedWorkspaceId();
       if (!selectedWorkspaceId) {
@@ -304,13 +306,13 @@ export default function RecordScreenCopy() {
         setState("idle");
         return;
       }
-      const safeTitle = title.trim() || `Recording ${new Date().toLocaleString()}`;
+      const safeTitle = title.trim() || t("defaultTitle", { date: new Date().toLocaleString() });
       setTitle(safeTitle);
 
       const draft = await recordingsApi.create(safeTitle);
       const recordingId = Number(draft?.recording?.id ?? draft?.id ?? draft?.data?.id);
       if (Number.isNaN(recordingId)) {
-        throw new Error("Unable to create recording draft: missing id in response.");
+        throw new Error(t("errors.draftMissingId"));
       }
 
       trackClientEvent({
@@ -341,9 +343,8 @@ export default function RecordScreenCopy() {
       setSystemAudioDetected(displayAudioTracks.length > 0);
       if (displayAudioTracks.length === 0) {
         toast({
-          title: "No system/tab audio captured",
-          description:
-            "To capture YouTube sound, share a browser tab/window with audio enabled in the share dialog.",
+          title: t("noAudio"),
+          description: t("youtubeAudioHint"),
         });
       }
 
@@ -354,7 +355,7 @@ export default function RecordScreenCopy() {
           cameraStreamRef.current = camStream;
         } catch {
           setCameraEnabled(false);
-          toast({ title: "Camera unavailable", description: "Recording continues without camera." });
+          toast({ title: t("cameraUnavailable"), description: t("camera.continuesWithoutCamera") });
         }
       }
 
@@ -365,7 +366,7 @@ export default function RecordScreenCopy() {
           micStreamRef.current = micStream;
         } catch {
           setMicEnabled(false);
-          toast({ title: "Microphone unavailable", description: "Recording continues without mic." });
+          toast({ title: t("micUnavailable"), description: t("camera.continuesWithoutMic") });
         }
       }
 
@@ -413,7 +414,7 @@ export default function RecordScreenCopy() {
         ...combinedAudioTracks,
       ]);
       if (mixed.getVideoTracks().length === 0) {
-        throw new Error("No video track available in recording stream.");
+        throw new Error(t("errors.noVideoTrack"));
       }
       mixedStreamRef.current = mixed;
 
@@ -421,7 +422,7 @@ export default function RecordScreenCopy() {
         fileName: `${safeTitle}.${recordingExtension}`,
         contentType: recordingMimeType,
       });
-      if (!init?.uploadId) throw new Error("Unable to initialize upload session.");
+      if (!init?.uploadId) throw new Error(t("errors.initUploadFailed"));
       uploadSessionRef.current = {
         recordingId,
         uploadId: init.uploadId,
@@ -466,8 +467,8 @@ export default function RecordScreenCopy() {
       }
     } catch (err: any) {
       toast({
-        title: "Could not start recording",
-        description: err?.message || "Please check permissions and try again.",
+        title: t("couldNotStart"),
+        description: err?.message || t("pleaseCheckPermissions"),
         variant: "destructive",
       });
       stopAllStreams();
@@ -503,13 +504,13 @@ export default function RecordScreenCopy() {
       await processUploadQueue(recordingMimeType);
       await waitForUploadDrain();
       if (session.uploadedParts.length === 0) {
-        throw new Error("No media data was captured.");
+        throw new Error(t("errors.noMediaCaptured"));
       }
       await finalizeUpload(session.recordingId, session.uploadId, session.uploadedParts);
     } catch (err: any) {
       toast({
-        title: "Failed to finalize upload",
-        description: err?.message || "Please try again.",
+        title: t("uploadFailed"),
+        description: err?.message || t("pleaseTryAgain"),
         variant: "destructive",
       });
       setState("idle");
@@ -529,17 +530,16 @@ export default function RecordScreenCopy() {
       }
     } catch (err: any) {
       toast({
-        title: "Could not pause",
-        description: err?.message || "Try stopping the recording instead.",
+        title: t("pauseFailed"),
+        description: err?.message || t("tryStopInstead"),
         variant: "destructive",
       });
       return;
     }
     if (rec.state !== "paused") {
       toast({
-        title: "Pause not supported",
-        description:
-          "This browser or recording format does not support pause. Use Stop to finish, or try Chrome with WebM.",
+        title: t("pauseUnsupported"),
+        description: t("pauseUnsupportedDetail"),
       });
       return;
     }
@@ -566,16 +566,16 @@ export default function RecordScreenCopy() {
         return;
       }
       toast({
-        title: "Could not resume",
-        description: err?.message || "Try stopping and starting a new recording.",
+        title: t("pauseFailed"),
+        description: err?.message || t("pleaseTryAgain"),
         variant: "destructive",
       });
       return;
     }
     if (rec.state !== "recording") {
       toast({
-        title: "Could not resume",
-        description: "The recorder did not return to an active state. Try stopping the recording.",
+        title: t("pauseFailed"),
+        description: t("prepareNotActive"),
         variant: "destructive",
       });
       return;
@@ -609,7 +609,7 @@ export default function RecordScreenCopy() {
         setCameraEnabled(true);
         cameraEnabledRef.current = true;
       } catch {
-        toast({ title: "Camera unavailable", description: "Could not turn camera on." });
+        toast({ title: t("cameraUnavailable"), description: t("cameraTurnOnFailed") });
       }
       return;
     }
@@ -689,24 +689,19 @@ export default function RecordScreenCopy() {
     <AppLayout>
       <div className="p-6 md:p-8 max-w-7xl mx-auto space-y-6">
         <div>
-          <h1 className="text-2xl font-bold">Record Screen</h1>
-          <p className="text-muted-foreground">
-            1080p screen recording with webcam/mic controls and robust upload.
-          </p>
+          <h1 className="text-2xl font-bold">{t("recordTitle")}</h1>
+          <p className="text-muted-foreground">{t("subtitle")}</p>
         </div>
 
         {state === "idle" && (
           <Card className="glass border-primary/20">
             <CardContent className="p-5 space-y-2">
-              <p className="text-sm font-semibold">Pre-record checklist</p>
+              <p className="text-sm font-semibold">{t("checklist.title")}</p>
               <p className="text-sm text-muted-foreground">
-                Browser: {browserName}. You can share an entire screen, a window, or a browser tab.
+                {t("checklist.browser", { browser: browserName })}
               </p>
               <div className="text-sm space-y-1">
-                <p>• Capture support: {supportsCapture ? "Ready" : "Not supported in this browser"}</p>
-                <p>• Output quality: 1080p (1920x1080)</p>
-                <p>• Audio: microphone + shared screen/tab audio (if provided by browser/OS)</p>
-                <p>• Tip: to capture website audio, share the browser tab and enable audio in the share dialog</p>
+                <p>• {t("checklist.audioTip")}</p>
               </div>
             </CardContent>
           </Card>
@@ -716,15 +711,17 @@ export default function RecordScreenCopy() {
           <CardContent className="p-6 space-y-5">
             {(state === "recording" || state === "paused") && (
               <div className="rounded-md border border-border px-3 py-2 text-xs text-muted-foreground flex flex-wrap gap-x-4 gap-y-1">
-                <span>Surface: {selectedSurface || "unknown"}</span>
-                <span>System audio: {systemAudioDetected ? "detected" : "not detected"}</span>
-                <span>Resolution: 1920x1080</span>
+                <span>{t("status.surface")}: {selectedSurface || t("status.unknown")}</span>
+                <span>
+                  {t("status.systemAudio")}: {systemAudioDetected ? t("status.detected") : t("status.notDetected")}
+                </span>
+                <span>{t("status.resolution")}: 1920x1080</span>
               </div>
             )}
             {state !== "idle" && (
               <div className={cn("grid gap-4", cameraEnabled ? "md:grid-cols-2" : "md:grid-cols-1")}>
                 <div className="space-y-2">
-                  <Label>{mainSource === "screen" ? "Main preview (Screen)" : "Secondary preview (Screen)"}</Label>
+                  <Label>{mainSource === "screen" ? t("preview.main") : t("previewSecondaryScreen")}</Label>
                   <video
                     ref={screenPreviewRef}
                     autoPlay
@@ -735,7 +732,7 @@ export default function RecordScreenCopy() {
                 </div>
                 {cameraEnabled && (
                   <div className="space-y-2">
-                    <Label>{mainSource === "camera" ? "Main preview (Camera)" : "Secondary preview (Camera)"}</Label>
+                    <Label>{mainSource === "camera" ? t("previewMainCamera") : t("previewSecondaryCamera")}</Label>
                     <video
                       ref={cameraPreviewRef}
                       autoPlay
@@ -756,7 +753,7 @@ export default function RecordScreenCopy() {
                 onClick={() => void toggleMicLive()}
               >
                 {micEnabled ? <Mic className="h-4 w-4 mr-2" /> : <MicOff className="h-4 w-4 mr-2" />}
-                {micEnabled ? "Mic On" : "Mic Off"}
+                {micEnabled ? t("micOn") : t("micOff")}
               </Button>
               <Button
                 type="button"
@@ -765,7 +762,7 @@ export default function RecordScreenCopy() {
                 onClick={() => void toggleCameraLive()}
               >
                 {cameraEnabled ? <Video className="h-4 w-4 mr-2" /> : <VideoOff className="h-4 w-4 mr-2" />}
-                {cameraEnabled ? "Camera On" : "Camera Off"}
+                {cameraEnabled ? t("cameraOn") : t("cameraOff")}
               </Button>
               <Button
                 type="button"
@@ -773,7 +770,7 @@ export default function RecordScreenCopy() {
                 onClick={() => setMainSource((prev) => (prev === "screen" ? "camera" : "screen"))}
                 disabled={!cameraEnabled || (state !== "recording" && state !== "paused")}
               >
-                <ArrowUpDown className="h-4 w-4 mr-2" /> Swap Main
+                <ArrowUpDown className="h-4 w-4 mr-2" /> {t("swapMain")}
               </Button>
               <div className="rounded-md border border-border px-3 py-2 flex items-center justify-center gap-2">
                 <Clock className="h-4 w-4 text-primary" />
@@ -782,11 +779,11 @@ export default function RecordScreenCopy() {
             </div>
 
             <div className="space-y-2">
-              <Label>Recording title</Label>
+              <Label>{t("recordingTitle")}</Label>
               <Input
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                placeholder="Recording title"
+                placeholder={t("recordingTitle")}
                 disabled={state !== "idle"}
               />
             </div>
@@ -806,26 +803,26 @@ export default function RecordScreenCopy() {
                   disabled={preparing}
                 >
                   {preparing ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Monitor className="h-4 w-4 mr-2" />}
-                  Start Recording
+                  {t("start")}
                 </Button>
               )}
               {state === "recording" && (
                 <>
                   <Button variant="outline" onClick={pauseRecording}>
-                    <Pause className="h-4 w-4 mr-2" /> Pause
+                    <Pause className="h-4 w-4 mr-2" /> {t("controls.pause")}
                   </Button>
                   <Button variant="destructive" onClick={() => void stopRecording()}>
-                    <Square className="h-4 w-4 mr-2" /> Stop & Finalize
+                    <Square className="h-4 w-4 mr-2" /> {t("stopAndFinalize")}
                   </Button>
                 </>
               )}
               {state === "paused" && (
                 <>
                   <Button variant="outline" onClick={resumeRecording}>
-                    <Play className="h-4 w-4 mr-2" /> Resume
+                    <Play className="h-4 w-4 mr-2" /> {t("controls.resume")}
                   </Button>
                   <Button variant="destructive" onClick={() => void stopRecording()}>
-                    <Square className="h-4 w-4 mr-2" /> Stop & Finalize
+                    <Square className="h-4 w-4 mr-2" /> {t("stopAndFinalize")}
                   </Button>
                 </>
               )}
@@ -839,9 +836,9 @@ export default function RecordScreenCopy() {
           <div className="rounded-2xl border border-border bg-card px-8 py-7 shadow-2xl text-center space-y-3">
             <Loader2 className="h-10 w-10 animate-spin text-primary mx-auto" />
             <p className="text-base font-semibold">
-              {state === "stopping" ? "Finalizing recording..." : "Processing recording..."}
+              {state === "stopping" ? t("processingOverlay.finalizing") : t("processingOverlay.processing")}
             </p>
-            <p className="text-sm text-muted-foreground">Please keep this tab open.</p>
+            <p className="text-sm text-muted-foreground">{t("processingOverlay.keepTabOpen")}</p>
           </div>
         </div>
       )}
@@ -849,14 +846,12 @@ export default function RecordScreenCopy() {
       <Dialog open={workspaceAlertOpen} onOpenChange={setWorkspaceAlertOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>Workspace required</DialogTitle>
-            <DialogDescription>
-              Please select a workspace before starting recording. If you do not have one yet, create a workspace first.
-            </DialogDescription>
+            <DialogTitle>{t("workspaceDialog.title")}</DialogTitle>
+            <DialogDescription>{t("workspaceDialog.description")}</DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <Button variant="outline" onClick={() => setWorkspaceAlertOpen(false)}>
-              Close
+              {t("common:actions.close")}
             </Button>
             <Button
               className="gradient-primary"
@@ -865,7 +860,7 @@ export default function RecordScreenCopy() {
                 navigate("/workspaces");
               }}
             >
-              Go to Workspaces
+              {t("workspaceDialog.goWorkspaces")}
             </Button>
           </DialogFooter>
         </DialogContent>

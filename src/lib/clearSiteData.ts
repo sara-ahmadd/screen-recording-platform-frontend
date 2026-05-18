@@ -78,8 +78,18 @@ async function clearIndexedDatabases(): Promise<void> {
   }
 }
 
-function clearWebStorages(): void {
+function clearWebStorages(preserveKeys: string[] = []): void {
   if (typeof window === "undefined") return;
+  const preserved: Record<string, string> = {};
+  for (const key of preserveKeys) {
+    try {
+      const value = window.localStorage.getItem(key);
+      if (value != null) preserved[key] = value;
+    } catch {
+      // ignore
+    }
+  }
+
   try {
     window.sessionStorage.clear();
   } catch {
@@ -90,18 +100,32 @@ function clearWebStorages(): void {
   } catch {
     // ignore
   }
+
+  for (const [key, value] of Object.entries(preserved)) {
+    try {
+      window.localStorage.setItem(key, value);
+    } catch {
+      // ignore
+    }
+  }
 }
+
+export type ClearBrowserSiteDataOptions = {
+  /** localStorage keys to keep (e.g. language, theme). */
+  preserveKeys?: string[];
+};
 
 /**
  * Clears PWA/service worker caches, storage, and script-readable cookies for the current origin.
  * Call after logging out if you still need the server to invalidate the session.
  */
-export async function clearBrowserSiteData(): Promise<void> {
+export async function clearBrowserSiteData(options?: ClearBrowserSiteDataOptions): Promise<void> {
   if (typeof window === "undefined") return;
+  const preserveKeys = options?.preserveKeys ?? [];
 
   await clearServiceWorkers();
   await clearCacheStorage();
   await clearIndexedDatabases();
   clearSameOriginScriptCookies();
-  clearWebStorages();
+  clearWebStorages(preserveKeys);
 }

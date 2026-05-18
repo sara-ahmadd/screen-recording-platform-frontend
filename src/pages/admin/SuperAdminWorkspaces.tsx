@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useCallback, useEffect, useState } from "react";
 import AppLayout from "@/components/AppLayout";
 import AdminCrudTable from "@/components/admin/AdminCrudTable";
@@ -24,6 +25,7 @@ import { Eye, Video } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 export default function SuperAdminWorkspacesPage() {
+  const { t } = useTranslation(["admin", "common"]);
   const { toast } = useToast();
   const navigate = useNavigate();
   const [rows, setRows] = useState<any[]>([]);
@@ -37,11 +39,15 @@ export default function SuperAdminWorkspacesPage() {
       const res = await superAdminApi.workspaces.list();
       setRows(res?.workspaces || res?.data || res || []);
     } catch (err: any) {
-      toast({ title: "Error loading workspaces", description: err.message, variant: "destructive" });
+      toast({
+        title: t("errorLoadingWorkspaces"),
+        description: err?.message || t("common:errors.tryAgain"),
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }
-  }, [toast]);
+  }, [toast, t]);
 
   useEffect(() => {
     void load();
@@ -67,9 +73,9 @@ export default function SuperAdminWorkspacesPage() {
   return (
     <AppLayout>
       <div className="p-6 md:p-8 max-w-7xl mx-auto">
-        <h1 className="text-3xl font-bold mb-4">All Workspaces</h1>
+        <h1 className="text-3xl font-bold mb-4">{t("allWorkspaces")}</h1>
         <AdminCrudTable
-          title="Workspaces Table"
+          title={t("workspacesTable")}
           rows={rows}
           loading={loading}
           onRefresh={load}
@@ -79,7 +85,7 @@ export default function SuperAdminWorkspacesPage() {
               <Button
                 size="icon"
                 variant="ghost"
-                title="View workspace details"
+                title={t("workspaces.viewDetails")}
                 onClick={() => openWorkspaceDetails(row)}
               >
                 <Eye className="h-4 w-4" />
@@ -87,7 +93,7 @@ export default function SuperAdminWorkspacesPage() {
               <Button
                 size="icon"
                 variant="ghost"
-                title="View workspace recordings"
+                title={t("workspaces.viewRecordings")}
                 onClick={() => navigate(`/super-admin/workspaces/${row?.id}/recordings`)}
               >
                 <Video className="h-4 w-4" />
@@ -96,12 +102,12 @@ export default function SuperAdminWorkspacesPage() {
           )}
           onCreate={async (payload) => {
             await superAdminApi.workspaces.create(payload);
-            toast({ title: "Workspace created", description: "Workspace was created successfully." });
+            toast({ title: t("workspaces.created"), description: t("workspaces.createdDesc") });
             await load();
           }}
           onUpdate={async (id, payload) => {
             await superAdminApi.workspaces.update(id, payload);
-            toast({ title: "Workspace updated", description: "Workspace was updated successfully." });
+            toast({ title: t("workspaces.updated"), description: t("workspaces.updatedDesc") });
             await load();
           }}
           onDelete={async (id) => { await superAdminApi.workspaces.delete(id); await load(); }}
@@ -112,43 +118,46 @@ export default function SuperAdminWorkspacesPage() {
         <DialogContent className="max-w-4xl">
           <DialogHeader>
             <DialogTitle>
-              Workspace Details {selectedWorkspace?.name ? `- ${selectedWorkspace.name}` : ""}
+              {selectedWorkspace?.name
+                ? t("workspaces.detailsTitleWithName", { name: selectedWorkspace.name })
+                : t("workspaces.detailsTitle")}
             </DialogTitle>
-            <DialogDescription>
-              Members, subscriptions, and plan information for this workspace.
-            </DialogDescription>
+            <DialogDescription>{t("workspaces.detailsDesc")}</DialogDescription>
           </DialogHeader>
 
           {!selectedWorkspace ? (
-            <p className="text-sm text-muted-foreground">No workspace selected.</p>
+            <p className="text-sm text-muted-foreground">{t("workspaces.noneSelected")}</p>
           ) : (
             <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-1">
               <div className="rounded-lg border border-border p-4 space-y-4">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div>
-                    <p className="text-sm text-muted-foreground">Workspace</p>
+                    <p className="text-sm text-muted-foreground">{t("workspaces.label")}</p>
                     <p className="text-xl font-semibold">{selectedWorkspace.name || "—"}</p>
                     <p className="text-xs text-muted-foreground mt-1">
-                      ID: {selectedWorkspace.id ?? "—"} | Owner: {selectedWorkspace.ownerId ?? "—"} | Slug:{" "}
-                      {selectedWorkspace.slug || "—"}
+                      {t("workspaces.meta", {
+                        id: selectedWorkspace.id ?? "—",
+                        ownerId: selectedWorkspace.ownerId ?? "—",
+                        slug: selectedWorkspace.slug || "—",
+                      })}
                     </p>
                   </div>
                   <Badge variant={selectedWorkspace.status === "active" ? "default" : "secondary"}>
-                    {String(selectedWorkspace.status || "unknown").toUpperCase()}
+                    {String(selectedWorkspace.status || t("unknown")).toUpperCase()}
                   </Badge>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <div className="rounded-md border border-border p-3">
-                    <p className="text-xs uppercase tracking-wide text-muted-foreground">Videos count</p>
+                    <p className="text-xs uppercase tracking-wide text-muted-foreground">{t("workspaces.videosCount")}</p>
                     <p className="mt-1 text-sm font-medium">{selectedWorkspace.videosCount ?? "—"}</p>
                   </div>
                   <div className="rounded-md border border-border p-3">
-                    <p className="text-xs uppercase tracking-wide text-muted-foreground">Current storage</p>
+                    <p className="text-xs uppercase tracking-wide text-muted-foreground">{t("workspaces.currentStorage")}</p>
                     <p className="mt-1 text-sm font-medium">{selectedWorkspace.currentStorage ?? "—"}</p>
                   </div>
                   <div className="rounded-md border border-border p-3">
-                    <p className="text-xs uppercase tracking-wide text-muted-foreground">Reset videos count at</p>
+                    <p className="text-xs uppercase tracking-wide text-muted-foreground">{t("workspaces.resetVideosAt")}</p>
                     <p className="mt-1 text-sm font-medium">
                       {selectedWorkspace.resetVideosCountAt
                         ? new Date(selectedWorkspace.resetVideosCountAt).toLocaleString()
@@ -156,7 +165,7 @@ export default function SuperAdminWorkspacesPage() {
                     </p>
                   </div>
                   <div className="rounded-md border border-border p-3">
-                    <p className="text-xs uppercase tracking-wide text-muted-foreground">Logo URL</p>
+                    <p className="text-xs uppercase tracking-wide text-muted-foreground">{t("workspaces.logoUrl")}</p>
                     <p className="mt-1 text-sm font-medium break-all">{selectedWorkspace.logoUrl || "—"}</p>
                   </div>
                 </div>
@@ -164,52 +173,65 @@ export default function SuperAdminWorkspacesPage() {
 
               <div className="rounded-lg border border-border p-4 space-y-2">
                 <p className="text-sm font-medium">
-                  Members ({Array.isArray(selectedWorkspace.users) ? selectedWorkspace.users.length : 0})
+                  {t("workspaces.members", {
+                    count: Array.isArray(selectedWorkspace.users) ? selectedWorkspace.users.length : 0,
+                  })}
                 </p>
                 {Array.isArray(selectedWorkspace.users) && selectedWorkspace.users.length > 0 ? (
                   <div className="space-y-2">
                     {selectedWorkspace.users.map((member: any) => (
                       <div key={member.id} className="rounded-md border border-border p-2">
-                        <p className="text-sm font-medium">{member.user_name || `User #${member.id}`}</p>
+                        <p className="text-sm font-medium">
+                          {member.user_name || t("workspaces.memberFallback", { id: member.id })}
+                        </p>
                         <p className="text-xs text-muted-foreground">
-                          {member.email || "—"} | Role: {member.membership?.role || member.role || "—"}
+                          {t("workspaces.memberMeta", {
+                            email: member.email || "—",
+                            role: member.membership?.role || member.role || "—",
+                          })}
                         </p>
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <p className="text-xs text-muted-foreground">No members found.</p>
+                  <p className="text-xs text-muted-foreground">{t("workspaces.noMembers")}</p>
                 )}
               </div>
 
               <div className="rounded-lg border border-border p-4 space-y-3">
-                <p className="text-sm font-medium">Current Subscription (Active only)</p>
+                <p className="text-sm font-medium">{t("workspaces.currentSubscription")}</p>
                 {!currentActiveSubscription ? (
-                  <p className="text-xs text-muted-foreground">
-                    No active subscription found for this workspace.
-                  </p>
+                  <p className="text-xs text-muted-foreground">{t("workspaces.noActiveSubscription")}</p>
                 ) : (
                   <div className="rounded-md border border-border p-3">
                     <div className="flex items-center justify-between gap-2">
                       <p className="text-sm font-medium">
-                        {currentActiveSubscription.plan?.name || `Plan #${currentActiveSubscription.planId ?? "—"}`}
+                        {currentActiveSubscription.plan?.name ||
+                          t("workspaces.planFallback", {
+                            id: currentActiveSubscription.planId ?? "—",
+                          })}
                       </p>
                       <Badge className="gradient-primary border-0">
                         {String(currentActiveSubscription.status || "active").toUpperCase()}
                       </Badge>
                     </div>
                     <p className="text-xs text-muted-foreground mt-1">
-                      Type: {currentActiveSubscription.type || "—"} | Auto renewal:{" "}
-                      {typeof currentActiveSubscription.autoRenewal === "boolean"
-                        ? currentActiveSubscription.autoRenewal
-                          ? "On"
-                          : "Off"
-                        : "—"}
+                      {t("workspaces.subscriptionMeta", {
+                        type: currentActiveSubscription.type || "—",
+                        renewal:
+                          typeof currentActiveSubscription.autoRenewal === "boolean"
+                            ? currentActiveSubscription.autoRenewal
+                              ? t("on")
+                              : t("off")
+                            : "—",
+                      })}
                     </p>
                     <p className="text-xs text-muted-foreground mt-1">
-                      Monthly: ${Number(currentActiveSubscription.plan?.monthlyPrice || 0)} | Yearly: $
-                      {Number(currentActiveSubscription.plan?.yearlyPrice || 0)} | Max members:{" "}
-                      {currentActiveSubscription.plan?.maxTeamMembers ?? "—"}
+                      {t("workspaces.pricingMeta", {
+                        monthly: Number(currentActiveSubscription.plan?.monthlyPrice || 0),
+                        yearly: Number(currentActiveSubscription.plan?.yearlyPrice || 0),
+                        members: currentActiveSubscription.plan?.maxTeamMembers ?? "—",
+                      })}
                     </p>
                   </div>
                 )}
@@ -217,27 +239,37 @@ export default function SuperAdminWorkspacesPage() {
 
               <div className="rounded-lg border border-border p-4 space-y-2">
                 <p className="text-sm font-medium">
-                  Subscription History ({Array.isArray(selectedWorkspace.subscriptions) ? selectedWorkspace.subscriptions.length : 0})
+                  {t("workspaces.historyTitle", {
+                    count: Array.isArray(selectedWorkspace.subscriptions)
+                      ? selectedWorkspace.subscriptions.length
+                      : 0,
+                  })}
                 </p>
                 {Array.isArray(selectedWorkspace.subscriptions) && selectedWorkspace.subscriptions.length > 0 ? (
                   <div className="rounded-xl border border-border/80 overflow-hidden">
                     <Table>
                       <TableHeader>
                         <TableRow>
-                          <TableHead>Plan</TableHead>
-                          <TableHead>Status</TableHead>
-                          <TableHead>Type</TableHead>
-                          <TableHead>Auto Renewal</TableHead>
+                          <TableHead>{t("table.plan")}</TableHead>
+                          <TableHead>{t("table.status")}</TableHead>
+                          <TableHead>{t("table.type")}</TableHead>
+                          <TableHead>{t("table.autoRenewal")}</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
                         {selectedWorkspace.subscriptions.map((sub: any) => (
                           <TableRow key={sub.id}>
-                            <TableCell className="capitalize">{sub.plan?.name || `Plan #${sub.planId ?? "—"}`}</TableCell>
+                            <TableCell className="capitalize">
+                              {sub.plan?.name || t("workspaces.planFallback", { id: sub.planId ?? "—" })}
+                            </TableCell>
                             <TableCell className="capitalize">{sub.status || "—"}</TableCell>
                             <TableCell className="capitalize">{sub.type || "—"}</TableCell>
                             <TableCell>
-                              {typeof sub.autoRenewal === "boolean" ? (sub.autoRenewal ? "On" : "Off") : "—"}
+                              {typeof sub.autoRenewal === "boolean"
+                                ? sub.autoRenewal
+                                  ? t("on")
+                                  : t("off")
+                                : "—"}
                             </TableCell>
                           </TableRow>
                         ))}
@@ -245,7 +277,7 @@ export default function SuperAdminWorkspacesPage() {
                     </Table>
                   </div>
                 ) : (
-                  <p className="text-xs text-muted-foreground">No subscriptions found.</p>
+                  <p className="text-xs text-muted-foreground">{t("workspaces.noSubscriptions")}</p>
                 )}
               </div>
             </div>

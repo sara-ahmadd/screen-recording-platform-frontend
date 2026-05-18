@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Link, NavLink, useNavigate, useSearchParams } from "react-router-dom";
 import AppLayout from "@/components/AppLayout";
 import { useAuth } from "@/contexts/AuthContext";
@@ -25,6 +26,7 @@ import { Label } from "@/components/ui/label";
 type SubscriptionType = "monthly" | "yearly";
 
 export default function SubscriptionPage() {
+  const { t } = useTranslation(["billing", "common"]);
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -90,7 +92,7 @@ export default function SubscriptionPage() {
         const res = await plansApi.getById(Number(planId));
         setPlan(res.plan || res.data || res);
       } catch (err: any) {
-        toast({ title: "Error loading plan", description: err.message, variant: "destructive" });
+        toast({ title: t("planLoadError"), description: err.message, variant: "destructive" });
       } finally {
         setLoadingPlan(false);
       }
@@ -105,15 +107,28 @@ export default function SubscriptionPage() {
   }, [requestedType]);
 
   const featureList = (selectedPlan: any) => {
-    const features = [];
-    if (selectedPlan.maxVideosPerMonth) features.push(`${selectedPlan.maxVideosPerMonth} videos/month`);
-    if (selectedPlan.maxVideoDuration) features.push(`${selectedPlan.maxVideoDuration} min max duration`);
-    if (selectedPlan.maxStorageGB) features.push(`${selectedPlan.maxStorageGB} GB storage`);
-    if (selectedPlan.maxTeamMembers) features.push(`${selectedPlan.maxTeamMembers} team members`);
-    if (selectedPlan.canDownloadVideos) features.push("Video downloads");
-    if (selectedPlan.canRemoveWaterMark) features.push("No watermark");
-    if (selectedPlan.canSharePublicLink) features.push("Public sharing");
-    if (selectedPlan.teamAccess) features.push("Team collaboration");
+    const features: string[] = [];
+    if (selectedPlan.maxVideosPerMonth) {
+      features.push(t("common:plans.videosPerMonth", { count: selectedPlan.maxVideosPerMonth }));
+    }
+    if (selectedPlan.maxVideoDuration) {
+      features.push(
+        t("common:plans.minMaxDuration", {
+          min: selectedPlan.minVideoDuration || 0,
+          max: selectedPlan.maxVideoDuration,
+        }),
+      );
+    }
+    if (selectedPlan.maxStorageGB) {
+      features.push(t("common:plans.storageGb", { gb: selectedPlan.maxStorageGB }));
+    }
+    if (selectedPlan.maxTeamMembers) {
+      features.push(t("common:plans.teamMembers", { count: selectedPlan.maxTeamMembers }));
+    }
+    if (selectedPlan.canDownloadVideos) features.push(t("common:plans.videoDownloads"));
+    if (selectedPlan.canRemoveWaterMark) features.push(t("common:plans.noWatermark"));
+    if (selectedPlan.canSharePublicLink) features.push(t("common:plans.publicSharing"));
+    if (selectedPlan.teamAccess) features.push(t("common:plans.teamCollaboration"));
     return features;
   };
 
@@ -171,7 +186,7 @@ export default function SubscriptionPage() {
               null,
             redirectUrl: String(subscriptionRes?.redirectUrl || checkoutSessionId),
             plan: subscriptionRes?.plan ?? {
-              name: String(plan?.name || "Subscription"),
+              name: String(plan?.name || t("subscriptionPlanFallback")),
               monthlyPriceUSD: Number(plan?.monthlyPriceUSD ?? plan?.monthlyPrice ?? 0),
               monthlyPriceEGP: Number(plan?.monthlyPriceEGP ?? 0),
               yearlyPriceUSD: Number(plan?.yearlyPriceUSD ?? plan?.yearlyPrice ?? 0),
@@ -203,10 +218,8 @@ export default function SubscriptionPage() {
       }
 
       setSuccessDetails({
-        mainMessage: String(
-          subscriptionRes?.message || "Subscription updated successfully",
-        ),
-        providerMessage: String(result?.message || "No payment required."),
+        mainMessage: String(subscriptionRes?.message || t("updatedSuccess")),
+        providerMessage: String(result?.message || t("noPaymentRequired")),
         requiresCheckout: Boolean(result?.requiresCheckout),
         usd: Number.isFinite(
           Number(result?.checkoutAmountUsd ?? subscriptionRes?.amount_usd ?? 0),
@@ -225,7 +238,7 @@ export default function SubscriptionPage() {
       }
       return true;
     } catch (err: any) {
-      const errorMessage = String(err?.message || "Subscription failed");
+      const errorMessage = String(err?.message || t("subscriptionFailed"));
       const attemptedPromoCode = paymentData?.promoCode?.trim() || "";
       
       if (attemptedPromoCode) {
@@ -240,7 +253,7 @@ export default function SubscriptionPage() {
           },
         });
       } else {
-        toast({ title: "Subscription failed", description: errorMessage, variant: "destructive" });
+        toast({ title: t("subscriptionFailed"), description: errorMessage, variant: "destructive" });
       }
       return false;
     } finally {
@@ -253,9 +266,8 @@ export default function SubscriptionPage() {
     const isFreePlan = Number(plan?.monthlyPrice || 0) === 0 && Number(plan?.yearlyPrice || 0) === 0;
     if (!isFreePlan && !recurringConsent && !termsAndConds) {
       toast({
-        title: "Consent required",
-        description:
-          "Please agree to automatic recurring payments before continuing.",
+        title: t("consentRequired"),
+        description: t("consentTerms"),
         variant: "destructive",
       });
       return;
@@ -276,25 +288,25 @@ export default function SubscriptionPage() {
   };
 
   const actionLabel = useMemo(() => {
-    if (!plan || !currentWorkspaceSubscription) return "Confirm Subscription";
+    if (!plan || !currentWorkspaceSubscription) return t("confirmSubscription");
     const targetPlanId = Number(plan?.id);
     const currentPlanId = Number(currentWorkspaceSubscription?.planId || currentWorkspaceSubscription?.plan?.id);
     const samePlan = !Number.isNaN(targetPlanId) && !Number.isNaN(currentPlanId) && targetPlanId === currentPlanId;
     if (samePlan) {
-      if (currentSubscriptionType === type) return "Current subscription";
-      if (currentSubscriptionType === "monthly" && type === "yearly") return "Confirm yearly upgrade";
-      if (currentSubscriptionType === "yearly" && type === "monthly") return "Confirm monthly downgrade";
-      return "Confirm plan change";
+      if (currentSubscriptionType === type) return t("currentSubscription");
+      if (currentSubscriptionType === "monthly" && type === "yearly") return t("confirmYearlyUpgrade");
+      if (currentSubscriptionType === "yearly" && type === "monthly") return t("confirmMonthlyDowngrade");
+      return t("confirmChange");
     }
     const currentPrice =
       currentSubscriptionType === "monthly" || currentSubscriptionType === "yearly"
         ? getCyclePrice(currentWorkspaceSubscription?.plan, currentSubscriptionType as SubscriptionType)
         : 0;
     const targetPrice = getCyclePrice(plan, type);
-    if (targetPrice > currentPrice) return "Confirm upgrade";
-    if (targetPrice < currentPrice) return "Confirm downgrade";
-    return "Confirm plan change";
-  }, [plan, currentWorkspaceSubscription, currentSubscriptionType, type]);
+    if (targetPrice > currentPrice) return t("confirmUpgrade");
+    if (targetPrice < currentPrice) return t("confirmDowngrade");
+    return t("confirmChange");
+  }, [plan, currentWorkspaceSubscription, currentSubscriptionType, type, t]);
 
   const isSamePlanAndCycle = useMemo(() => {
     if (!plan || !currentWorkspaceSubscription) return false;
@@ -308,8 +320,8 @@ export default function SubscriptionPage() {
     <AppLayout>
       <div className="p-6 md:p-8 max-w-7xl mx-auto">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold">Confirm Subscription</h1>
-          <p className="text-muted-foreground mt-2">Review your plan and confirm billing cycle.</p>
+          <h1 className="text-3xl font-bold">{t("confirmSubscription")}</h1>
+          <p className="text-muted-foreground mt-2">{t("reviewSubtitle")}</p>
         </div>
 
         {loadingPlan ? (
@@ -319,9 +331,9 @@ export default function SubscriptionPage() {
         ) : !plan ? (
           <Card className="glass">
             <CardContent className="py-10 text-center">
-              <p className="text-muted-foreground">Plan not found.</p>
+              <p className="text-muted-foreground">{t("planNotFound")}</p>
               <Link to="/" className="inline-block mt-4">
-                <Button variant="outline">Back to Home</Button>
+                <Button variant="outline">{t("common:actions.backToHome")}</Button>
               </Link>
             </CardContent>
           </Card>
@@ -329,12 +341,12 @@ export default function SubscriptionPage() {
           <div className="grid gap-6 grid-cols-1 xl:grid-cols-2">
             <Card className="glass">
               <CardHeader>
-                <CardTitle className="capitalize">{plan.name} Plan</CardTitle>
-                <CardDescription>Plan features and limits</CardDescription>
+                <CardTitle className="capitalize">{t("planLabel", { name: plan.name })}</CardTitle>
+                <CardDescription>{t("planFeatures")}</CardDescription>
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-muted-foreground mb-3">
-                  Maximum members: {Number(plan.maxTeamMembers || 0)}
+                  {t("maxMembers", { count: Number(plan.maxTeamMembers || 0) })}
                 </p>
                 <ul className="space-y-3">
                   {featureList(plan).map((feature) => (
@@ -349,22 +361,24 @@ export default function SubscriptionPage() {
 
             <Card className="glass">
               <CardHeader>
-                <CardTitle>Subscription Details</CardTitle>
-                <CardDescription>Select billing type and confirm.</CardDescription>
+                <CardTitle>{t("details")}</CardTitle>
+                <CardDescription>{t("selectBillingConfirm")}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-5">
                 <div className="space-y-2">
-                  <p className="text-sm font-medium">Workspace</p>
+                  <p className="text-sm font-medium">{t("workspaceLabel")}</p>
                   {!selectedWorkspace ? (
                     <p className="text-sm text-muted-foreground">
-                      Select a workspace before subscribing.
+                      {t("selectWorkspaceBeforeSubscribe")}
                     </p>
                   ) : (
                     <div className="flex items-center gap-3 rounded-md border border-border p-3">
                       {selectedWorkspaceLogo ? (
                         <img
                           src={selectedWorkspaceLogo}
-                          alt={`${selectedWorkspace.name || "Workspace"} logo`}
+                          alt={t("workspaceLogoAlt", {
+                            name: selectedWorkspace.name || t("workspaceDetails.workspaceFallback"),
+                          })}
                           className="h-10 w-10 rounded-md object-cover border border-border"
                         />
                       ) : (
@@ -374,17 +388,19 @@ export default function SubscriptionPage() {
                       )}
                       <div>
                         <p className="font-medium">{selectedWorkspace.name}</p>
-                        <p className="text-xs text-muted-foreground">ID: {selectedWorkspace.id}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {t("common:workspaceIdShort", { id: selectedWorkspace.id })}
+                        </p>
                       </div>
                     </div>
                   )}
                 </div>
 
                 {Number(plan.monthlyPrice || 0) === 0 && Number(plan.yearlyPrice || 0) === 0 ? (
-                  <p className="text-sm text-muted-foreground">Free plan — no billing cycle.</p>
+                  <p className="text-sm text-muted-foreground">{t("freePlanNoBilling")}</p>
                 ) : (
                   <div className="space-y-1">
-                    <p className="text-sm font-medium">Billing cycle</p>
+                    <p className="text-sm font-medium">{t("billingCycle")}</p>
                     <div className="flex gap-2 flex-col md:flex-row">
                       <Button
                         type="button"
@@ -392,7 +408,10 @@ export default function SubscriptionPage() {
                         className={type === "monthly" ? "gradient-primary" : ""}
                         onClick={() => setType("monthly")}
                       >
-                        Monthly({plan.monthlyPriceEGP || 0} EGP ~ {plan.monthlyPrice || 0} USD /mo)
+                        {t("monthlyCycle", {
+                          egp: plan.monthlyPriceEGP || 0,
+                          usd: plan.monthlyPrice || 0,
+                        })}
                       </Button>
                       <Button
                         type="button"
@@ -400,7 +419,10 @@ export default function SubscriptionPage() {
                         className={type === "yearly" ? "gradient-primary" : ""}
                         onClick={() => setType("yearly")}
                       >
-                        Yearly({plan.yearlyPriceEGP || 0} EGP ~ {plan.yearlyPrice || 0} USD /yr)
+                        {t("yearlyCycle", {
+                          egp: plan.yearlyPriceEGP || 0,
+                          usd: plan.yearlyPrice || 0,
+                        })}
                       </Button>
                     </div>
                   </div>
@@ -420,7 +442,7 @@ export default function SubscriptionPage() {
                         htmlFor="recurring-consent"
                         className="text-sm font-normal leading-5"
                       >
-                        I agree to automatic recurring payments for this subscription.
+                        {t("agreeRecurringShort")}
                       </Label>
                     </div>
                     <div className="flex items-start gap-2">
@@ -435,7 +457,14 @@ export default function SubscriptionPage() {
                         htmlFor="terms-and-conditions"
                         className="text-sm font-normal leading-5"
                       >
-                        I agree to <NavLink className={'text-blue-500 underline'} to='/terms-and-conditions'>Terms&Conditions</NavLink>.
+                        {t("agreeTermsPrefix")}{" "}
+                        <NavLink className="text-blue-500 underline" to="/terms-and-conditions">
+                          {t("common:nav.termsConditions")}
+                        </NavLink>
+                        and <NavLink className="text-blue-500 underline" to="/privacy-policy">
+                          {t("common:nav.privacyPolicy")}
+                        </NavLink>
+                        .
                       </Label>
                     </div>
                   </div>
@@ -483,15 +512,19 @@ export default function SubscriptionPage() {
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Subscription updated successfully</DialogTitle>
+            <DialogTitle>{t("updatedSuccess")}</DialogTitle>
             <DialogDescription className="whitespace-pre-line">
               {successDetails
-                ? `${successDetails.mainMessage}
-
-${successDetails.providerMessage}
-
-Payment required: ${successDetails.requiresCheckout ? "Yes" : "No"}
-Amount: $${successDetails.usd.toFixed(2)} USD (${successDetails.providerAmount.toFixed(2)} ${successDetails.currency})`
+                ? t("successDetail", {
+                    mainMessage: successDetails.mainMessage,
+                    providerMessage: successDetails.providerMessage,
+                    paymentRequired: successDetails.requiresCheckout
+                      ? t("paymentRequiredYes")
+                      : t("paymentRequiredNo"),
+                    usd: successDetails.usd.toFixed(2),
+                    providerAmount: successDetails.providerAmount.toFixed(2),
+                    currency: successDetails.currency,
+                  })
                 : ""}
             </DialogDescription>
           </DialogHeader>
@@ -504,7 +537,7 @@ Amount: $${successDetails.usd.toFixed(2)} USD (${successDetails.providerAmount.t
                 navigate("/billing");
               }}
             >
-              Go to Billing
+              {t("goBilling")}
             </Button>
           </DialogFooter>
         </DialogContent>

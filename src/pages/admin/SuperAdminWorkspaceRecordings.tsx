@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useCallback, useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import AppLayout from "@/components/AppLayout";
@@ -16,6 +17,7 @@ import {
 import { ArrowLeft, Loader2 } from "lucide-react";
 
 export default function SuperAdminWorkspaceRecordingsPage() {
+  const { t } = useTranslation(["admin", "common"]);
   const { toast } = useToast();
   const { id } = useParams<{ id: string }>();
   const [recordings, setRecordings] = useState<any[]>([]);
@@ -31,14 +33,14 @@ export default function SuperAdminWorkspaceRecordingsPage() {
     } catch (err: any) {
       setRecordings([]);
       toast({
-        title: "Failed to load workspace recordings",
-        description: err?.message || "Please try again.",
+        title: t("workspaceRecordingsLoadFailed"),
+        description: err?.message || t("common:errors.tryAgain"),
         variant: "destructive",
       });
     } finally {
       setLoading(false);
     }
-  }, [id, toast]);
+  }, [id, toast, t]);
 
   useEffect(() => {
     void load();
@@ -49,19 +51,21 @@ export default function SuperAdminWorkspaceRecordingsPage() {
       <div className="p-6 md:p-8 max-w-7xl mx-auto space-y-4">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold">Workspace Recordings</h1>
-            <p className="text-sm text-muted-foreground mt-1">Workspace ID: {id || "N/A"}</p>
+            <h1 className="text-3xl font-bold">{t("workspaceRecordings.title")}</h1>
+            <p className="text-sm text-muted-foreground mt-1">
+              {t("workspaces.workspaceId", { id: id || t("unknown") })}
+            </p>
           </div>
           <Link to="/super-admin/workspaces">
             <Button variant="outline">
-              <ArrowLeft className="h-4 w-4 mr-2" /> Back to Workspaces
+              <ArrowLeft className="h-4 w-4 mr-2" /> {t("workspaces.backToWorkspaces")}
             </Button>
           </Link>
         </div>
 
         <Card className="glass">
           <CardHeader>
-            <CardTitle>All recordings for this workspace</CardTitle>
+            <CardTitle>{t("workspaces.recordingsForWorkspace")}</CardTitle>
           </CardHeader>
           <CardContent>
             {loading ? (
@@ -69,19 +73,17 @@ export default function SuperAdminWorkspaceRecordingsPage() {
                 <Loader2 className="h-6 w-6 animate-spin text-primary" />
               </div>
             ) : recordings.length === 0 ? (
-              <p className="py-8 text-center text-muted-foreground">
-                No recordings found for this workspace.
-              </p>
+              <p className="py-8 text-center text-muted-foreground">{t("workspaces.noRecordings")}</p>
             ) : (
               <div className="rounded-xl border border-border/80 overflow-hidden">
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>ID</TableHead>
-                      <TableHead>Title</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Visibility</TableHead>
-                      <TableHead>Created</TableHead>
+                      <TableHead>{t("table.id")}</TableHead>
+                      <TableHead>{t("table.title")}</TableHead>
+                      <TableHead>{t("table.status")}</TableHead>
+                      <TableHead>{t("table.visibility")}</TableHead>
+                      <TableHead>{t("table.created")}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>

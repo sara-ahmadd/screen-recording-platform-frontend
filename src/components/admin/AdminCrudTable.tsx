@@ -1,4 +1,5 @@
 import { useMemo, useState, type ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -64,6 +65,7 @@ export default function AdminCrudTable({
   onUpdate,
   onDelete,
 }: AdminCrudTableProps) {
+  const { t } = useTranslation(["admin", "common", "billing"]);
   const [search, setSearch] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editId, setEditId] = useState<number | null>(null);
@@ -168,18 +170,18 @@ export default function AdminCrudTable({
         <div className="flex flex-wrap gap-2">
           {showSearchInput && (
             <Input
-              placeholder="Search rows..."
+              placeholder={t("crudTable.searchPlaceholder")}
               className="max-w-sm"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
           )}
           <Button variant="outline" onClick={() => void onRefresh()}>
-            <RefreshCw className="h-4 w-4 mr-2" /> Refresh
+            <RefreshCw className="h-4 w-4 mr-2" /> {t("crudTable.refresh")}
           </Button>
           {allowCreate && (
             <Button className="gradient-primary" onClick={openCreate}>
-              <Plus className="h-4 w-4 mr-2" /> Add Row
+              <Plus className="h-4 w-4 mr-2" /> {t("crudTable.addRow")}
             </Button>
           )}
         </div>
@@ -191,7 +193,7 @@ export default function AdminCrudTable({
                 {columns.map((c) => (
                   <TableHead key={c}>{c}</TableHead>
                 ))}
-                <TableHead className="text-right">Actions</TableHead>
+                <TableHead className="text-right">{t("crudTable.actions")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -204,7 +206,7 @@ export default function AdminCrudTable({
               ) : filteredRows.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={columns.length + 1} className="py-8 text-center text-muted-foreground">
-                    No data found.
+                    {t("crudTable.noData")}
                   </TableCell>
                 </TableRow>
               ) : (
@@ -248,11 +250,13 @@ export default function AdminCrudTable({
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="max-w-3xl">
           <DialogHeader>
-            <DialogTitle>{editId == null ? "Create Row" : `Update Row #${editId}`}</DialogTitle>
-            <DialogDescription>Fill in the form fields and save.</DialogDescription>
+            <DialogTitle>
+              {editId == null ? t("crudTable.createRow") : t("crudTable.updateRow", { id: editId })}
+            </DialogTitle>
+            <DialogDescription>{t("crudTable.formDescription")}</DialogDescription>
           </DialogHeader>
           {Object.keys(formValues).length === 0 ? (
-            <p className="text-sm text-muted-foreground">No editable fields detected for this row.</p>
+            <p className="text-sm text-muted-foreground">{t("crudTable.noEditableFields")}</p>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {Object.entries(formValues).map(([key, value]) => {
@@ -279,7 +283,7 @@ export default function AdminCrudTable({
                         onValueChange={(next) => setFormValues((prev) => ({ ...prev, [key]: next }))}
                       >
                         <SelectTrigger>
-                          <SelectValue placeholder={`Select ${prettifyLabel(key)}`} />
+                          <SelectValue placeholder={t("crudTable.selectField", { field: prettifyLabel(key) })} />
                         </SelectTrigger>
                         <SelectContent>
                           {fieldSelectOptions[key].map((option) => (
@@ -295,7 +299,7 @@ export default function AdminCrudTable({
                         onValueChange={(next) => setFormValues((prev) => ({ ...prev, [key]: next }))}
                       >
                         <SelectTrigger>
-                          <SelectValue placeholder={`Select ${prettifyLabel(key)}`} />
+                          <SelectValue placeholder={t("crudTable.selectField", { field: prettifyLabel(key) })} />
                         </SelectTrigger>
                         <SelectContent>
                           {fieldOptions[key].map((option) => (
@@ -327,9 +331,11 @@ export default function AdminCrudTable({
             </div>
           )}
           <div className="flex justify-end gap-2">
-            <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancel</Button>
+            <Button variant="outline" onClick={() => setDialogOpen(false)}>
+              {t("common:actions.cancel")}
+            </Button>
             <Button className="gradient-primary" onClick={() => void handleSave()} disabled={saving}>
-              {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save"}
+              {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : t("common:actions.save")}
             </Button>
           </div>
         </DialogContent>
@@ -340,12 +346,14 @@ export default function AdminCrudTable({
           <DialogContent className="max-w-3xl">
             <DialogHeader>
               <DialogTitle>
-                Row Details {detailsRow?.id != null ? `#${detailsRow.id}` : ""}
+                {detailsRow?.id != null
+                  ? t("crudTable.rowDetailsWithId", { id: detailsRow.id })
+                  : t("crudTable.rowDetails")}
               </DialogTitle>
-              <DialogDescription>Detailed information for the selected row.</DialogDescription>
+              <DialogDescription>{t("crudTable.rowDetailsDesc")}</DialogDescription>
             </DialogHeader>
             {!detailsRow ? (
-              <p className="text-sm text-muted-foreground">No data available.</p>
+              <p className="text-sm text-muted-foreground">{t("crudTable.noDataAvailable")}</p>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-[60vh] overflow-y-auto pr-1">
                 {Object.entries(detailsRow).map(([key, value]) => (
@@ -354,7 +362,11 @@ export default function AdminCrudTable({
                       {prettifyLabel(key)}
                     </p>
                     <p className="mt-1 text-sm break-words">
-                      {value == null ? "—" : typeof value === "object" ? JSON.stringify(value) : String(value)}
+                      {value == null
+                        ? t("billing:emDash")
+                        : typeof value === "object"
+                          ? JSON.stringify(value)
+                          : String(value)}
                     </p>
                   </div>
                 ))}

@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { recordingsApi } from "@/lib/api";
 import { Loader2, Play, Monitor } from "lucide-react";
 
 export default function SharePage() {
+  const { t } = useTranslation(["errors", "common"]);
   const { shareToken } = useParams<{ shareToken: string }>();
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -12,7 +14,7 @@ export default function SharePage() {
   useEffect(() => {
     async function load() {
       if (!shareToken) {
-        setError("Invalid share token");
+        setError(t("invalidShare"));
         setLoading(false);
         return;
       }
@@ -20,16 +22,20 @@ export default function SharePage() {
         const res = await recordingsApi.previewLink(shareToken);
         setData(res.recording || res);
       } catch (err: any) {
-        setError(err.message || "Video not found");
+        setError(err.message || t("videoNotFound"));
       } finally {
         setLoading(false);
       }
     }
     load();
-  }, [shareToken]);
+  }, [shareToken, t]);
 
   if (loading) {
-    return <div className="min-h-screen flex items-center justify-center bg-background"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
   }
 
   if (error) {
@@ -50,7 +56,7 @@ export default function SharePage() {
           <div className="gradient-primary rounded-lg p-1.5">
             <Monitor className="h-4 w-4 text-primary-foreground" />
           </div>
-          <span className="font-bold">theRec</span>
+          <span className="font-bold">{t("common:brand")}</span>
         </Link>
       </header>
       <main className="max-w-[95%] mx-auto p-6">
@@ -69,8 +75,12 @@ export default function SharePage() {
             </div>
           )}
         </div>
-        <h1 className="text-xl font-bold">{data?.title || "Shared Recording"}</h1>
-        {data?.createdAt && <p className="text-sm text-muted-foreground mt-1">Shared on {new Date(data.createdAt).toLocaleDateString()}</p>}
+        <h1 className="text-xl font-bold">{data?.title || t("sharedRecording")}</h1>
+        {data?.createdAt && (
+          <p className="text-sm text-muted-foreground mt-1">
+            {t("sharedOn", { date: new Date(data.createdAt).toLocaleDateString() })}
+          </p>
+        )}
       </main>
     </div>
   );

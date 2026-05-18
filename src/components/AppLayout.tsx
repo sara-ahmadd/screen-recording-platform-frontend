@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "@/contexts/AuthContext";
 import {
   AlertTriangle,
@@ -22,42 +23,52 @@ import { useAvatarSrc } from "@/hooks/useAvatarSrc";
 import { useConfirmDialog } from "@/contexts/ConfirmDialogContext";
 import Logo from "@/components/Logo";
 import ThemeToggle from "@/components/ThemeToggle";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 import NotificationsBell from "@/components/NotificationsBell";
 import { useVideoCountWarning } from "@/contexts/VideoCountWarningContext";
 
-const baseNavItems = [
-  { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
-  { href: "/record", icon: Video, label: "Record" },
-  { href: "/upload", icon: Upload, label: "Upload" },
-  { href: "/workspaces", icon: Users, label: "Workspaces" },
-  { href: "/billing", icon: CreditCard, label: "Billing" },
-  { href: "/feedback", icon: MessageSquare, label: "Feedback" },
-];
-
-const superAdminNavItems = [
-  { href: "/super-admin/recordings", icon: Shield, label: "All Recordings" },
-  { href: "/super-admin/workspaces", icon: Shield, label: "All Workspaces" },
-  { href: "/super-admin/users", icon: Shield, label: "All Users" },
-  { href: "/super-admin/plans", icon: Shield, label: "All Plans" },
-  { href: "/super-admin/paymob-plans", icon: Shield, label: "Paymob plans" },
-  { href: "/super-admin/promocodes", icon: Shield, label: "All Promocodes" },
-  { href: "/super-admin/analytics", icon: Shield, label: "Analytics Overview" },
-  { href: "/super-admin/analytics-visuals", icon: Shield, label: "Analytics Visuals" },
-  { href: "/super-admin/subscriptions", icon: Shield, label: "Subscriptions" },
-  { href: "/super-admin/feedback", icon: Shield, label: "All Feedback" },
-];
-
 export default function AppLayout({ children }: { children: React.ReactNode }) {
+  const { t } = useTranslation(["layout", "common"]);
   const { user, logout } = useAuth();
   const videoCountWarning = useVideoCountWarning();
   const isSuperAdmin = String(user?.role || "").toLowerCase() === "superadmin";
+
+  const baseNavItems = useMemo(
+    () => [
+      { href: "/dashboard", icon: LayoutDashboard, label: t("layout:nav.dashboard") },
+      { href: "/record", icon: Video, label: t("layout:nav.record") },
+      { href: "/upload", icon: Upload, label: t("layout:nav.upload") },
+      { href: "/workspaces", icon: Users, label: t("layout:nav.workspaces") },
+      { href: "/billing", icon: CreditCard, label: t("layout:nav.billing") },
+      { href: "/feedback", icon: MessageSquare, label: t("layout:nav.feedback") },
+    ],
+    [t]
+  );
+
+  const superAdminNavItems = useMemo(
+    () => [
+      { href: "/super-admin/recordings", icon: Shield, label: t("layout:nav.allRecordings") },
+      { href: "/super-admin/workspaces", icon: Shield, label: t("layout:nav.allWorkspaces") },
+      { href: "/super-admin/users", icon: Shield, label: t("layout:nav.allUsers") },
+      { href: "/super-admin/plans", icon: Shield, label: t("layout:nav.allPlans") },
+      { href: "/super-admin/paymob-plans", icon: Shield, label: t("layout:nav.paymobPlans") },
+      { href: "/super-admin/promocodes", icon: Shield, label: t("layout:nav.allPromocodes") },
+      { href: "/super-admin/analytics", icon: Shield, label: t("layout:nav.analyticsOverview") },
+      { href: "/super-admin/analytics-visuals", icon: Shield, label: t("layout:nav.analyticsVisuals") },
+      { href: "/super-admin/subscriptions", icon: Shield, label: t("layout:nav.subscriptions") },
+      { href: "/super-admin/feedback", icon: Shield, label: t("layout:nav.allFeedback") },
+    ],
+    [t]
+  );
+
   const navItems = user
     ? [
         ...baseNavItems,
         ...(isSuperAdmin ? superAdminNavItems : []),
-        { href: "/notifications", icon: Bell, label: "Notifications" },
+        { href: "/notifications", icon: Bell, label: t("layout:nav.notifications") },
       ]
     : baseNavItems;
+
   const confirm = useConfirmDialog();
   const location = useLocation();
   const navigate = useNavigate();
@@ -71,10 +82,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   const handleLogout = async () => {
     const confirmed = await confirm({
-      title: "Sign out?",
-      description: "You will need to login again to continue.",
-      confirmText: "Sign out",
-      cancelText: "Cancel",
+      title: t("layout:signOut.title"),
+      description: t("layout:signOut.description"),
+      confirmText: t("layout:signOut.confirm"),
+      cancelText: t("common:actions.cancel"),
     });
     if (!confirmed) return;
     await logout();
@@ -87,15 +98,14 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           type="button"
           className="fixed inset-0 z-30 bg-black/30 md:hidden"
           onClick={() => setIsSidebarOpen(false)}
-          aria-label="Close sidebar overlay"
+          aria-label={t("layout:sidebar.closeOverlay")}
         />
       )}
 
-      {/* Sidebar */}
       <aside
         className={cn(
-          "fixed left-0 top-0 z-40 h-screen w-64 flex-col bg-sidebar border-r border-sidebar-border transition-transform duration-200 overflow-y-auto flex",
-          isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+          "fixed start-0 top-0 z-40 h-screen w-64 flex-col bg-sidebar border-e border-sidebar-border transition-transform duration-200 overflow-y-auto flex",
+          isSidebarOpen ? "translate-x-0" : "ltr:-translate-x-full rtl:translate-x-full"
         )}
       >
         <div className="p-6 flex items-center justify-between">
@@ -108,8 +118,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             variant="ghost"
             className="h-8 w-8 text-sidebar-foreground"
             onClick={() => setIsSidebarOpen(false)}
-            title="Hide sidebar"
-            aria-label="Hide sidebar"
+            title={t("layout:sidebar.hide")}
+            aria-label={t("layout:sidebar.hide")}
           >
             <PanelLeftClose className="h-4 w-4" />
           </Button>
@@ -126,7 +136,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                   : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
               )}
             >
-              <item.icon className="h-4 w-4" />
+              <item.icon className="h-4 w-4 shrink-0" />
               {item.label}
             </Link>
           ))}
@@ -136,7 +146,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             type="button"
             onClick={() => navigate("/profile")}
             className={cn(
-              "w-full flex items-center gap-3 mb-6 rounded-lg p-2 -m-2 text-left transition-colors",
+              "w-full flex items-center gap-3 mb-6 rounded-lg p-2 -m-2 text-start transition-colors",
               location.pathname === "/profile"
                 ? "bg-sidebar-accent text-sidebar-primary"
                 : "hover:bg-sidebar-accent text-sidebar-foreground"
@@ -145,7 +155,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             {sidebarAvatarUrl && !avatarFailed ? (
               <img
                 src={sidebarAvatarUrl}
-                alt={user.user_name || "User avatar"}
+                alt={user?.user_name || t("layout:sidebar.userAvatar")}
                 loading="lazy"
                 className="h-8 w-8 rounded-full object-cover border border-sidebar-border"
                 onError={() => setAvatarFailed(true)}
@@ -161,7 +171,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             </div>
           </button>
           <Button variant="ghost" size="sm" className="w-full justify-start text-sidebar-foreground/70 hover:text-white" onClick={handleLogout}>
-            <LogOut className="h-4 w-4 mr-2 mt-3" /> Sign out
+            <LogOut className="h-4 w-4 me-2 mt-3 shrink-0" /> {t("common:actions.signOut")}
           </Button>
         </div>
       </aside>
@@ -169,27 +179,30 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       <div
         className={cn(
           "flex min-h-screen flex-col transition-all",
-          isSidebarOpen ? "md:ml-64" : "md:ml-0"
+          isSidebarOpen ? "md:ms-64" : "md:ms-0"
         )}
       >
         <header className="sticky top-0 z-30 border-b border-border bg-background/95 backdrop-blur-sm">
-          <div className={`flex h-16 items-center ${isSidebarOpen ? 'justify-end' : 'justify-between'} px-4 md:px-6`}>
-           {!isSidebarOpen&& <div className="flex min-w-0 items-center gap-2">
-              <Button
-                type="button"
-                size="icon"
-                variant="outline"
-                onClick={() => setIsSidebarOpen((v) => !v)}
-                aria-label={isSidebarOpen ? "Hide sidebar" : "Show sidebar"}
-              >
-                {isSidebarOpen ? <PanelLeftClose className="h-4 w-4" /> : <PanelLeftOpen className="h-4 w-4" />}
-              </Button>
-              <Link to="/" className="flex min-w-0 items-center gap-2">
-                <Logo imageClassName="h-auto" withText textClassName="font-bold" />
-              </Link>
-            </div>}
+          <div className={`flex h-16 items-center ${isSidebarOpen ? "justify-end" : "justify-between"} px-4 md:px-6`}>
+            {!isSidebarOpen && (
+              <div className="flex min-w-0 items-center gap-2">
+                <Button
+                  type="button"
+                  size="icon"
+                  variant="outline"
+                  onClick={() => setIsSidebarOpen((v) => !v)}
+                  aria-label={isSidebarOpen ? t("layout:sidebar.hide") : t("layout:sidebar.show")}
+                >
+                  {isSidebarOpen ? <PanelLeftClose className="h-4 w-4" /> : <PanelLeftOpen className="h-4 w-4" />}
+                </Button>
+                <Link to="/" className="flex min-w-0 items-center gap-2">
+                  <Logo imageClassName="h-auto" withText textClassName="font-bold" />
+                </Link>
+              </div>
+            )}
             <div className="flex items-center gap-2">
               <NotificationsBell className="sticky h-9 w-9" />
+              <LanguageSwitcher className="h-9" />
               <ThemeToggle className="sticky h-9 w-9" />
             </div>
           </div>
@@ -201,7 +214,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           >
             <div className="mx-auto flex max-w-5xl items-start gap-3">
               <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-amber-600 dark:text-amber-400" aria-hidden />
-              <div className="min-w-0 flex-1 space-y-1">
+              <div className="min-w-0 flex-1 space-y-1 text-start">
                 <p className="font-semibold leading-tight">{videoCountWarning.banner.title}</p>
                 {videoCountWarning.banner.message ? (
                   <p className="text-sm text-amber-900/90 dark:text-amber-100/90">{videoCountWarning.banner.message}</p>
@@ -213,7 +226,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 size="icon"
                 className="shrink-0 text-amber-900 hover:bg-amber-200/80 dark:text-amber-100 dark:hover:bg-amber-900/60"
                 onClick={videoCountWarning.dismiss}
-                aria-label="Dismiss warning"
+                aria-label={t("layout:warning.dismiss")}
               >
                 <X className="h-4 w-4" />
               </Button>

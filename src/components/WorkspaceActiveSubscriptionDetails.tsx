@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { buildAvatarSrc } from "@/hooks/useAvatarSrc";
@@ -9,20 +10,20 @@ import {
 } from "@/lib/workspaceSubscription";
 import { Loader2 } from "lucide-react";
 
-function formatDate(value?: string | null) {
-  if (!value) return "—";
+function formatDate(value: string | null | undefined, emDash: string) {
+  if (!value) return emDash;
   const dt = new Date(value);
-  if (Number.isNaN(dt.getTime())) return "—";
+  if (Number.isNaN(dt.getTime())) return emDash;
   return dt.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
 }
 
-function getPriceLabel(subscription: any) {
+function getPriceLabel(subscription: any, t: (key: string) => string) {
   const monthly = Number(subscription?.plan?.monthlyPrice || 0);
   const yearly = Number(subscription?.plan?.yearlyPrice || 0);
   const type = (subscription?.type || "").toLowerCase();
-  if (type === "yearly") return `$${yearly}/year`;
-  if (type === "monthly") return `$${monthly}/month`;
-  return monthly > 0 ? `$${monthly}/month` : "Free";
+  if (type === "yearly") return `$${yearly}${t("perYear")}`;
+  if (type === "monthly") return `$${monthly}${t("perMonth")}`;
+  return monthly > 0 ? `$${monthly}${t("perMonth")}` : t("freePrice");
 }
 
 type Props = {
@@ -37,12 +38,19 @@ type Props = {
 
 export function WorkspaceActiveSubscriptionDetails({
   workspace,
-  emptySelectionMessage = "Select a workspace to see its active subscription.",
+  emptySelectionMessage,
   allWorkspaces,
   loading = false,
-  title = "Active subscription",
-  description = "Current plan for your selected workspace.",
+  title,
+  description,
 }: Props) {
+  const { t } = useTranslation("billing");
+  const emDash = t("emDash");
+  const resolvedTitle = title ?? t("activeSubscriptionTitle");
+  const resolvedDescription = description ?? t("activeSubscriptionDesc");
+  const resolvedEmptyMessage = emptySelectionMessage ?? t("selectWorkspaceSubscription");
+  const workspaceName = String(workspace?.name || t("workspaceLabel"));
+
   const planNameById = useMemo(
     () => buildPlanNameByIdFromWorkspaces(allWorkspaces),
     [allWorkspaces]
@@ -70,12 +78,12 @@ export function WorkspaceActiveSubscriptionDetails({
   return (
     <Card className="glass">
       <CardHeader>
-        <CardTitle>{title}</CardTitle>
-        <CardDescription>{description}</CardDescription>
+        <CardTitle>{resolvedTitle}</CardTitle>
+        <CardDescription>{resolvedDescription}</CardDescription>
       </CardHeader>
       <CardContent>
         {!workspace ? (
-          <p className="text-sm text-muted-foreground">{emptySelectionMessage}</p>
+          <p className="text-sm text-muted-foreground">{resolvedEmptyMessage}</p>
         ) : loading ? (
           <div className="flex justify-center py-10">
             <Loader2 className="h-6 w-6 animate-spin text-primary" />
@@ -86,29 +94,31 @@ export function WorkspaceActiveSubscriptionDetails({
               {logoSrc ? (
                 <img
                   src={logoSrc}
-                  alt={`${workspace.name || "Workspace"} logo`}
+                  alt={t("workspaceLogoAlt", { name: workspaceName })}
                   className="h-12 w-12 rounded-md object-cover border border-border"
                 />
               ) : (
                 <div className="h-12 w-12 rounded-md bg-secondary border border-border flex items-center justify-center text-sm font-semibold text-muted-foreground">
-                  {(workspace.name || "W")[0].toUpperCase()}
+                  {(workspaceName[0] ?? "W").toUpperCase()}
                 </div>
               )}
               <div>
-                <p className="text-lg font-semibold">{workspace.name || "Workspace"}</p>
-                <p className="text-sm text-muted-foreground">Workspace ID: {workspace.id}</p>
+                <p className="text-lg font-semibold">{workspaceName}</p>
+                <p className="text-sm text-muted-foreground">
+                  {t("workspaceId")}: {workspace.id}
+                </p>
               </div>
             </div>
 
             {!currentSubscription ? (
-              <p className="text-sm text-muted-foreground">No subscription data available for this workspace.</p>
+              <p className="text-sm text-muted-foreground">{t("noSubscriptionData")}</p>
             ) : (
               <div className="rounded-lg border border-border p-4 space-y-4">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div>
-                    <p className="text-sm text-muted-foreground">Current plan</p>
+                    <p className="text-sm text-muted-foreground">{t("currentPlan")}</p>
                     <p className="text-xl font-semibold capitalize">
-                      {currentSubscription.plan?.name || currentPlanName || "Free"}
+                      {currentSubscription.plan?.name || currentPlanName || t("freePrice")}
                     </p>
                   </div>
                   <Badge
@@ -117,46 +127,56 @@ export function WorkspaceActiveSubscriptionDetails({
                       isSubscriptionActiveForDisplay(currentSubscription) ? "gradient-primary border-0" : ""
                     }
                   >
-                    {(currentSubscription.status || "unknown").toUpperCase()}
+                    {(currentSubscription.status || t("notAvailable")).toUpperCase()}
                   </Badge>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <div className="rounded-md border border-border p-3">
-                    <p className="text-xs uppercase tracking-wide text-muted-foreground">Price</p>
-                    <p className="mt-1 text-sm font-medium">{getPriceLabel(currentSubscription)}</p>
+                    <p className="text-xs uppercase tracking-wide text-muted-foreground">{t("price")}</p>
+                    <p className="mt-1 text-sm font-medium">{getPriceLabel(currentSubscription, t)}</p>
                   </div>
                   <div className="rounded-md border border-border p-3">
-                    <p className="text-xs uppercase tracking-wide text-muted-foreground">Billing cycle</p>
-                    <p className="mt-1 text-sm font-medium capitalize">{currentSubscription.type || "N/A"}</p>
-                  </div>
-                  <div className="rounded-md border border-border p-3">
-                    <p className="text-xs uppercase tracking-wide text-muted-foreground">Current period start</p>
-                    <p className="mt-1 text-sm font-medium">{formatDate(currentSubscription.currentPeriodStart)}</p>
-                  </div>
-                  <div className="rounded-md border border-border p-3">
-                    <p className="text-xs uppercase tracking-wide text-muted-foreground">Current period end</p>
-                    <p className="mt-1 text-sm font-medium">{formatDate(currentSubscription.currentPeriodEnd)}</p>
-                  </div>
-                  <div className="rounded-md border border-border p-3">
-                    <p className="text-xs uppercase tracking-wide text-muted-foreground">Next billing date</p>
-                    <p className="mt-1 text-sm font-medium">{formatDate(currentSubscription.nextBillingDate)}</p>
-                  </div>
-                  <div className="rounded-md border border-border p-3">
-                    <p className="text-xs uppercase tracking-wide text-muted-foreground">Auto renewal</p>
-                    <p className="mt-1 text-sm font-medium">
-                      {typeof currentSubscription.autoRenewal === "boolean"
-                        ? currentSubscription.autoRenewal
-                          ? "On"
-                          : "Off"
-                        : "Off"}
+                    <p className="text-xs uppercase tracking-wide text-muted-foreground">{t("billingCycle")}</p>
+                    <p className="mt-1 text-sm font-medium capitalize">
+                      {currentSubscription.type || t("notAvailable")}
                     </p>
                   </div>
                   <div className="rounded-md border border-border p-3">
-                    <p className="text-xs uppercase tracking-wide text-muted-foreground">Plan limits</p>
+                    <p className="text-xs uppercase tracking-wide text-muted-foreground">{t("periodStart")}</p>
                     <p className="mt-1 text-sm font-medium">
-                      {currentSubscription.plan?.maxVideosPerMonth ?? "-"} videos/mo,{" "}
-                      {currentSubscription.plan?.maxStorageGB ?? "-"} GB
+                      {formatDate(currentSubscription.currentPeriodStart, emDash)}
+                    </p>
+                  </div>
+                  <div className="rounded-md border border-border p-3">
+                    <p className="text-xs uppercase tracking-wide text-muted-foreground">{t("periodEnd")}</p>
+                    <p className="mt-1 text-sm font-medium">
+                      {formatDate(currentSubscription.currentPeriodEnd, emDash)}
+                    </p>
+                  </div>
+                  <div className="rounded-md border border-border p-3">
+                    <p className="text-xs uppercase tracking-wide text-muted-foreground">{t("nextBilling")}</p>
+                    <p className="mt-1 text-sm font-medium">
+                      {formatDate(currentSubscription.nextBillingDate, emDash)}
+                    </p>
+                  </div>
+                  <div className="rounded-md border border-border p-3">
+                    <p className="text-xs uppercase tracking-wide text-muted-foreground">{t("autoRenewal")}</p>
+                    <p className="mt-1 text-sm font-medium">
+                      {typeof currentSubscription.autoRenewal === "boolean"
+                        ? currentSubscription.autoRenewal
+                          ? t("on")
+                          : t("off")
+                        : t("off")}
+                    </p>
+                  </div>
+                  <div className="rounded-md border border-border p-3">
+                    <p className="text-xs uppercase tracking-wide text-muted-foreground">{t("planLimits")}</p>
+                    <p className="mt-1 text-sm font-medium">
+                      {t("planLimitsSummary", {
+                        videos: currentSubscription.plan?.maxVideosPerMonth ?? "-",
+                        storage: currentSubscription.plan?.maxStorageGB ?? "-",
+                      })}
                     </p>
                   </div>
                 </div>

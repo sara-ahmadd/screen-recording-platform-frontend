@@ -80,6 +80,16 @@
   body {
     @apply bg-background text-foreground;
   }
+
+  html[lang="ar"] body {
+    font-family: "IBM Plex Sans Arabic", system-ui, -apple-system, sans-serif;
+  }
+
+  html[dir="rtl"] [data-radix-popper-content-wrapper],
+  html[dir="rtl"] [role="dialog"],
+  html[dir="rtl"] [role="alertdialog"] {
+    direction: rtl;
+  }
 }
 
 @layer utilities {

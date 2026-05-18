@@ -1,4 +1,6 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+import type { TFunction } from "i18next";
 import { workspaceApi } from "@/lib/api";
 import { getSocket } from "@/lib/socket";
 import { useAuth } from "@/contexts/AuthContext";
@@ -15,9 +17,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Plus, Users, Mail, UserMinus, Loader2, CheckCircle2, LogOut, AlertTriangle } from "lucide-react";
 import { buildAvatarSrc } from "@/hooks/useAvatarSrc";
 
-const formatBytes = (bytes?: number | null) => {
-  if (!bytes || bytes <= 0) return "0 B";
-  const units = ["B", "KB", "MB", "GB", "TB"];
+const formatBytes = (bytes: number | null | undefined, t: TFunction) => {
+  if (!bytes || bytes <= 0) return t("common:storage.zero");
+  const units = [
+    t("common:storage.b"),
+    t("common:storage.kb"),
+    t("common:storage.mb"),
+    t("common:storage.gb"),
+    t("common:storage.tb"),
+  ];
   let size = bytes;
   let unitIndex = 0;
   while (size >= 1024 && unitIndex < units.length - 1) {
@@ -50,6 +58,11 @@ const getWorkspaceOwnerId = (workspace?: any): number | null => {
 };
 
 export default function WorkspacesPage() {
+  const { t } = useTranslation(["workspaces", "common"]);
+  const formatStorage = useCallback(
+    (bytes?: number | null) => formatBytes(bytes, t),
+    [t],
+  );
   const { user, selectedWorkspaceId, setSelectedWorkspaceId, refreshUser } = useAuth();
   const { toast } = useToast();
   const confirm = useConfirmDialog();
@@ -127,7 +140,7 @@ export default function WorkspacesPage() {
       const fd = new FormData();
       fd.append("name", newWsName);
       const res = await workspaceApi.create(fd);
-      toastApiSuccess(res, { title: "Workspace created", fallbackDescription: "Workspace created." });
+      toastApiSuccess(res, { title: t("created"), fallbackDescription: t("createdDesc") });
       setNewWsName("");
       const id = res.workspace?.id || res.id;
       setWsId(id);
@@ -135,7 +148,7 @@ export default function WorkspacesPage() {
       if (id != null) setSelectedWorkspaceId(String(id));
       loadMembers(id);
     } catch (err: any) {
-      toast({ title: "Error", description: err.message, variant: "destructive" });
+      toast({ title: t("common:toast.error"), description: err.message, variant: "destructive" });
     } finally {
       setCreating(false);
     }
@@ -145,27 +158,27 @@ export default function WorkspacesPage() {
     if (!wsId || !inviteEmail) return;
     try {
       const inviteRes = await workspaceApi.invite(wsId, inviteEmail);
-      toastApiSuccess(inviteRes, { title: "Invitation sent", fallbackDescription: "Invitation sent." });
+      toastApiSuccess(inviteRes, { title: t("inviteSent"), fallbackDescription: t("inviteDesc") });
       setInviteEmail("");
     } catch (err: any) {
-      toast({ title: "Error", description: err.message, variant: "destructive" });
+      toast({ title: t("common:toast.error"), description: err.message, variant: "destructive" });
     }
   };
 
   const handleLeaveWorkspace = async () => {
     if (!wsId) return;
     const confirmed = await confirm({
-      title: "Leave workspace?",
-      description: "You will leave this workspace.",
-      confirmText: "Leave",
-      cancelText: "Cancel",
+      title: t("leaveTitle"),
+      description: t("leaveDesc"),
+      confirmText: t("leaveAction"),
+      cancelText: t("common:actions.cancel"),
     });
     if (!confirmed) return;
     try {
       const leaveRes = await workspaceApi.leave(wsId);
       toastApiSuccess(leaveRes, {
-        title: "Left workspace",
-        fallbackDescription: "You left the workspace.",
+        title: t("left"),
+        fallbackDescription: t("leftDesc"),
       });
       setWorkspaceMembersMap((prev) => {
         const next = { ...prev };
@@ -180,25 +193,25 @@ export default function WorkspacesPage() {
       setWsId(null);
       await refreshUser();
     } catch (err: any) {
-      toast({ title: "Error", description: err.message, variant: "destructive" });
+      toast({ title: t("common:toast.error"), description: err.message, variant: "destructive" });
     }
   };
 
   const handleDeleteWorkspace = async () => {
     if (!wsId) return;
     const confirmed = await confirm({
-      title: "Delete workspace?",
-      description: "This action is permanent and cannot be undone.",
-      confirmText: "Delete",
-      cancelText: "Cancel",
+      title: t("deleteTitle"),
+      description: t("deleteDesc"),
+      confirmText: t("common:actions.delete"),
+      cancelText: t("common:actions.cancel"),
     });
     if (!confirmed) return;
 
     try {
       const deleteRes = await workspaceApi.delete(wsId);
       toastApiSuccess(deleteRes, {
-        title: "Workspace deleted",
-        fallbackDescription: "Workspace deleted.",
+        title: t("deleted"),
+        fallbackDescription: t("deletedDesc"),
       });
       setWorkspaceMembersMap((prev) => {
         const next = { ...prev };
@@ -218,7 +231,7 @@ export default function WorkspacesPage() {
       setWsId(null);
       await refreshUser();
     } catch (err: any) {
-      toast({ title: "Error", description: err.message, variant: "destructive" });
+      toast({ title: t("common:toast.error"), description: err.message, variant: "destructive" });
     }
   };
 
@@ -226,10 +239,10 @@ export default function WorkspacesPage() {
     if (!wsId) return;
     try {
       const roleRes = await workspaceApi.updateMember(userId, wsId, role);
-      toastApiSuccess(roleRes, { title: "Role updated", fallbackDescription: "Member role updated." });
+      toastApiSuccess(roleRes, { title: t("roleUpdated"), fallbackDescription: t("roleUpdatedDesc") });
       loadMembers(wsId);
     } catch (err: any) {
-      toast({ title: "Error", description: err.message, variant: "destructive" });
+      toast({ title: t("common:toast.error"), description: err.message, variant: "destructive" });
     }
   };
 
@@ -239,19 +252,21 @@ export default function WorkspacesPage() {
     if (!memberUserId) return;
 
     const confirmed = await confirm({
-      title: "Remove member?",
-      description: `${member.user_name || member.email || "This member"} will be removed from this workspace.`,
-      confirmText: "Remove",
-      cancelText: "Cancel",
+      title: t("removeMemberTitle"),
+      description: t("removeMemberDesc", {
+        name: member.user_name || member.email || t("removeMemberFallback"),
+      }),
+      confirmText: t("removeAction"),
+      cancelText: t("common:actions.cancel"),
     });
     if (!confirmed) return;
 
     try {
       const removeRes = await workspaceApi.removeMember(wsId, Number(memberUserId));
-      toastApiSuccess(removeRes, { title: "Member removed", fallbackDescription: "Member removed." });
+      toastApiSuccess(removeRes, { title: t("memberRemoved"), fallbackDescription: t("memberRemovedDesc") });
       loadMembers(wsId);
     } catch (err: any) {
-      toast({ title: "Error", description: err.message, variant: "destructive" });
+      toast({ title: t("common:toast.error"), description: err.message, variant: "destructive" });
     }
   };
 
@@ -280,7 +295,7 @@ export default function WorkspacesPage() {
     if (!editingWorkspaceId) return;
     const trimmedName = editingWorkspaceName.trim();
     if (!trimmedName) {
-      toast({ title: "Workspace name is required", variant: "destructive" });
+      toast({ title: t("nameRequired"), variant: "destructive" });
       return;
     }
 
@@ -311,12 +326,12 @@ export default function WorkspacesPage() {
         setHiddenWorkspaceLogos((prev) => ({ ...prev, [`${editingWorkspaceId}:${updatedLogoSrc}`]: false }));
       }
 
-      toastApiSuccess(res, { title: "Workspace updated", fallbackDescription: "Workspace updated." });
+      toastApiSuccess(res, { title: t("updated"), fallbackDescription: t("updatedDesc") });
       await refreshUser();
       await loadMembers(editingWorkspaceId);
       closeWorkspaceEditor();
     } catch (err: any) {
-      toast({ title: "Error", description: err.message, variant: "destructive" });
+      toast({ title: t("common:toast.error"), description: err.message, variant: "destructive" });
     } finally {
       setUpdatingWorkspace(false);
     }
@@ -327,11 +342,11 @@ export default function WorkspacesPage() {
     const socket = getSocket();
     const onNewMember = () => {
       if (wsId) loadMembers(wsId);
-      toastSuccess("New member joined!");
+      toastSuccess(t("memberJoined"));
     };
     const onRemoved = () => { if (wsId) loadMembers(wsId); };
     const onRoleUpdated = () => { if (wsId) loadMembers(wsId); };
-    const onStorageLimit = (data: any) => { toast({ title: "⚠️ Storage limit", description: data?.message || "Workspace storage is full.", variant: "destructive" }); };
+    const onStorageLimit = (data: any) => { toast({ title: t("storageLimit"), description: data?.message || t("storageLimitDesc"), variant: "destructive" }); };
 
     socket.on("new_member", onNewMember);
     socket.on("member_removed", onRemoved);
@@ -382,14 +397,14 @@ export default function WorkspacesPage() {
       <div className="p-6 md:p-8 max-w-7xl mx-auto">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-2xl font-bold">Workspaces</h1>
-            <p className="text-muted-foreground text-sm mt-1">Collaborate with your team</p>
+            <h1 className="text-2xl font-bold">{t("title")}</h1>
+            <p className="text-muted-foreground text-sm mt-1">{t("subtitle")}</p>
           </div>
         </div>
 
         <Card className="glass mb-6">
           <CardHeader>
-            <CardTitle className="text-base">Your Workspaces</CardTitle>
+            <CardTitle className="text-base">{t("yourWorkspaces")}</CardTitle>
           </CardHeader>
           <CardContent>
             {(user?.workspaces?.length || 0) === 0 ? (
@@ -402,8 +417,7 @@ export default function WorkspacesPage() {
                   aria-hidden
                 />
                 <p className="text-sm leading-relaxed text-amber-950 dark:text-amber-50/95">
-                  You need at least one workspace before you can open the dashboard or use recording features. Create one
-                  below to continue.
+                  {t("needOneAlert")}
                 </p>
               </div>
             ) : null}
@@ -430,12 +444,12 @@ export default function WorkspacesPage() {
                           type="button"
                           className="shrink-0"
                           onClick={() => openWorkspaceEditor(workspaceData)}
-                          title="View or update workspace logo"
+                          title={t("viewUpdateLogo")}
                         >
                           {logoSrc && !hideLogo ? (
                             <img
                               src={logoSrc}
-                              alt={`${workspaceData.name || ws.name || "Workspace"} logo`}
+                              alt={t("workspaceLogoAlt", { name: workspaceData.name || ws.name || t("title") })}
                               className="h-11 w-11 rounded-md object-contain border border-border"
                               onError={() => {
                                 setHiddenWorkspaceLogos((prev) => ({ ...prev, [`${ws.id}:${logoSrc}`]: true }));
@@ -453,20 +467,20 @@ export default function WorkspacesPage() {
                               type="button"
                               className="font-medium truncate text-left hover:underline min-w-0"
                               onClick={() => openWorkspaceEditor(workspaceData)}
-                              title="Edit workspace name"
+                              title={t("editWorkspaceName")}
                             >
                               {workspaceData.name || ws.name}
                             </button>
                             {isOwnWorkspace ? (
                               <span className="text-xs text-muted-foreground shrink-0">
-                                Your workspace
+                                {t("yourWorkspace")}
                               </span>
                             ) : null}
                           </div>
                           <p className="text-xs text-muted-foreground truncate">{workspaceData.slug || ws.slug || "-"}</p>
                           <p className="text-xs mt-1">
                             <span className="inline-flex rounded-full bg-secondary px-2 py-0.5 text-muted-foreground">
-                              {workspaceData.status || "active"}
+                              {workspaceData.status || t("statusActive")}
                             </span>
                           </p>
                         </div>
@@ -477,7 +491,7 @@ export default function WorkspacesPage() {
                           variant="outline"
                           onClick={() => handleViewWorkspaceMembers(workspaceData)}
                         >
-                          {showMembers ? "Hide members" : "View members"}
+                          {showMembers ? t("hideMembers") : t("viewMembers")}
                         </Button>
                         <Button
                           variant={isCurrent ? "outline" : "default"}
@@ -486,49 +500,49 @@ export default function WorkspacesPage() {
                             setSelectedWorkspaceId(String(ws.id));
                             setWsId(ws.id);
                             loadMembers(ws.id);
-                            toastSuccess("Workspace selected", ws.name);
+                            toastSuccess(t("workspaceSelected"), ws.name);
                           }}
                         >
                           {isCurrent ? <CheckCircle2 className="h-4 w-4" /> : null}
-                          {isCurrent ? "Current" : "Use workspace"}
+                          {isCurrent ? t("current") : t("useWorkspace")}
                         </Button>
                       </div>
                     </div>
 
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
                       <div className="rounded-md border border-border p-2">
-                        <p className="text-muted-foreground">Workspace ID</p>
+                        <p className="text-muted-foreground">{t("workspaceId")}</p>
                         <p className="font-medium mt-1">{workspaceData.id || ws.id || "-"}</p>
                       </div>
                       <div className="rounded-md border border-border p-2">
-                        <p className="text-muted-foreground">Owner ID</p>
+                        <p className="text-muted-foreground">{t("ownerId")}</p>
                         <p className="font-medium mt-1">{workspaceData.ownerId ?? "-"}</p>
                       </div>
                       <div className="rounded-md border border-border p-2">
-                        <p className="text-muted-foreground">Subscription ID</p>
+                        <p className="text-muted-foreground">{t("subscriptionId")}</p>
                         <p className="font-medium mt-1">{workspaceData.subscriptionId ?? "-"}</p>
                       </div>
                       <div className="rounded-md border border-border p-2">
-                        <p className="text-muted-foreground">Videos Count</p>
+                        <p className="text-muted-foreground">{t("videosCount")}</p>
                         <p className="font-medium mt-1">{workspaceData.videosCount ?? 0}</p>
                       </div>
                       <div className="rounded-md border border-border p-2">
-                        <p className="text-muted-foreground">Storage Used</p>
-                        <p className="font-medium mt-1">{formatBytes(workspaceData.currentStorage)}</p>
+                        <p className="text-muted-foreground">{t("storageUsed")}</p>
+                        <p className="font-medium mt-1">{formatStorage(workspaceData.currentStorage)}</p>
                       </div>
                       <div className="rounded-md border border-border p-2">
-                        <p className="text-muted-foreground">Reset Videos At</p>
+                        <p className="text-muted-foreground">{t("resetVideosAt")}</p>
                         <p className="font-medium mt-1">{workspaceData.resetVideosCountAt ? new Date(workspaceData.resetVideosCountAt).toLocaleDateString() : "-"}</p>
                       </div>
                       <div className="rounded-md border border-border p-2">
-                        <p className="text-muted-foreground">Created At</p>
+                        <p className="text-muted-foreground">{t("createdAt")}</p>
                         <p className="font-medium mt-1">{workspaceData.createdAt ? new Date(workspaceData.createdAt).toLocaleDateString() : "-"}</p>
                       </div>
                     </div>
 
                     {showMembers && (
                       <div className="space-y-2 rounded-md border border-border bg-secondary/20 p-3">
-                        <p className="text-xs font-medium text-muted-foreground">Members</p>
+                        <p className="text-xs font-medium text-muted-foreground">{t("members")}</p>
                         {workspaceMembers.length > 0 ? (
                           workspaceMembers.map((member: any) => (
                             <div key={member.id || member.userId || member.email} className="flex items-center justify-between text-sm gap-3">
@@ -536,7 +550,7 @@ export default function WorkspacesPage() {
                                 {member.avatar_url ? (
                                   <img
                                     src={buildAvatarSrc(member.avatar_url)}
-                                    alt={member.user_name || "Member avatar"}
+                                    alt={member.user_name || t("memberAvatarAlt")}
                                     className="h-7 w-7 rounded-full object-cover border border-border shrink-0"
                                   />
                                 ) : (
@@ -545,7 +559,7 @@ export default function WorkspacesPage() {
                                   </div>
                                 )}
                                 <div className="min-w-0">
-                                  <p className="truncate">{member.user_name || member.name || "Member"}</p>
+                                  <p className="truncate">{member.user_name || member.name || t("memberFallback")}</p>
                                   <p className="text-xs text-muted-foreground truncate">{member.email || "-"}</p>
                                 </div>
                               </div>
@@ -553,7 +567,7 @@ export default function WorkspacesPage() {
                             </div>
                           ))
                         ) : (
-                          <p className="text-xs text-muted-foreground">No members found for this workspace.</p>
+                          <p className="text-xs text-muted-foreground">{t("noMembersFound")}</p>
                         )}
                       </div>
                     )}
@@ -561,7 +575,7 @@ export default function WorkspacesPage() {
                 );
               })}
               {(user?.workspaces?.length || 0) === 0 && (
-                <p className="text-sm text-muted-foreground">No workspaces available.</p>
+                <p className="text-sm text-muted-foreground">{t("noWorkspaces")}</p>
               )}
             </div>
           </CardContent>
@@ -571,15 +585,15 @@ export default function WorkspacesPage() {
           {/* Create workspace */}
           <Card className="glass">
             <CardHeader>
-              <CardTitle className="text-base flex items-center gap-2"><Plus className="h-4 w-4" /> Create Workspace</CardTitle>
+              <CardTitle className="text-base flex items-center gap-2"><Plus className="h-4 w-4" /> {t("create")}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label>Workspace Name</Label>
-                <Input value={newWsName} onChange={(e) => setNewWsName(e.target.value)} placeholder="My Team" />
+                <Label>{t("workspaceName")}</Label>
+                <Input value={newWsName} onChange={(e) => setNewWsName(e.target.value)} placeholder={t("placeholderName")} />
               </div>
               <Button className="w-full gradient-primary" onClick={handleCreate} disabled={creating || !newWsName}>
-                {creating ? <Loader2 className="h-4 w-4 animate-spin" /> : "Create"}
+                {creating ? <Loader2 className="h-4 w-4 animate-spin" /> : t("create")}
               </Button>
             </CardContent>
           </Card>
@@ -587,19 +601,19 @@ export default function WorkspacesPage() {
           {/* Invite members */}
           <Card className="glass">
             <CardHeader>
-              <CardTitle className="text-base flex items-center gap-2"><Mail className="h-4 w-4" /> Invite Members</CardTitle>
+              <CardTitle className="text-base flex items-center gap-2"><Mail className="h-4 w-4" /> {t("invite")}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label>Workspace ID</Label>
-                <Input type="number" value={wsId || ""} onChange={(e) => { setWsId(Number(e.target.value)); loadMembers(Number(e.target.value)); }} placeholder="Enter workspace ID" />
+                <Label>{t("workspaceId")}</Label>
+                <Input type="number" value={wsId || ""} onChange={(e) => { setWsId(Number(e.target.value)); loadMembers(Number(e.target.value)); }} placeholder={t("placeholderId")} />
               </div>
               <div className="space-y-2">
-                <Label>Email</Label>
-                <Input type="email" value={inviteEmail} onChange={(e) => setInviteEmail(e.target.value)} placeholder="colleague@email.com" />
+                <Label>{t("common:labels.email")}</Label>
+                <Input type="email" value={inviteEmail} onChange={(e) => setInviteEmail(e.target.value)} placeholder={t("invitePlaceholder")} />
               </div>
               <Button className="w-full" variant="outline" onClick={handleInvite} disabled={!wsId || !inviteEmail}>
-                Send Invite
+                {t("sendInvite")}
               </Button>
             </CardContent>
           </Card>
@@ -609,7 +623,7 @@ export default function WorkspacesPage() {
         {members.length > 0 && (
           <Card className="glass mt-6">
             <CardHeader>
-              <CardTitle className="text-base flex items-center gap-2"><Users className="h-4 w-4" /> Members</CardTitle>
+              <CardTitle className="text-base flex items-center gap-2"><Users className="h-4 w-4" /> {t("members")}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
@@ -632,7 +646,7 @@ export default function WorkspacesPage() {
                               size="sm"
                               className="h-8 w-8 p-0 text-muted-foreground hover:bg-primary hover:text-white shrink-0"
                               onClick={handleLeaveWorkspace}
-                              title="Leave workspace"
+                              title={t("leaveWorkspaceTitle")}
                             >
                               <LogOut className="h-3.5" />
                             </Button>
@@ -643,7 +657,7 @@ export default function WorkspacesPage() {
                               size="sm"
                               className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive shrink-0"
                               onClick={() => handleRemoveMember(member)}
-                              title="Remove member"
+                              title={t("removeMemberTitle")}
                             >
                               <UserMinus className="h-3.5 w-3.5" />
                             </Button>
@@ -665,9 +679,9 @@ export default function WorkspacesPage() {
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="workspaceMember">Member</SelectItem>
-                              <SelectItem value="workspaceAdmin">Admin</SelectItem>
-                              <SelectItem value="workspaceOwner">Owner</SelectItem>
+                              <SelectItem value="workspaceMember">{t("member")}</SelectItem>
+                              <SelectItem value="workspaceAdmin">{t("admin")}</SelectItem>
+                              <SelectItem value="workspaceOwner">{t("owner")}</SelectItem>
                             </SelectContent>
                           </Select>
                         </div>
@@ -688,11 +702,11 @@ export default function WorkspacesPage() {
           return (
             <Card className="glass mt-6">
               <CardHeader>
-                <CardTitle className="text-base text-destructive">Danger Zone</CardTitle>
+                <CardTitle className="text-base text-destructive">{t("dangerZone")}</CardTitle>
               </CardHeader>
               <CardContent>
                 <Button variant="destructive" onClick={handleDeleteWorkspace}>
-                  Delete Workspace
+                  {t("deleteWorkspace")}
                 </Button>
               </CardContent>
             </Card>
@@ -702,23 +716,23 @@ export default function WorkspacesPage() {
       <Dialog open={editingWorkspaceId !== null} onOpenChange={(open) => !open && closeWorkspaceEditor()}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Edit Workspace</DialogTitle>
-            <DialogDescription>Update workspace logo and workspace name.</DialogDescription>
+            <DialogTitle>{t("editWorkspaceDialog")}</DialogTitle>
+            <DialogDescription>{t("editDialogDesc")}</DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label>Logo</Label>
+              <Label>{t("logo")}</Label>
               <div className="flex items-center gap-3">
                 {editingWorkspaceLogoPreview ? (
                   <button
                     type="button"
                     onClick={() => setIsLogoPreviewOpen(true)}
                     className="rounded-md"
-                    title="Preview logo"
+                    title={t("previewLogo")}
                   >
                     <img
                       src={editingWorkspaceLogoPreview}
-                      alt="Workspace logo preview"
+                      alt={t("logoPreview")}
                       className="h-16 w-16 rounded-md object-contain border border-border"
                     />
                   </button>
@@ -735,20 +749,20 @@ export default function WorkspacesPage() {
               </div>
             </div>
             <div className="space-y-2">
-              <Label>Workspace Name</Label>
+              <Label>{t("workspaceName")}</Label>
               <Input
                 value={editingWorkspaceName}
                 onChange={(e) => setEditingWorkspaceName(e.target.value)}
-                placeholder="Workspace name"
+                placeholder={t("workspaceName")}
               />
             </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={closeWorkspaceEditor} disabled={updatingWorkspace}>
-              Cancel
+              {t("common:actions.cancel")}
             </Button>
             <Button className="gradient-primary" onClick={handleUpdateWorkspace} disabled={updatingWorkspace || !editingWorkspaceName.trim()}>
-              {updatingWorkspace ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save changes"}
+              {updatingWorkspace ? <Loader2 className="h-4 w-4 animate-spin" /> : t("saveWorkspace")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -756,18 +770,18 @@ export default function WorkspacesPage() {
       <Dialog open={isLogoPreviewOpen} onOpenChange={setIsLogoPreviewOpen}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>Logo Preview</DialogTitle>
-            <DialogDescription>Workspace logo in full size preview.</DialogDescription>
+            <DialogTitle>{t("logoPreviewTitle")}</DialogTitle>
+            <DialogDescription>{t("logoFullPreviewDesc")}</DialogDescription>
           </DialogHeader>
           {editingWorkspaceLogoPreview ? (
             <img
               src={editingWorkspaceLogoPreview}
-              alt="Workspace logo full preview"
+              alt={t("workspaceLogoFullPreview")}
               className="w-full max-h-[70vh] object-contain rounded-md border border-border"
             />
           ) : (
             <div className="h-48 rounded-md border border-border bg-secondary/40 flex items-center justify-center text-muted-foreground">
-              No logo to preview
+              {t("noLogo")}
             </div>
           )}
         </DialogContent>

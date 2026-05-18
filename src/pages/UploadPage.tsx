@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useState, useCallback, useRef, useEffect } from "react";
 import { getSelectedWorkspaceId, recordingsApi } from "@/lib/api";
 import { useBlocker, useNavigate } from "react-router-dom";
@@ -25,6 +26,7 @@ const PART_SIZE = 5 * 1024 * 1024; // 5MB
 const VIDEO_DURATION_LIMIT_ERROR = "video duration exceeds current plan limit";
 
 export default function UploadPage() {
+  const { t } = useTranslation(["recording", "common", "dashboard"]);
   const navigate = useNavigate();
   const { toast } = useToast();
   const confirm = useConfirmDialog();
@@ -54,7 +56,7 @@ export default function UploadPage() {
   useEffect(() => {
     if (blocker.state !== "blocked") return;
     const confirmed = window.confirm(
-      "Upload is still in progress. Your changes may not be saved. Are you sure you want to leave this page?",
+      t("leaveUploadWarning"),
     );
     if (confirmed) blocker.proceed();
     else blocker.reset();
@@ -122,7 +124,7 @@ export default function UploadPage() {
       setDragOver(false);
       const f = e.dataTransfer.files[0];
       if (f && f.type.startsWith("video/")) handleFile(f);
-      else toast({ title: "Invalid file", description: "Please drop a video file.", variant: "destructive" });
+      else toast({ title: t("invalidFile"), description: t("upload.dropVideoOnly"), variant: "destructive" });
     },
     [toast],
   );
@@ -207,13 +209,13 @@ useEffect(() => {
   const handleUpload = async () => {
     const fileToUse = file;
     if (!fileToUse || !title.trim()) {
-      toast({ title: "Select a file and title", variant: "destructive" });
+      toast({ title: t("selectFileTitle"), variant: "destructive" });
       return;
     }
 
     const workspaceId = getSelectedWorkspaceId();
     if (!workspaceId) {
-      toast({ title: "Workspace required", variant: "destructive" });
+      toast({ title: t("common:workspace.required"), variant: "destructive" });
       return;
     }
 
@@ -263,8 +265,8 @@ useEffect(() => {
       // even if the realtime "processing_initiated" event arrives earlier/later.
       processingInitiatedRef.current = true;
       toastApiSuccess(completeRes, {
-        title: "Upload complete",
-        fallbackDescription: "Your video is now being processed.",
+        title: t("uploadComplete"),
+        fallbackDescription: t("upload.processingDesc"),
       });
 
       trackClientEvent({
@@ -290,7 +292,7 @@ useEffect(() => {
         }
       }
       if (cancelRequestedRef.current) {
-        toast({ title: "Upload cancelled", variant: "success" });
+        toast({ title: t("dashboard:uploadCancelled"), variant: "success" });
         setStep("select");
         setProcessingRecordingId(null);
         processingInitiatedRef.current = false;
@@ -299,7 +301,7 @@ useEffect(() => {
         return;
       }
       toast({
-        title: "Upload failed",
+        title: t("uploadFailed"),
         description: err?.message || "Something went wrong.",
         variant: "destructive",
       });
@@ -318,11 +320,10 @@ useEffect(() => {
   const handleCancelActiveUpload = async () => {
     if (!activeUploadSession || cancellingUpload) return;
     const confirmed = await confirm({
-      title: "Cancel this upload?",
-      description:
-        "This will stop the current upload, abort multipart upload on the server, and delete this recording draft.",
-      confirmText: "Cancel upload",
-      cancelText: "Keep uploading",
+      title: t("dashboard:cancelUploadConfirm"),
+      description: t("dashboard:cancelUploadDesc"),
+      confirmText: t("cancelUpload"),
+      cancelText: t("dashboard:keep"),
     });
     if (!confirmed) return;
 
@@ -350,8 +351,8 @@ useEffect(() => {
   return (
     <AppLayout>
       <div className="p-6 md:p-8 max-w-7xl mx-auto">
-        <h1 className="text-2xl font-bold mb-2">Upload Existing Video</h1>
-        <p className="text-muted-foreground mb-8">Upload your video directly to cloud storage.</p>
+        <h1 className="text-2xl font-bold mb-2">{t("uploadTitle")}</h1>
+        <p className="text-muted-foreground mb-8">{t("uploadSubtitle")}</p>
 
         <Card className="glass">
           <CardContent className="p-6">
@@ -401,8 +402,8 @@ useEffect(() => {
                         <Upload className="h-8 w-8 text-primary-foreground" />
                       </div>
                       <div>
-                        <p className="font-medium">Drop your video here</p>
-                        <p className="text-sm text-muted-foreground">or click to browse</p>
+                        <p className="font-medium">{t("dropHere")}</p>
+                        <p className="text-sm text-muted-foreground">{t("orBrowse")}</p>
                       </div>
                     </div>
                   )}
@@ -412,7 +413,7 @@ useEffect(() => {
                   <div className="space-y-4">
                     <div className="space-y-2">
                       <Label>Title</Label>
-                      <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Recording title" />
+                      <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder={t("upload.titlePlaceholder")} />
                     </div>
                     <Button className="w-full gradient-primary" onClick={() => void handleUpload()} disabled={!title.trim()}>
                       <Upload className="h-4 w-4 mr-2" /> Upload
@@ -425,7 +426,7 @@ useEffect(() => {
             {step === "uploading" && (
               <div className="text-center py-8 space-y-4">
                 <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto" />
-                <h3 className="text-lg font-semibold">Uploading...</h3>
+                <h3 className="text-lg font-semibold">{t("uploading")}</h3>
                 <Progress value={progress} className="h-2" />
                 <p className="text-sm text-muted-foreground">{progress}% complete</p>
                 <Button
@@ -439,7 +440,7 @@ useEffect(() => {
                   ) : (
                     <X className="h-4 w-4 mr-2" />
                   )}
-                  Cancel upload
+                  {t("cancelUpload")}
                 </Button>
               </div>
             )}
@@ -449,8 +450,8 @@ useEffect(() => {
                 <div className="gradient-primary rounded-full p-4 w-fit mx-auto animate-pulse-slow">
                   <Loader2 className="h-8 w-8 text-primary-foreground animate-spin" />
                 </div>
-                <h3 className="text-lg font-semibold">Processing video...</h3>
-                <p className="text-sm text-muted-foreground">This may take a few moments. You'll be redirected shortly.</p>
+                <h3 className="text-lg font-semibold">{t("processingVideo")}</h3>
+                <p className="text-sm text-muted-foreground">{t("redirectedShortly")}</p>
               </div>
             )}
           </CardContent>
