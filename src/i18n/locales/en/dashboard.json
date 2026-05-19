@@ -44,6 +44,7 @@
   "trashLoadError": "Error loading trash",
   "allVisibility": "All visibility",
   "selectDateRange": "Select date range",
+  "selectPlaceholder": "Select",
   "orderPrefix": "Order",
   "pageOf": "Page {{page}} of {{total}}",
   "trashEmptyTitle": "No trashed recordings",

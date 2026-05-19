@@ -594,7 +594,7 @@ export default function DashboardPage() {
                               onValueChange={(v: "public" | "private") => handleUpdateVisibility(rec, v)}
                             >
                               <SelectTrigger className="h-7 w-[96px] text-[11px]">
-                                <SelectValue />
+                                <SelectValue placeholder={t("selectPlaceholder")} />
                               </SelectTrigger>
                               <SelectContent>
                                 <SelectItem value="public">{t("public")}</SelectItem>

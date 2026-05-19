@@ -298,6 +298,21 @@ export default function RecordScreen() {
     }
   };
 
+  const PIP_WIDTH_CONTROLS_ONLY = 360;
+  const PIP_HEIGHT_CONTROLS_ONLY = 88;
+  const PIP_WIDTH_WITH_CAMERA = 460;
+  const PIP_HEIGHT_WITH_CAMERA = 280;
+
+  const syncDetachedControlsWindowSize = useCallback((pipWindow: Window, showCamera: boolean) => {
+    const width = showCamera ? PIP_WIDTH_WITH_CAMERA : PIP_WIDTH_CONTROLS_ONLY;
+    const height = showCamera ? PIP_HEIGHT_WITH_CAMERA : PIP_HEIGHT_CONTROLS_ONLY;
+    try {
+      pipWindow.resizeTo(width, height);
+    } catch {
+      // resizeTo may be unavailable on some Document PiP implementations.
+    }
+  }, []);
+
   const closeDetachedControlsWindow = useCallback(() => {
     const pipWindow = controlsPipWindowRef.current;
     controlsPipWindowRef.current = null;
@@ -328,16 +343,18 @@ export default function RecordScreen() {
     if (!pipWindow || pipWindow.closed) return;
     const canRecord = state === "recording";
     const canPause = state === "paused";
+    const showCamera = Boolean(cameraEnabled && cameraStreamRef.current);
     const doc = pipWindow.document;
     const root = doc.getElementById("pip-root");
     if (!root) {
       doc.body.style.margin = "0";
       doc.documentElement.style.width = "100%";
-      doc.documentElement.style.height = "100%";
+      doc.documentElement.style.height = showCamera ? "100%" : "auto";
       doc.body.style.width = "100%";
-      doc.body.style.height = "100%";
+      doc.body.style.height = showCamera ? "100%" : "auto";
+      doc.body.style.overflow = "hidden";
       doc.body.innerHTML = `
-        <div id="pip-root" style="box-sizing:border-box;display:flex;flex-direction:column;gap:8px;padding:10px 12px;width:100%;height:100%;font-family:Inter,system-ui,sans-serif;background:#0b0b10;color:#fff;">
+        <div id="pip-root" style="box-sizing:border-box;display:flex;flex-direction:column;gap:8px;padding:10px 12px;width:100%;height:${showCamera ? "100%" : "auto"};font-family:Inter,system-ui,sans-serif;background:#0b0b10;color:#fff;">
           <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
             <div id="pip-time" style="border:1px solid #333;padding:8px 10px;border-radius:10px;min-width:62px;text-align:center;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;"></div>
             <button id="pip-toggle" style="padding:8px 10px;border-radius:10px;border:1px solid #333;background:#15151d;color:#fff;cursor:pointer;"></button>
@@ -373,8 +390,10 @@ export default function RecordScreen() {
 
     const pipCameraShell = doc.getElementById("pip-camera-shell") as HTMLDivElement | null;
     const pipCameraPreview = doc.getElementById("pip-camera-preview") as HTMLVideoElement | null;
-    if (pipCameraShell && pipCameraPreview && cameraEnabled && cameraStreamRef.current) {
-      pipCameraShell.style.display = "block";
+    if (pipCameraShell && pipCameraPreview && showCamera) {
+      pipCameraShell.style.display = "flex";
+      pipCameraShell.style.flex = "1";
+      pipCameraShell.style.minHeight = "160px";
       if (pipCameraPreview.srcObject !== cameraStreamRef.current) {
         pipCameraPreview.srcObject = cameraStreamRef.current;
       }
@@ -383,7 +402,14 @@ export default function RecordScreen() {
       pipCameraShell.style.display = "none";
       pipCameraPreview.srcObject = null;
     }
-  }, [cameraEnabled, formattedTime, state, t]);
+
+    if (root) {
+      root.style.height = showCamera ? "100%" : "auto";
+    }
+    doc.documentElement.style.height = showCamera ? "100%" : "auto";
+    doc.body.style.height = showCamera ? "100%" : "auto";
+    syncDetachedControlsWindowSize(pipWindow, showCamera);
+  }, [cameraEnabled, formattedTime, state, syncDetachedControlsWindowSize, t]);
 
   const ensureDetachedControlsWindow = useCallback(async () => {
     if (typeof window === "undefined") return false;
@@ -391,8 +417,11 @@ export default function RecordScreen() {
     if (!dpp?.requestWindow) return false;
     let pipWindow = controlsPipWindowRef.current;
     if (!pipWindow || pipWindow.closed) {
+      const showCamera = Boolean(cameraEnabled && cameraStreamRef.current);
+      const width = showCamera ? PIP_WIDTH_WITH_CAMERA : PIP_WIDTH_CONTROLS_ONLY;
+      const height = showCamera ? PIP_HEIGHT_WITH_CAMERA : PIP_HEIGHT_CONTROLS_ONLY;
       try {
-        pipWindow = await dpp.requestWindow({ width: 460, height: 280 });
+        pipWindow = await dpp.requestWindow({ width, height });
       } catch {
         return false;
       }
@@ -405,7 +434,7 @@ export default function RecordScreen() {
     }
     renderDetachedControlsWindow();
     return true;
-  }, [renderDetachedControlsWindow]);
+  }, [cameraEnabled, renderDetachedControlsWindow]);
 
   const ensureNativeCameraPictureInPicture = useCallback(async () => {
     if (typeof document === "undefined") return false;
