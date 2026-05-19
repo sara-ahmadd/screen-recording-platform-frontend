@@ -39,7 +39,7 @@ export default function LanguageSwitcher({
       title={t("language.switchTo", { language: t(`language.names.${next}`) })}
     >
       <Languages className="h-4 w-4 shrink-0" aria-hidden />
-      <span className="text-xs uppercase tracking-wide">{current === "en" ? "EN" : "AR"}</span>
+      <span className="text-xs uppercase tracking-wide">{current === "ar" ? "EN" : "AR"}</span>
     </Button>
   );
 }

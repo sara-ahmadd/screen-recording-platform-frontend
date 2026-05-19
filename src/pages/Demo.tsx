@@ -1,12 +1,21 @@
+import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { ArrowLeft, Sparkles, Monitor, Share2, Layers } from "lucide-react";
 import { Link } from "react-router-dom";
 import PublicPageLayout from "@/components/PublicPageLayout";
+import { normalizeLanguage } from "@/i18n/constants";
 
-const DEMO_VIDEO_SRC = "/assets/updated%20demo.mp4";
+const DEMO_VIDEO_BY_LANG = {
+  en: "/assets/updated-english-demo.mp4",
+  ar: "/assets/arabic-demo.mp4",
+} as const;
 
 export default function DemoPage() {
-  const { t } = useTranslation("marketing");
+  const { t, i18n } = useTranslation("marketing");
+  const demoVideoSrc = useMemo(() => {
+    const lang = normalizeLanguage(i18n.language);
+    return DEMO_VIDEO_BY_LANG[lang];
+  }, [i18n.language]);
 
   return (
     <PublicPageLayout title={t("demo.title")} subtitle={t("demo.subtitle")} showPageHeader={false}>
@@ -41,14 +50,14 @@ export default function DemoPage() {
           <div className="absolute inset-0 rounded-3xl border border-gradient-to-br from-violet-500/20 to-transparent pointer-events-none" />
           <div className="relative aspect-video w-full rounded-2xl overflow-hidden bg-muted/30 group border border-border/40">
             <video
-              className="h-full w-full object-fill bg-black"
+              key={demoVideoSrc}
+              className="h-full w-full object-contain bg-black"
               controls
               preload="metadata"
               playsInline
               autoPlay
-              
             >
-              <source src={DEMO_VIDEO_SRC} type="video/mp4" />
+              <source src={demoVideoSrc} type="video/mp4" />
               {t("demo.noVideoTag")}
             </video>
             <div className="absolute top-4 left-4 bg-background/80 backdrop-blur-md border border-border/60 px-3 py-1.5 rounded-full text-xs font-semibold flex items-center gap-2 pointer-events-none">
