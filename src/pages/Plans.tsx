@@ -16,6 +16,7 @@ import {
 } from "@/lib/workspaceSubscription";
 import { usePaidToFreeSubscribe } from "@/hooks/usePaidToFreeSubscribe";
 import { PaidToFreeDialogs } from "@/components/PaidToFreeDialogs";
+import PublicPageLayout from "@/components/PublicPageLayout";
 
 export default function PlansPage() {
   const { t } = useTranslation(["billing", "common"]);
@@ -146,7 +147,7 @@ export default function PlansPage() {
   };
 
   return (
-    <AppLayout>
+    <PublicPageLayout title={t("choosePlan")} subtitle={t("compareFeatures")}>
       <div className="p-6 md:p-8 max-w-7xl mx-auto">
         <div className="text-center mb-10">
           <h1 className="text-3xl font-bold">{t("choosePlan")}</h1>
@@ -276,6 +277,6 @@ export default function PlansPage() {
           onPeriodAcknowledge={handlePeriodDialogContinue}
         />
       </div>
-    </AppLayout>
+    </PublicPageLayout>
   );
 }

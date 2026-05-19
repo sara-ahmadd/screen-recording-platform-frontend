@@ -114,7 +114,7 @@ export const routes: RouteRecord[] = [
       { path: "recording/:id", element: <ProtectedRoute><RecordingDetailPage /></ProtectedRoute> },
       { path: "workspaces", element: <ProtectedRoute><WorkspacesPage /></ProtectedRoute> },
       { path: "billing", element: <ProtectedRoute><BillingPage /></ProtectedRoute> },
-      { path: "plans", element: <ProtectedRoute><PlansPage /></ProtectedRoute> },
+      { path: "plans", element:<PlansPage /> },
       { path: "subscription", element: <ProtectedRoute><SubscriptionPage /></ProtectedRoute> },
       { path: "checkout/review", element: <ProtectedRoute><CheckoutReviewPage /></ProtectedRoute> },
       { path: "notifications", element: <ProtectedRoute><NotificationsPage /></ProtectedRoute> },
