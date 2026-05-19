@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import { useHomePageSiteReset } from "@/hooks/useHomePageSiteReset";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -29,7 +28,6 @@ import HowItWorksSection from "@/components/HowItWorks";
 export default function Index() {
   const { t } = useTranslation(["home", "common", "auth"]);
   const headerLinks = useHeaderLinks();
-  useHomePageSiteReset(true);
   const { user, selectedWorkspaceId, refreshUser, lastAuthError, loading } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();

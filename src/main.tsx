@@ -1,13 +1,11 @@
-import { ViteReactSSG } from "vite-react-ssg";
-import { registerSW } from "virtual:pwa-register";
-import { routes } from "./App.tsx";
-import "@/i18n/config";
 import "./index.css";
 
-// if (typeof window !== "undefined") {
-//   registerSW({ immediate: true });
-// }
+if (typeof window !== "undefined") {
+  await (await import("@/lib/siteBootstrapReset")).runSiteBootstrapReset();
+}
 
+const { ViteReactSSG } = await import("vite-react-ssg");
+const { routes } = await import("./App.tsx");
 
 export const createRoot = ViteReactSSG({
   routes,

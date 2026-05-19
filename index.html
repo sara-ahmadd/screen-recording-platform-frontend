@@ -56,6 +56,26 @@
     <script>
       (function () {
         try {
+          if (sessionStorage.getItem("site_data_reset_done") === "1") return;
+          var preserve = ["app-language", "theme"];
+          var saved = {};
+          for (var i = 0; i < preserve.length; i++) {
+            var v = localStorage.getItem(preserve[i]);
+            if (v != null) saved[preserve[i]] = v;
+          }
+          sessionStorage.clear();
+          localStorage.clear();
+          for (var k in saved) {
+            if (Object.prototype.hasOwnProperty.call(saved, k)) {
+              localStorage.setItem(k, saved[k]);
+            }
+          }
+        } catch (_) {}
+      })();
+    </script>
+    <script>
+      (function () {
+        try {
           var savedLang = localStorage.getItem("app-language");
           if (savedLang === "ar") {
             document.documentElement.lang = "ar";
