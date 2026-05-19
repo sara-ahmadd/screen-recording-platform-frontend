@@ -37,6 +37,8 @@ export function connectSocket() {
   if (!token) return;
   const s = getSocket();
   const bearer = toBearerToken(token);
+  if (s.connected && bearer === lastAuthToken) return;
+
   const authChanged = bearer !== lastAuthToken;
   s.auth = { token: bearer };
   lastAuthToken = bearer;

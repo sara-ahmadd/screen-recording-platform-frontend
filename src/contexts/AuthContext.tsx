@@ -39,36 +39,58 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [lastAuthError, setLastAuthError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const refreshingTokenRef = useRef(false);
+  const refreshUserInFlightRef = useRef<Promise<boolean> | null>(null);
+  const selectedWorkspaceIdRef = useRef(selectedWorkspaceId);
+  const initialSessionLoadRef = useRef(false);
+
+  selectedWorkspaceIdRef.current = selectedWorkspaceId;
 
   const setSelectedWorkspaceId = useCallback((workspaceId: string | null) => {
     setSelectedWorkspaceIdState(workspaceId);
     persistSelectedWorkspaceId(workspaceId);
+    selectedWorkspaceIdRef.current = workspaceId;
   }, []);
 
   const refreshUser = useCallback(async () => {
-    try {
-      const data = await authApi.me();
-      const profile = data.user || data;
-      setUser(profile);
-      setLastAuthError(null);
-
-      const workspaceIds = (profile.workspaces || []).map((ws: Workspace) => String(ws.id));
-      if (selectedWorkspaceId && !workspaceIds.includes(selectedWorkspaceId)) {
-        setSelectedWorkspaceId(null);
-      }
-
-      connectSocket();
-      return true;
-    } catch (err: any) {
-      setLastAuthError(err?.message || i18n.t("auth:sessionVerifyFailed"));
-      setUser(null);
-      setAccessToken(null);
-      setRefreshToken(null);
-      setSelectedWorkspaceId(null);
-      disconnectSocket();
-      return false;
+    if (refreshUserInFlightRef.current) {
+      return refreshUserInFlightRef.current;
     }
-  }, [selectedWorkspaceId, setSelectedWorkspaceId]);
+
+    const run = (async () => {
+      try {
+        const data = await authApi.me();
+        const profile = data.user || data;
+        setUser(profile);
+        setLastAuthError(null);
+
+        const workspaceIds = (profile.workspaces || []).map((ws: Workspace) => String(ws.id));
+        const activeWorkspaceId = selectedWorkspaceIdRef.current;
+        if (activeWorkspaceId && !workspaceIds.includes(activeWorkspaceId)) {
+          setSelectedWorkspaceId(null);
+        }
+
+        connectSocket();
+        return true;
+      } catch (err: any) {
+        setLastAuthError(err?.message || i18n.t("auth:sessionVerifyFailed"));
+        setUser(null);
+        setAccessToken(null);
+        setRefreshToken(null);
+        setSelectedWorkspaceId(null);
+        disconnectSocket();
+        return false;
+      }
+    })();
+
+    refreshUserInFlightRef.current = run;
+    try {
+      return await run;
+    } finally {
+      if (refreshUserInFlightRef.current === run) {
+        refreshUserInFlightRef.current = null;
+      }
+    }
+  }, [setSelectedWorkspaceId]);
 
   const forceLogout = useCallback(() => {
     setAccessToken(null);
@@ -79,8 +101,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [setSelectedWorkspaceId]);
 
   useEffect(() => {
+    if (initialSessionLoadRef.current) return;
+    initialSessionLoadRef.current = true;
+
     if (getAccessToken()) {
-      refreshUser().finally(() => setLoading(false));
+      void refreshUser().finally(() => setLoading(false));
     } else {
       setLoading(false);
     }

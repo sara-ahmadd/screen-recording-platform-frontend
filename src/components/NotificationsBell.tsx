@@ -116,15 +116,17 @@ type NotificationsBellProps = {
 export default function NotificationsBell({ className }: NotificationsBellProps) {
   const { t } = useTranslation("layout");
   const { user } = useAuth();
+  const userId = user?.id;
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [notifications, setNotifications] = useState<InboxNotification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const planLimitDeleteInFlight = useRef<Set<number>>(new Set());
-  const isLoggedIn = Boolean(user);
+  const initialLoadDoneForUserRef = useRef<number | null>(null);
+  const isLoggedIn = Boolean(userId);
 
   const loadUnreadCount = useCallback(async () => {
-    if (!user) {
+    if (!userId) {
       setUnreadCount(0);
       return;
     }
@@ -134,10 +136,10 @@ export default function NotificationsBell({ className }: NotificationsBellProps)
     } catch {
       // Keep previous count if request fails.
     }
-  }, [user]);
+  }, [userId]);
 
   const loadNotifications = useCallback(async () => {
-    if (!user) {
+    if (!userId) {
       setNotifications([]);
       setUnreadCount(0);
       return;
@@ -154,16 +156,19 @@ export default function NotificationsBell({ className }: NotificationsBellProps)
     } finally {
       setLoading(false);
     }
-  }, [user, toast, t]);
+  }, [userId, toast, t]);
 
   useEffect(() => {
-    if (user) {
-      void Promise.all([loadNotifications(), loadUnreadCount()]);
-    } else {
+    if (!userId) {
+      initialLoadDoneForUserRef.current = null;
       setNotifications([]);
       setUnreadCount(0);
+      return;
     }
-  }, [user, loadNotifications, loadUnreadCount]);
+    if (initialLoadDoneForUserRef.current === userId) return;
+    initialLoadDoneForUserRef.current = userId;
+    void Promise.all([loadNotifications(), loadUnreadCount()]);
+  }, [userId, loadNotifications, loadUnreadCount]);
 
   useEffect(() => {
     const unsubscribe = subscribeNotificationsUpdated((detail) => {
@@ -173,18 +178,18 @@ export default function NotificationsBell({ className }: NotificationsBellProps)
       }
       if (typeof detail?.unreadCount === "number") {
         setUnreadCount(detail.unreadCount);
-      } else if (user) {
+      } else if (userId) {
         void loadUnreadCount();
       }
-      if (!detail?.notifications && user) {
-        void loadNotifications();
+      if (detail?.notifications) {
+        return;
       }
     });
     return unsubscribe;
-  }, [user, loadNotifications, loadUnreadCount]);
+  }, [userId, loadUnreadCount]);
 
   useEffect(() => {
-    if (!user) return;
+    if (!userId) return;
     const socket = getSocket();
     let refreshTimer: ReturnType<typeof setTimeout> | null = null;
 
@@ -228,7 +233,7 @@ export default function NotificationsBell({ className }: NotificationsBellProps)
       socket.offAny(onAnyEvent);
       if (refreshTimer) clearTimeout(refreshTimer);
     };
-  }, [user, loadNotifications, loadUnreadCount]);
+  }, [userId, loadNotifications, loadUnreadCount]);
 
   const handleReadOne = async (id: number, isUnread: boolean) => {
     if (!isLoggedIn || !isUnread) return;
@@ -263,7 +268,7 @@ export default function NotificationsBell({ className }: NotificationsBellProps)
     }
   };
 
-  if (!user) return null;
+  if (!userId) return null;
 
   return (
     <DropdownMenu>

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/contexts/AuthContext";
 import { getSocket } from "@/lib/socket";
@@ -14,7 +14,6 @@ import {
   sortNotificationsImportantFirst,
   type ParsedSubscription3ds,
 } from "@/lib/inboxNotification";
-import { emitNotificationsUpdated } from "@/lib/notificationsSync";
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -32,8 +31,10 @@ const PAYMENT_REQUIRED_SERVER_TITLE = "Payment required";
 export function SubscriptionRenewal3dsProvider({ children }: { children: ReactNode }) {
   const { t } = useTranslation("layout");
   const { user, loading } = useAuth();
+  const userId = user?.id;
   const [open, setOpen] = useState(false);
   const [gate, setGate] = useState<ParsedSubscription3ds | null>(null);
+  const fetchedForUserRef = useRef<number | null>(null);
 
   const tryShowGate = useCallback((parsed: ParsedSubscription3ds | null) => {
     if (!parsed?.actionUrl) return;
@@ -44,9 +45,11 @@ export function SubscriptionRenewal3dsProvider({ children }: { children: ReactNo
   }, []);
 
   useEffect(() => {
-    if (!user || loading) {
-      setOpen(false);
-      setGate(null);
+    if (!userId || loading) {
+      if (!userId) {
+        setOpen(false);
+        setGate(null);
+      }
       return;
     }
 
@@ -54,17 +57,22 @@ export function SubscriptionRenewal3dsProvider({ children }: { children: ReactNo
     const handler = (data: unknown) => {
       const parsed = parseSubscriptionRenewal3dsSocketPayload(data);
       tryShowGate(parsed);
-      emitNotificationsUpdated();
     };
 
     socket.on("subscription_renewal_3ds_required", handler);
     return () => {
       socket.off("subscription_renewal_3ds_required", handler);
     };
-  }, [user, loading, tryShowGate]);
+  }, [userId, loading, tryShowGate]);
 
   useEffect(() => {
-    if (!user || loading) return;
+    if (!userId || loading) {
+      if (!userId) fetchedForUserRef.current = null;
+      return;
+    }
+    if (fetchedForUserRef.current === userId) return;
+    fetchedForUserRef.current = userId;
+
     let cancelled = false;
     (async () => {
       try {
@@ -88,7 +96,7 @@ export function SubscriptionRenewal3dsProvider({ children }: { children: ReactNo
     return () => {
       cancelled = true;
     };
-  }, [user, loading, tryShowGate]);
+  }, [userId, loading, tryShowGate]);
 
   const handleRemindLater = useCallback(() => {
     if (gate) {

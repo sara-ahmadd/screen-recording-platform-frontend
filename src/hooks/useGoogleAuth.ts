@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -32,96 +32,98 @@ type UseGoogleAuthOptions = {
 export function useGoogleAuth(options: UseGoogleAuthOptions = {}) {
   const { hintEmail = "", onInactiveError } = options;
   const { t } = useTranslation("auth");
-  const { refreshUser, lastAuthError } = useAuth();
+  const { refreshUser } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
   const [googleLoading, setGoogleLoading] = useState(false);
 
+  const hintEmailRef = useRef(hintEmail);
+  const onInactiveErrorRef = useRef(onInactiveError);
+  const handledSearchRef = useRef<string | null>(null);
+  const inFlightRef = useRef(false);
+
+  hintEmailRef.current = hintEmail;
+  onInactiveErrorRef.current = onInactiveError;
+
   const handleGoogleLogin = () => {
+    handledSearchRef.current = null;
     localStorage.setItem(PENDING_GOOGLE_LOGIN_KEY, "1");
     window.location.href = `${API_BASE_URL}/auth/google`;
   };
 
   useEffect(() => {
+    const search = location.search;
+    if (handledSearchRef.current === search) return;
+
     async function completeGoogleLogin() {
       const inviteToken = getPendingInviteToken();
       const postLoginPath = inviteToken
         ? `/workspace/accept-invite?token=${encodeURIComponent(inviteToken)}`
         : "/dashboard";
-      const sp = new URLSearchParams(location.search);
+      const sp = new URLSearchParams(search);
       const googleFlag = sp.get("google");
       const accessTokenFromQuery = sp.get("accessToken");
+      const hasQueryTokens = googleFlag === "1" && Boolean(accessTokenFromQuery);
+      const hasPendingCallback = localStorage.getItem(PENDING_GOOGLE_LOGIN_KEY) === "1";
 
-      if (googleFlag === "1" && accessTokenFromQuery) {
-        setGoogleLoading(true);
-        try {
+      if (!hasQueryTokens && !hasPendingCallback) return;
+      if (inFlightRef.current) return;
+
+      inFlightRef.current = true;
+      handledSearchRef.current = search;
+      setGoogleLoading(true);
+
+      try {
+        if (hasQueryTokens && accessTokenFromQuery) {
           const refreshTokenFromQuery = sp.get("refreshToken");
           setAccessToken(accessTokenFromQuery);
           if (refreshTokenFromQuery) setRefreshToken(refreshTokenFromQuery);
+        } else if (hasPendingCallback) {
+          const res = await fetch(`${API_BASE_URL}/auth/google/callback`, {
+            method: "GET",
+            credentials: "include",
+          });
+          if (!res.ok) throw new Error("Google login callback failed");
+
+          const data = await res.json();
+          const token =
+            data?.accessToken ||
+            data?.token ||
+            data?.data?.accessToken ||
+            data?.user?.accessToken;
+          const refresh =
+            data?.refreshToken || data?.data?.refreshToken || data?.user?.refreshToken;
+          if (!token) throw new Error("No access token returned");
+
+          setAccessToken(token);
+          if (refresh) setRefreshToken(refresh);
+
           const meOk = await refreshUser();
-          if (!meOk) {
-            throw new Error(lastAuthError || "Could not verify login session.");
-          }
+          if (!meOk) throw new Error("Could not verify login session.");
+
           localStorage.removeItem(PENDING_GOOGLE_LOGIN_KEY);
-          toastSuccess(t("toast.signedIn"), t("toast.googleLoginSuccess"));
+          toastApiSuccess(data, {
+            title: t("toast.signedIn"),
+            fallbackDescription: t("toast.googleLoginSuccess"),
+          });
           navigate(postLoginPath, { replace: true });
-        } catch (err: unknown) {
-          if (!isIgnorableGoogleCorsError(err)) {
-            const errMsg = (err as { message?: string })?.message || "Please try again.";
-            if (isInactiveAuthError(errMsg)) {
-              onInactiveError?.(hintEmail);
-            }
-            toast({
-              title: t("toast.googleLoginFailed"),
-              description: errMsg,
-              variant: "destructive",
-            });
-          }
-        } finally {
-          setGoogleLoading(false);
+          return;
         }
-        return;
-      }
 
-      if (localStorage.getItem(PENDING_GOOGLE_LOGIN_KEY) !== "1") return;
-
-      setGoogleLoading(true);
-      try {
-        const res = await fetch(`${API_BASE_URL}/auth/google/callback`, {
-          method: "GET",
-          credentials: "include",
-        });
-        if (!res.ok) throw new Error("Google login callback failed");
-
-        const data = await res.json();
-        const token =
-          data?.accessToken ||
-          data?.token ||
-          data?.data?.accessToken ||
-          data?.user?.accessToken;
-        const refresh =
-          data?.refreshToken || data?.data?.refreshToken || data?.user?.refreshToken;
-        if (!token) throw new Error("No access token returned");
-
-        setAccessToken(token);
-        if (refresh) setRefreshToken(refresh);
         const meOk = await refreshUser();
-        if (!meOk) {
-          throw new Error(lastAuthError || "Could not verify login session.");
-        }
+        if (!meOk) throw new Error("Could not verify login session.");
+
         localStorage.removeItem(PENDING_GOOGLE_LOGIN_KEY);
-        toastApiSuccess(data, {
-          title: t("toast.signedIn"),
-          fallbackDescription: t("toast.googleLoginSuccess"),
-        });
+        toastSuccess(t("toast.signedIn"), t("toast.googleLoginSuccess"));
         navigate(postLoginPath, { replace: true });
       } catch (err: unknown) {
+        handledSearchRef.current = null;
         localStorage.removeItem(PENDING_GOOGLE_LOGIN_KEY);
         if (!isIgnorableGoogleCorsError(err)) {
           const errMsg = (err as { message?: string })?.message || "Please try again.";
           if (isInactiveAuthError(errMsg)) {
-            onInactiveError?.(hintEmail);
+            onInactiveErrorRef.current?.(hintEmailRef.current);
           }
           toast({
             title: t("toast.googleLoginFailed"),
@@ -130,12 +132,13 @@ export function useGoogleAuth(options: UseGoogleAuthOptions = {}) {
           });
         }
       } finally {
+        inFlightRef.current = false;
         setGoogleLoading(false);
       }
     }
 
     void completeGoogleLogin();
-  }, [hintEmail, lastAuthError, location.search, navigate, onInactiveError, refreshUser, t, toast]);
+  }, [location.search, navigate, refreshUser, t, toast]);
 
   return { googleLoading, handleGoogleLogin, GoogleIcon };
 }

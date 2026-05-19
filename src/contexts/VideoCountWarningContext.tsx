@@ -4,6 +4,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
@@ -90,7 +91,9 @@ function readDismissedIds(): number[] {
 
 export function VideoCountWarningProvider({ children }: { children: ReactNode }) {
   const { user, loading } = useAuth();
+  const userId = user?.id;
   const [banner, setBanner] = useState<BannerPayload | null>(null);
+  const fetchedForUserRef = useRef<number | null>(null);
 
   const isDismissedFor = useCallback((id?: number) => {
     if (typeof window === "undefined") return true;
@@ -133,8 +136,8 @@ export function VideoCountWarningProvider({ children }: { children: ReactNode })
   );
 
   useEffect(() => {
-    if (!user || loading) {
-      setBanner(null);
+    if (!userId || loading) {
+      if (!userId) setBanner(null);
       return;
     }
 
@@ -161,10 +164,16 @@ export function VideoCountWarningProvider({ children }: { children: ReactNode })
       socket.off("notification_created", onPayload);
       socket.off("limit_warning", onLimitWarning);
     };
-  }, [user, loading, tryShowBanner]);
+  }, [userId, loading, tryShowBanner]);
 
   useEffect(() => {
-    if (!user || loading) return;
+    if (!userId || loading) {
+      if (!userId) fetchedForUserRef.current = null;
+      return;
+    }
+    if (fetchedForUserRef.current === userId) return;
+    fetchedForUserRef.current = userId;
+
     let cancelled = false;
     (async () => {
       try {
@@ -178,16 +187,16 @@ export function VideoCountWarningProvider({ children }: { children: ReactNode })
     return () => {
       cancelled = true;
     };
-  }, [user, loading, scanNotificationsList]);
+  }, [userId, loading, scanNotificationsList]);
 
   useEffect(() => {
-    if (!user) return;
+    if (!userId) return;
     return subscribeNotificationsUpdated((detail) => {
       if (detail?.notifications?.length) {
         scanNotificationsList(detail.notifications as Record<string, unknown>[]);
       }
     });
-  }, [user, scanNotificationsList]);
+  }, [userId, scanNotificationsList]);
 
   const dismiss = useCallback(() => {
     setBanner((current) => {
