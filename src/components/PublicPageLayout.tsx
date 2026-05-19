@@ -5,11 +5,14 @@ import { Button } from "@/components/ui/button";
 import Logo from "./Logo";
 import ThemeToggle from "./ThemeToggle";
 import LanguageSwitcher from "./LanguageSwitcher";
+import { TRUST_FOOTER_LINKS } from "@/lib/trustLinks";
 
 type PublicPageLayoutProps = {
   title: string;
   subtitle: string;
   footer?: boolean;
+  /** When false, children must provide the page H1 (e.g. demo page). */
+  showPageHeader?: boolean;
   children: ReactNode;
 };
 
@@ -17,6 +20,7 @@ export function useHeaderLinks() {
   const { t } = useTranslation("common");
   return [
     { href: "/how-it-works", label: t("nav.howItWorks") },
+    { href: "/demo", label: t("nav.demo") },
     { href: "/plans", label: t("nav.pricing") },
     { href: "/blogs", label: t("nav.blogs") },
     { href: "/about", label: t("nav.about") },
@@ -31,17 +35,14 @@ export default function PublicPageLayout({
   subtitle,
   children,
   footer = true,
+  showPageHeader = true,
 }: PublicPageLayoutProps) {
   const { t } = useTranslation("common");
   const headerLinks = useHeaderLinks();
-  const footerLinks = [
-    { href: "/how-it-works", label: t("nav.howItWorks") },
-    { href: "/privacy-policy", label: t("nav.privacyPolicy") },
-    { href: "/terms-and-conditions", label: t("nav.termsConditions") },
-    { href: "/contact", label: t("nav.contact") },
-    { href: "/about", label: t("nav.about") },
-    { href: "/blogs", label: t("nav.blogs") },
-  ];
+  const footerLinks = TRUST_FOOTER_LINKS.map((item) => ({
+    href: item.href,
+    label: t(item.labelKey),
+  }));
 
   return (
     <div className="min-h-screen bg-background relative">
@@ -88,10 +89,12 @@ export default function PublicPageLayout({
       </nav>
 
       <main className="max-w-[95%] mx-auto px-6 py-12 md:py-16">
-        <section className="mb-8 text-start">
-          <h1 className="text-3xl md:text-4xl font-bold tracking-tight">{title}</h1>
-          <p className="text-muted-foreground mt-3">{subtitle}</p>
-        </section>
+        {showPageHeader && title ? (
+          <section className="mb-8 text-start">
+            <h1 className="text-3xl md:text-4xl font-bold tracking-tight">{title}</h1>
+            {subtitle ? <p className="text-muted-foreground mt-3 text-lg leading-relaxed">{subtitle}</p> : null}
+          </section>
+        ) : null}
         <section className="glass rounded-2xl p-6 md:p-8">{children}</section>
       </main>
 

@@ -9,7 +9,7 @@ export default function DemoPage() {
   const { t } = useTranslation("marketing");
 
   return (
-    <PublicPageLayout title={''} subtitle={''}>
+    <PublicPageLayout title={t("demo.title")} subtitle={t("demo.subtitle")} showPageHeader={false}>
       <div className="relative min-h-screen w-full bg-background text-foreground overflow-x-hidden antialiased selection:bg-violet-500/30">
       <div className="absolute inset-0 bg-noise opacity-[0.015] dark:opacity-[0.03] pointer-events-none z-50" />
       <div className="absolute top-[-10%] left-[-10%] h-[600px] w-[600px] rounded-full bg-violet-500/10 dark:bg-violet-500/[0.07] blur-[120px] pointer-events-none" />

@@ -1,16 +1,9 @@
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { TRUST_FOOTER_LINKS } from "@/lib/trustLinks";
 
 export default function Footer() {
   const { t } = useTranslation("common");
-  const footerLinks = [
-    { href: "/privacy-policy", label: t("nav.privacyPolicy") },
-    { href: "/terms-and-conditions", label: t("nav.termsConditions") },
-    { href: "/contact", label: t("nav.contact") },
-    { href: "/about", label: t("nav.about") },
-    { href: "/blogs", label: t("nav.blogs") },
-    { href: "/how-it-works", label: t("nav.howItWorks") },
-  ];
 
   return (
     <footer className="border-t border-border/50 py-8">
@@ -18,17 +11,17 @@ export default function Footer() {
         <p className="text-sm text-muted-foreground">
           {t("footer.copyright", { year: new Date().getFullYear() })}
         </p>
-        <div className="flex flex-wrap items-center gap-4 text-sm">
-          {footerLinks.map((item) => (
+        <nav aria-label={t("footer.navAria", { defaultValue: "Footer" })} className="flex flex-wrap items-center gap-4 text-sm">
+          {TRUST_FOOTER_LINKS.map((item) => (
             <Link
               key={item.href}
               to={item.href}
               className="text-muted-foreground hover:text-foreground transition-colors"
             >
-              {item.label}
+              {t(item.labelKey)}
             </Link>
           ))}
-        </div>
+        </nav>
       </div>
     </footer>
   );

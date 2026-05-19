@@ -18,6 +18,7 @@ import enWorkspaces from "./locales/en/workspaces.json";
 import enRecording from "./locales/en/recording.json";
 import enProfile from "./locales/en/profile.json";
 import enMarketing from "./locales/en/marketing.json";
+import enBlogPosts from "./locales/en/blogPosts.json";
 import enLegal from "./locales/en/legal.json";
 import enAdmin from "./locales/en/admin.json";
 import enErrors from "./locales/en/errors.json";
@@ -33,6 +34,7 @@ import arWorkspaces from "./locales/ar/workspaces.json";
 import arRecording from "./locales/ar/recording.json";
 import arProfile from "./locales/ar/profile.json";
 import arMarketing from "./locales/ar/marketing.json";
+import arBlogPosts from "./locales/ar/blogPosts.json";
 import arLegal from "./locales/ar/legal.json";
 import arAdmin from "./locales/ar/admin.json";
 import arErrors from "./locales/ar/errors.json";
@@ -69,7 +71,7 @@ const resources = {
     workspaces: enWorkspaces,
     recording: enRecording,
     profile: enProfile,
-    marketing: enMarketing,
+    marketing: { ...enMarketing, blogs: enBlogPosts },
     legal: enLegal,
     admin: enAdmin,
     errors: enErrors,
@@ -85,7 +87,7 @@ const resources = {
     workspaces: arWorkspaces,
     recording: arRecording,
     profile: arProfile,
-    marketing: arMarketing,
+    marketing: { ...arMarketing, blogs: arBlogPosts },
     legal: arLegal,
     admin: arAdmin,
     errors: arErrors,

@@ -254,6 +254,14 @@
     "signedIn": "Signed in",
     "freePlanSignIn": "Please sign in to subscribe to the free plan."
   },
+  "blogs": {
+    "badge": "Resources",
+    "title": "Insights for",
+    "titleHighlight": "modern async teams",
+    "subtitle": "Practical guides on screen recording, async video, and secure collaboration—written for teams who want clarity without another meeting.",
+    "viewAll": "View all articles",
+    "readMore": "Read article"
+  },
   "asyncCta": {
     "badge": "Async Communication",
     "title": "Replace long meetings",

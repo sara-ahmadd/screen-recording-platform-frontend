@@ -40,12 +40,36 @@
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "theRec",
-        "applicationCategory": "BusinessApplication",
-        "operatingSystem": "Web",
-        "description": "theRec is an online screen recorder and video recorder for teams to capture, share, and collaborate faster.",
-        "url": "https://therec.site/"
+        "@graph": [
+          {
+            "@type": "Organization",
+            "name": "theRec.site",
+            "url": "https://therec.site/",
+            "logo": "https://therec.site/og-image.svg",
+            "email": "hello@updates.therec.site",
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "51 memfais, Bab sharqi",
+              "addressLocality": "Alexandria",
+              "addressCountry": "EG"
+            }
+          },
+          {
+            "@type": "WebSite",
+            "name": "theRec",
+            "url": "https://therec.site/",
+            "inLanguage": ["en", "ar"],
+            "publisher": { "@type": "Organization", "name": "theRec.site" }
+          },
+          {
+            "@type": "SoftwareApplication",
+            "name": "theRec",
+            "applicationCategory": "BusinessApplication",
+            "operatingSystem": "Web",
+            "description": "theRec is an online screen recorder and video recorder for teams to capture, share, and collaborate faster.",
+            "url": "https://therec.site/"
+          }
+        ]
       }
     </script>
     <script src="https://www.merchant.geidea.net/hpp/geideaCheckout.min.js"></script>

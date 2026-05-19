@@ -1,15 +1,26 @@
-User-agent: Googlebot
-Allow: /
-
-User-agent: Bingbot
-Allow: /
-
-User-agent: Twitterbot
-Allow: /
-
-User-agent: facebookexternalhit
-Allow: /
-
 User-agent: *
 Allow: /
+Disallow: /dashboard
+Disallow: /record
+Disallow: /record-copy
+Disallow: /upload
+Disallow: /recording/
+Disallow: /workspaces
+Disallow: /billing
+Disallow: /subscription
+Disallow: /checkout/
+Disallow: /notifications
+Disallow: /profile
+Disallow: /select-workspace
+Disallow: /accept-invite
+Disallow: /workspace/
+Disallow: /super-admin/
+Disallow: /login
+Disallow: /register
+Disallow: /verify
+Disallow: /forgot-password
+Disallow: /preview/
+Disallow: /share/
+Disallow: /payment/
+
 Sitemap: https://therec.site/sitemap.xml

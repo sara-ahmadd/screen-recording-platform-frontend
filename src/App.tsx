@@ -2,6 +2,7 @@ import "@/i18n/config";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { RouteRecord } from "vite-react-ssg";
 import { HelmetProvider } from "react-helmet-async";
+import CookieConsent from "@/components/CookieConsent";
 import { Outlet } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
@@ -68,6 +69,7 @@ const RootLayout = () => (
           <Toaster />
           <Sonner />
           <SeoManager />
+          <CookieConsent />
           <ConfirmDialogProvider>
             <AuthProvider>
               <VideoCountWarningProvider>

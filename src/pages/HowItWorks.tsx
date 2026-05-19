@@ -51,12 +51,9 @@ export default function HowItWorksPage() {
   return (
     <>
       <PublicPageLayout footer={false} title={t("howItWorks.pageTitle")} subtitle={t("howItWorks.pageSubtitle")}>
-        <section className="py-10">
-          <div className="mx-auto text-center">
-            <h1 className="text-4xl md:text-5xl font-black tracking-tight leading-[1.05] text-foreground">
-              <span className="inline-block">{t("howItWorks.componentSubtitle")}</span>
-            </h1>
-          </div>
+        <section className="mb-10 rounded-2xl border border-border/50 bg-muted/20 p-6 md:p-8">
+          <h2 className="text-xl font-bold text-foreground">{t("howItWorks.introTitle")}</h2>
+          <p className="mt-3 text-muted-foreground leading-relaxed">{t("howItWorks.introBody")}</p>
         </section>
 
         <section>

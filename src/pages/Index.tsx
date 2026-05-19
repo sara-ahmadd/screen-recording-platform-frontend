@@ -24,6 +24,8 @@ import NotificationsBell from "@/components/NotificationsBell";
 import { Reveal } from "@/components/Reveal";
 import { Badge } from "@/components/Badge";
 import HowItWorksSection from "@/components/HowItWorks";
+import HomeBlogSection from "@/components/home/HomeBlogSection";
+import { TRUST_FOOTER_LINKS } from "@/lib/trustLinks";
 
 export default function Index() {
   const { t } = useTranslation(["home", "common", "auth"]);
@@ -261,7 +263,7 @@ export default function Index() {
     <div className="min-h-screen bg-background">
       {/* Nav */}
       <nav className="border-b border-border/50 backdrop-blur-sm sticky top-0 pt-3 z-50 bg-background/80">
-        <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2">
             <Logo imageClassName="h-auto" withText textClassName="text-lg font-bold" />
           </Link>
@@ -308,7 +310,7 @@ export default function Index() {
 
       {/* Hero */}
       <Reveal from="left">
-      <section className="max-w-6xl mx-auto px-6 py-14 md:py-10 text-center">
+      <section className="max-w-7xl mx-auto px-6 py-14 md:py-10 text-center">
         <Badge className="gradient-primary border-0 mb-6 text-sm px-4 py-1.5 text-primary-foreground">
           <Zap className="h-3.5 w-3.5 me-1" /> {t("home:hero.title")}
         </Badge>
@@ -370,7 +372,7 @@ export default function Index() {
 <HowItWorksSection/> 
 {/* Trust & Security */}
 <Reveal from="left">
-<section className="max-w-6xl mx-auto px-6 py-14">
+<section className="max-w-7xl mx-auto px-6 py-14">
   <div className="glass rounded-3xl p-8 md:p-12 overflow-hidden relative">
     
     <div className="absolute inset-0 opacity-[0.03] bg-[radial-gradient(circle_at_top_right,var(--primary)_0%,transparent_40%)]" />
@@ -435,7 +437,7 @@ export default function Index() {
 </Reveal>
      {/* Site Overview */}
     <Reveal from="right">
-    <section className="max-w-6xl mx-auto px-6 py-24">
+    <section className="max-w-7xl mx-auto px-6 py-24">
       <div className="text-center mb-14">
         <Badge className="gradient-primary border-0 mb-4 text-primary-foreground px-4 py-1.5">
           {t("home:overview.badge")}
@@ -485,7 +487,7 @@ export default function Index() {
 
 {/* Async Communication CTA */}
 <Reveal from="left">
-<section className="max-w-6xl mx-auto px-6 py-16">
+<section className="max-w-7xl mx-auto px-6 py-16">
   <div className="glass rounded-3xl p-10 md:p-14 text-center relative overflow-hidden">
 
     <div className="absolute inset-0 opacity-[0.04] bg-[radial-gradient(circle_at_center,var(--primary)_0%,transparent_60%)]" />
@@ -530,13 +532,12 @@ export default function Index() {
 </section>
 </Reveal>
 
-
-
+      <HomeBlogSection />
 
       {/* Plans */}
       {(plansLoading || plans.length > 0) && (
         <Reveal from="right">
-          <section id="plans-section" className="max-w-6xl mx-auto px-6 py-16">
+          <section id="plans-section" className="max-w-7xl mx-auto px-6 py-16">
             <Badge className="gradient-primary border-0 mb-5 text-primary-foreground px-4 py-1.5">
         {t("home:pricing.title")}
       </Badge>
@@ -721,7 +722,7 @@ export default function Index() {
 
      {/* Final CTA */}
 <Reveal from="left">
-<section className="max-w-6xl mx-auto px-6 pb-24">
+<section className="max-w-7xl mx-auto px-6 pb-24">
 
   <div className="glass rounded-[2rem] p-10 md:p-16 text-center relative overflow-hidden">
 
@@ -802,27 +803,21 @@ export default function Index() {
 
       {/* Footer */}
       <footer className="border-t border-border/50 py-8 mt-12">
-        <div className="max-w-6xl mx-auto px-6 flex flex-wrap items-center justify-between gap-4">
+        <div className="max-w-7xl mx-auto px-6 flex flex-wrap items-center justify-between gap-4">
           <p className="text-sm text-muted-foreground">
             {t("common:footer.copyright", { year: new Date().getFullYear() })}
           </p>
-          <div className="flex flex-wrap items-center gap-4 text-sm">
-            <Link to="/privacy-policy" className="text-muted-foreground hover:text-foreground transition-colors">
-              {t("common:nav.privacyPolicy")}
-            </Link>
-            <Link to="/terms-and-conditions" className="text-muted-foreground hover:text-foreground transition-colors">
-              {t("common:nav.termsConditions")}
-            </Link>
-            <Link to="/contact" className="text-muted-foreground hover:text-foreground transition-colors">
-              {t("common:nav.contact")}
-            </Link>
-            <Link to="/about" className="text-muted-foreground hover:text-foreground transition-colors">
-              {t("common:nav.about")}
-            </Link>
-            <Link to="/blogs" className="text-muted-foreground hover:text-foreground transition-colors">
-              {t("common:nav.blogs")}
-            </Link>
-          </div>
+          <nav aria-label="Footer" className="flex flex-wrap items-center gap-4 text-sm">
+            {TRUST_FOOTER_LINKS.map((item) => (
+              <Link
+                key={item.href}
+                to={item.href}
+                className="text-muted-foreground hover:text-foreground transition-colors"
+              >
+                {t(`common:${item.labelKey}`)}
+              </Link>
+            ))}
+          </nav>
         </div>
       </footer>
 

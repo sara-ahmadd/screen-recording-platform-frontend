@@ -393,7 +393,7 @@ const EN_ADDITIONS = {
         },
         s5: {
           title: "Final Review & Payment",
-          desc: "The final checkout review page displays the selected subscription plan, billing cycle, and payment summary. Clicking \"Continue to Payment\" redirects the user to Stripe Checkout where the payment is securely completed.",
+          desc: "The final checkout review page displays the selected subscription plan, billing cycle, and payment summary. Clicking \"Continue to Payment\" redirects the user to Checkout review  where the payment is securely completed.",
         },
       },
     },
@@ -909,7 +909,7 @@ const AR_ADDITIONS = {
   marketing: {
     contact: {
       supportDesc: "تواصل لمشاكل المنصة النشطة أو قفل حساب مساحة العمل أو أعطال معالجة الفيديو.",
-      generalDesc: "راسلنا بخصوص ترقيات مساحات العمل الجماعية أو المؤسسات أو التعاون الإعلامي.",
+      generalDesc: "راسلنا بخصوص ترقيات او اقتراحات للتطوير او استفسارات عن الموقع.",
       slaDesc: "نقرأ كل تذكرة يدويًا. معدل الاستجابة ضمن أطر زمنية تشغيلية معتادة.",
     },
     about: {
@@ -1031,7 +1031,7 @@ const AR_ADDITIONS = {
         },
         s5: {
           title: "المراجعة النهائية والدفع",
-          desc: "تعرض صفحة المراجعة الخطة ودورة الفوترة والملخص. «متابعة للدفع» يوجّه إلى Stripe Checkout لإتمام الدفع بأمان.",
+          desc: "تعرض صفحة المراجعة الخطة ودورة الفوترة والملخص. «متابعة للدفع» يوجّه إلى Checkout review  لإتمام الدفع بأمان.",
         },
       },
     },

@@ -66,6 +66,7 @@
   },
   "nav": {
     "blogs": "Blogs",
+    "demo": "Demo",
     "pricing": "Pricing",
     "contact": "Contact",
     "about": "About",
@@ -73,6 +74,11 @@
     "howItWorks": "How it works",
     "privacyPolicy": "Privacy Policy",
     "termsConditions": "Terms & Conditions"
+  },
+  "cookie": {
+    "title": "Cookie notice",
+    "message": "We use essential cookies and similar technologies to keep you signed in, remember language preferences, and measure site performance. By continuing, you agree to our policies.",
+    "accept": "Accept"
   },
   "plans": {
     "videosPerMonth": "{{count}} videos/month",

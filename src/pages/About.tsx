@@ -8,7 +8,9 @@ import {
   Users,
   Rocket,
   Sparkles,
+  CheckCircle2,
 } from "lucide-react";
+import EditorialByline from "@/components/EditorialByline";
 
 export default function AboutPage() {
   const { t } = useTranslation("marketing");
@@ -23,10 +25,13 @@ export default function AboutPage() {
     "about.audience4",
     "about.audience5",
   ] as const;
+  const expertiseItems = ["eeat.expertise1", "eeat.expertise2", "eeat.expertise3"] as const;
 
   return (
     <PublicPageLayout title={t("about.title")} subtitle={t("about.subtitle")}>
       <div className="max-w-full mx-auto space-y-10 md:space-y-12">
+        <p className="text-muted-foreground leading-relaxed">{t("about.editorialNote")}</p>
+
         {/* Why */}
         <section className="glass rounded-3xl border border-border/50 p-8 md:p-10 relative overflow-hidden">
           <div className="inline-flex items-center gap-2 rounded-full border border-violet-500/20 bg-violet-500/10 px-4 py-1.5  font-semibold uppercase tracking-wider text-violet-700 dark:text-violet-300 mb-6">
@@ -107,6 +112,24 @@ export default function AboutPage() {
             <p className="mt-6 text-muted-foreground leading-relaxed text-sm">{t("about.audienceClosing")}</p>
           </section>
         </div>
+
+        <section className="glass rounded-3xl border border-border/50 p-8 md:p-10">
+          <h3 className="text-2xl font-bold tracking-tight text-foreground">{t("eeat.aboutTeamTitle")}</h3>
+          <p className="mt-4 text-muted-foreground leading-relaxed">{t("eeat.aboutTeamBody")}</p>
+          <h4 className="mt-8 text-sm font-semibold uppercase tracking-wider text-violet-600 dark:text-violet-400">
+            {t("eeat.expertiseTitle")}
+          </h4>
+          <ul className="mt-4 space-y-3">
+            {expertiseItems.map((key) => (
+              <li key={key} className="flex gap-3 text-muted-foreground">
+                <CheckCircle2 className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                <span>{t(key)}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        <EditorialByline />
 
         {/* Evolution */}
         <section className="glass rounded-2xl border border-border/50 p-6 md:p-8 flex gap-4 items-start">

@@ -1,73 +1,93 @@
 {
   "defaultTitle": "Online Screen Recorder for Teams",
-  "defaultDescription": "theRec is an online screen recorder and video recorder for teams to capture, share, and collaborate faster.",
-  "defaultKeywords": "screen recording, video recorder, online recorder, online screen recorder, team collaboration, browser screen recorder, record screen online",
+  "defaultDescription": "theRec is an independent browser-based screen recorder for teams to capture, share, and collaborate with async video.",
+  "defaultKeywords": "screen recording, video recorder, online recorder, online screen recorder, team collaboration, browser screen recorder, record screen online, async video",
   "robotsNoIndex": "noindex, nofollow",
+  "robotsIndex": "index, follow",
   "routes": {
     "home": {
       "title": "Online Screen Recorder for Teams",
-      "description": "Record your screen online, share video recordings instantly, and collaborate in one place with theRec.",
-      "keywords": "screen recording, online screen recorder, video recorder, record screen online, team video collaboration"
+      "description": "Record your screen in the browser, share secure video links, and collaborate in workspaces with theRec — no desktop install required.",
+      "keywords": "online screen recorder, browser screen recording, team video collaboration, async video updates"
     },
     "login": {
-      "title": "Login",
-      "description": "Sign in to your theRec workspace to manage screen recordings and team videos."
+      "title": "Sign In to Your Workspace",
+      "description": "Sign in to theRec to access your workspace recordings, billing, and team collaboration tools."
     },
     "register": {
-      "title": "Create Account",
-      "description": "Create your theRec account to start recording your screen and sharing videos online."
+      "title": "Create a Free theRec Account",
+      "description": "Register for theRec to start recording your screen online and sharing videos with your team in minutes."
     },
     "verify": {
-      "title": "Verify Account",
-      "description": "Verify your email to activate your theRec account."
+      "title": "Verify Your Email Address",
+      "description": "Complete email verification to activate your theRec account and secure your workspace."
     },
     "forgotPassword": {
-      "title": "Reset Password",
-      "description": "Reset your theRec account password securely."
+      "title": "Reset Your Account Password",
+      "description": "Request a secure password reset link for your theRec account."
     },
     "preview": {
-      "title": "Video Preview",
-      "description": "Preview a shared theRec screen recording."
+      "title": "Shared Video Preview",
+      "description": "Watch a shared theRec screen recording via secure preview link."
     },
     "share": {
-      "title": "Shared Recording",
-      "description": "Watch and review a shared recording on theRec."
+      "title": "Shared Team Recording",
+      "description": "View a shared recording hosted on theRec with workspace permissions."
     },
     "about": {
-      "title": "About",
-      "description": "Learn about theRec.site — an independent screen recording and async communication platform."
+      "title": "About theRec.site — Our Mission & Story",
+      "description": "Learn who built theRec.site, why we focus on simple async screen recording, and how we serve remote teams, educators, and creators.",
+      "keywords": "about theRec, screen recording company, async video platform"
     },
     "blogs": {
-      "title": "Blogs",
-      "description": "Read tips on screen recording, video recording, and online collaboration with theRec."
+      "title": "Blog & Resources for Async Video Teams",
+      "description": "In-depth guides on async video communication, screen recording best practices, secure sharing, upload performance, and remote team workflows.",
+      "keywords": "screen recording blog, async video guides, remote team communication"
     },
     "privacyPolicy": {
-      "title": "Privacy Policy",
-      "description": "Read theRec privacy policy and how we handle your data."
+      "title": "Privacy Policy — Data & Security",
+      "description": "Read how theRec collects, stores, and protects account data, recordings metadata, and subscription information.",
+      "keywords": "theRec privacy policy, video data security"
     },
     "terms": {
-      "title": "Terms and Conditions",
-      "description": "Read theRec terms and conditions for using our online recorder platform."
+      "title": "Terms and Conditions of Use",
+      "description": "Terms governing use of theRec screen recording platform, subscriptions, refunds, and acceptable use.",
+      "keywords": "theRec terms of service, subscription terms"
     },
     "contact": {
-      "title": "Contact",
-      "description": "Contact theRec support for help with screen recording and account questions."
+      "title": "Contact Support & General Inquiries",
+      "description": "Reach theRec support team for technical help, billing questions, partnerships, and product feedback. Based in Alexandria, Egypt.",
+      "keywords": "contact theRec, screen recorder support"
     },
     "dashboard": {
-      "title": "Dashboard",
-      "description": "Manage your workspace recordings, status, and collaboration flow in theRec."
+      "title": "Workspace Dashboard",
+      "description": "Manage recordings, workspaces, and collaboration inside your theRec account."
     },
     "howItWorks": {
-      "title": "How It Works",
-      "description": "Learn how to record, upload, process, and share videos with theRec."
+      "title": "How Screen Recording Works on theRec",
+      "description": "Step-by-step guide: record in the browser, upload securely, process video, and share with your team or clients.",
+      "keywords": "how screen recording works, theRec workflow"
     },
     "demo": {
-      "title": "Demo",
-      "description": "Watch a demo of theRec screen recording platform."
+      "title": "Product Demo — Record, Process & Share",
+      "description": "Watch a 60-second theRec demo showing browser recording, cloud processing, and instant link sharing for async teams.",
+      "keywords": "theRec demo, screen recorder walkthrough"
     },
     "plans": {
-      "title": "Pricing",
-      "description": "Compare theRec plans and choose the right subscription for your team."
+      "title": "Workspace Pricing Plans",
+      "description": "Compare theRec subscription plans for teams — storage, members, downloads, and collaboration features."
+    },
+    "paymentSuccess": {
+      "title": "Payment Confirmation",
+      "description": "Your theRec subscription payment was processed successfully."
+    },
+    "paymentFailed": {
+      "title": "Payment Not Completed",
+      "description": "Your theRec payment could not be completed. You can retry from billing settings."
+    },
+    "notFound": {
+      "title": "Page Not Found",
+      "description": "The page you requested on theRec does not exist. Return to the homepage or contact support."
     }
   }
 }
