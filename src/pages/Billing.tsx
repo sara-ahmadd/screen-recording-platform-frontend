@@ -56,7 +56,8 @@ export default function BillingPage() {
   }, [user?.workspaces]);
 
   const selectedWorkspaceLogo = useMemo(() => {
-    const rawLogo = selectedWorkspace?.logoUrl || selectedWorkspace?.logo_url || selectedWorkspace?.logo || "";
+    const rawLogo = selectedWorkspace?.logoUrl || selectedWorkspace?.logo_url || selectedWorkspace?.logo || "/assets/small-logo.png";
+    if(rawLogo&&(rawLogo.includes('localhost')||rawLogo.includes('placeholder')))return "/assets/small-logo.png"
     return buildAvatarSrc(rawLogo);
   }, [selectedWorkspace]);
 

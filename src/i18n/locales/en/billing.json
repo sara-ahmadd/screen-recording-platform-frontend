@@ -60,6 +60,7 @@
   "billingInformation": "Billing information",
   "continueToPayment": "Continue to Payment",
   "paymentLinkMissing": "Payment link is missing. Please retry checkout.",
+  "planWithCycle": "{{name}} ({{cycle}})",
   "errorLoadingPlans": "Error loading plans",
   "workspaceNotFound": "Selected workspace not found in your profile data.",
   "noSubscriptionData": "No subscription data available for this workspace.",

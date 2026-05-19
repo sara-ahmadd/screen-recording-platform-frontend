@@ -113,7 +113,7 @@
     "membersUpTo": "Up to {{count}} members",
     "yearlySave": "({{egp}} EGP ≈ ${{usd}} USD) /year (save {{percent}}%)",
     "planFallback": "Plan",
-    "perMonth": "EGP",
+    "perMonth": "/month",
     "egp": "EGP",
     "usdApprox": "≈ {{amount}} USD /mo",
     "badge": "Pricing",

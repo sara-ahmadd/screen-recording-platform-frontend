@@ -16,12 +16,13 @@ type PublicPageLayoutProps = {
 export function useHeaderLinks() {
   const { t } = useTranslation("common");
   return [
-    { href: "/blogs", label: t("nav.blogs") },
-    { href: "/plans", label: t("nav.pricing") },
-    { href: "/contact", label: t("nav.contact") },
-    { href: "/about", label: t("nav.about") },
-    { href: "/privacy-policy", label: t("nav.securityPrivacy") },
     { href: "/how-it-works", label: t("nav.howItWorks") },
+    { href: "/plans", label: t("nav.pricing") },
+    { href: "/blogs", label: t("nav.blogs") },
+    { href: "/about", label: t("nav.about") },
+    { href: "/contact", label: t("nav.contact") },
+    { href: "/terms-and-conditions", label: t("nav.termsConditions") },
+    { href: "/privacy-policy", label: t("nav.securityPrivacy") },
   ];
 }
 
@@ -34,12 +35,12 @@ export default function PublicPageLayout({
   const { t } = useTranslation("common");
   const headerLinks = useHeaderLinks();
   const footerLinks = [
+    { href: "/how-it-works", label: t("nav.howItWorks") },
     { href: "/privacy-policy", label: t("nav.privacyPolicy") },
     { href: "/terms-and-conditions", label: t("nav.termsConditions") },
     { href: "/contact", label: t("nav.contact") },
     { href: "/about", label: t("nav.about") },
     { href: "/blogs", label: t("nav.blogs") },
-    { href: "/how-it-works", label: t("nav.howItWorks") },
   ];
 
   return (

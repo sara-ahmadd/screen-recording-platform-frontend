@@ -14,7 +14,7 @@
     <link rel="canonical" href="https://therec.site/" />
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
 
-<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/favicon.ico">
 
     <link rel="manifest" href="/site.webmanifest">
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -53,26 +53,6 @@
 
   <body>
     <div id="root"></div>
-    <script>
-      (function () {
-        try {
-          if (sessionStorage.getItem("site_data_reset_done") === "1") return;
-          var preserve = ["app-language", "theme"];
-          var saved = {};
-          for (var i = 0; i < preserve.length; i++) {
-            var v = localStorage.getItem(preserve[i]);
-            if (v != null) saved[preserve[i]] = v;
-          }
-          sessionStorage.clear();
-          localStorage.clear();
-          for (var k in saved) {
-            if (Object.prototype.hasOwnProperty.call(saved, k)) {
-              localStorage.setItem(k, saved[k]);
-            }
-          }
-        } catch (_) {}
-      })();
-    </script>
     <script>
       (function () {
         try {

@@ -116,8 +116,18 @@ export type ClearBrowserSiteDataOptions = {
 };
 
 /**
+ * Clears service workers and Cache Storage only. Does not touch auth tokens or other storage.
+ * Safe to run on app load for deploy cache busting.
+ */
+export async function clearBrowserCachesOnly(): Promise<void> {
+  if (typeof window === "undefined") return;
+  await clearServiceWorkers();
+  await clearCacheStorage();
+}
+
+/**
  * Clears PWA/service worker caches, storage, and script-readable cookies for the current origin.
- * Call after logging out if you still need the server to invalidate the session.
+ * Use for explicit user actions (e.g. profile "clear site data"), not on every page load.
  */
 export async function clearBrowserSiteData(options?: ClearBrowserSiteDataOptions): Promise<void> {
   if (typeof window === "undefined") return;

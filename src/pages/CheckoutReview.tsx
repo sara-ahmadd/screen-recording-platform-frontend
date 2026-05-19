@@ -48,7 +48,9 @@ export default function CheckoutReviewPage() {
         : Number(payload?.plan?.monthlyPriceUSD || 0),
     [cycle, payload],
   );
-  const cycleLabel = cycle === "yearly" ? t("perYear").replace("/", "") : t("monthShort");
+  const cycleKey = cycle === "yearly" ? "yearly" : "monthly";
+  const cycleLabel = t(`cycle.${cycleKey}`);
+  const periodLabel = cycle === "yearly" ? t("yearShort") : t("monthShort");
   const hasRedirect = Boolean(String(payload?.redirectUrl ?? "").trim());
   useEffect(() => {
     const script = document.createElement("script");
@@ -93,7 +95,7 @@ export default function CheckoutReviewPage() {
                 <CardTitle className="mt-1 text-2xl">{t("checkoutReview")}</CardTitle>
               </div>
               <Badge variant="secondary" className="capitalize">
-                {t("cycleBilling", { cycle })}
+                {t("cycleBilling", { cycle: cycleLabel })}
               </Badge>
             </div>
           </CardHeader>
@@ -103,7 +105,10 @@ export default function CheckoutReviewPage() {
                 {t("aboutToSubscribe")}
               </p>
               <p className="text-xl font-semibold">
-                {payload?.plan?.name || t("subscription")} ({cycle})
+                {t("planWithCycle", {
+                  name: payload?.plan?.name || t("subscription"),
+                  cycle: cycleLabel,
+                })}
               </p>
             </div>
 
@@ -112,10 +117,11 @@ export default function CheckoutReviewPage() {
                 {t("totalDueNow")}
               </p>
               <p className="mt-2 text-3xl md:text-4xl font-bold">
-                EGP {payload.amountProvider.toLocaleString()} / {cycleLabel}
+                {t("priceEgp", { amount: Number(payload?.amountProvider || 0).toLocaleString() })} /{" "}
+                {periodLabel}
               </p>
               <p className="mt-1 text-sm text-muted-foreground">
-                ≈ ${payload.amountUsd.toLocaleString()} USD
+                {t("approxUsd", { amount: Number(payload?.amountUsd || 0).toLocaleString() })}
               </p>
             </div>
 
@@ -150,7 +156,7 @@ export default function CheckoutReviewPage() {
                 handlePayment()
               }}
             >
-              <CreditCard className="h-4 w-4 mr-2" />
+              <CreditCard className="h-4 w-4 me-2" />
               {t("continueToPayment")}
             </Button>
             {!hasRedirect&&!payload?.checkoutSessionId ? (

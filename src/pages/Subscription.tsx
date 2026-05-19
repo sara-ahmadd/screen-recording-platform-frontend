@@ -58,7 +58,8 @@ export default function SubscriptionPage() {
   }, [selectedWorkspaceId, user?.workspaces]);
 
   const selectedWorkspaceLogo = useMemo(() => {
-    const rawLogo = selectedWorkspace?.logoUrl || selectedWorkspace?.logo_url || selectedWorkspace?.logo || "";
+    const rawLogo = selectedWorkspace?.logoUrl || selectedWorkspace?.logo_url || selectedWorkspace?.logo || "/assets/small-logo.png";
+    if(rawLogo&&(rawLogo.includes('localhost')||rawLogo.includes('placeholder')))return "/assets/small-logo.png"
     return buildAvatarSrc(rawLogo);
   }, [selectedWorkspace]);
 
@@ -318,7 +319,7 @@ export default function SubscriptionPage() {
 
   return (
     <AppLayout>
-      <div className="p-6 md:p-8 max-w-7xl mx-auto">
+      <div className="p-6 md:p-8 max-w-full mx-auto">
         <div className="mb-8">
           <h1 className="text-3xl font-bold">{t("confirmSubscription")}</h1>
           <p className="text-muted-foreground mt-2">{t("reviewSubtitle")}</p>
@@ -458,10 +459,10 @@ export default function SubscriptionPage() {
                         className="text-sm font-normal leading-5"
                       >
                         {t("agreeTermsPrefix")}{" "}
-                        <NavLink className="text-blue-500 underline" to="/terms-and-conditions">
+                        <NavLink className="text-blue-500 underline" to="/terms-and-conditions" target="_blank">
                           {t("common:nav.termsConditions")}
                         </NavLink>
-                        and <NavLink className="text-blue-500 underline" to="/privacy-policy">
+                        and <NavLink className="text-blue-500 underline" to="/privacy-policy" target="_blank">
                           {t("common:nav.privacyPolicy")}
                         </NavLink>
                         .

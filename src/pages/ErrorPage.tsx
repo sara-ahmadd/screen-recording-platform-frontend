@@ -1,3 +1,4 @@
+import PublicPageLayout from "@/components/PublicPageLayout";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 
@@ -6,6 +7,8 @@ export default function ErrorPage() {
   const navigate = useNavigate();
 
   return (
+    <PublicPageLayout title="" subtitle="">
+
     <div
       className="relative min-h-screen overflow-hidden text-white"
       style={{
@@ -78,5 +81,7 @@ export default function ErrorPage() {
         <p className="mt-8 text-sm text-white/60">{t("thanks")}</p>
       </div>
     </div>
+    </PublicPageLayout>
+
   );
 }

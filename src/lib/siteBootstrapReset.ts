@@ -1,31 +1,31 @@
-import { clearBrowserSiteData } from "@/lib/clearSiteData";
-import { normalizeLanguage, PRESERVED_STORAGE_KEYS } from "@/i18n/constants";
+import { clearBrowserCachesOnly } from "@/lib/clearSiteData";
 
-/** Set after a successful reset for the current browser tab session. */
-export const SITE_RESET_SESSION_KEY = "site_data_reset_done";
+/** Tracks which production build's caches were already cleared for this browser profile. */
+const CACHE_VERSION_KEY = "app_cache_version";
+const BUILD_ID = import.meta.env.VITE_BUILD_ID ?? import.meta.env.MODE ?? "development";
+
+let bootstrapPromise: Promise<void> | null = null;
 
 /**
- * Runs once per tab session when the app loads: clears caches, service workers,
- * IndexedDB, cookies (script-visible), and web storage while keeping language
- * and theme preferences.
+ * On new deploys, clears service-worker and HTTP caches so users get fresh assets.
+ * Does not clear localStorage, sessionStorage, or cookies (auth and preferences stay intact).
  */
 export async function runSiteBootstrapReset(): Promise<void> {
   if (typeof window === "undefined") return;
-  if (sessionStorage.getItem(SITE_RESET_SESSION_KEY) === "1") return;
 
-  await clearBrowserSiteData({ preserveKeys: [...PRESERVED_STORAGE_KEYS] });
+  if (!bootstrapPromise) {
+    bootstrapPromise = (async () => {
+      try {
+        const lastVersion = localStorage.getItem(CACHE_VERSION_KEY);
+        if (lastVersion === BUILD_ID) return;
 
-  sessionStorage.setItem(SITE_RESET_SESSION_KEY, "1");
-
-  try {
-    const { default: i18n } = await import("@/i18n/config");
-    const lang = normalizeLanguage(localStorage.getItem("app-language") ?? i18n.language);
-    if (i18n.language !== lang) {
-      await i18n.changeLanguage(lang);
-    }
-    const { syncDocumentLanguage } = await import("@/i18n/syncDocumentLanguage");
-    syncDocumentLanguage(lang);
-  } catch {
-    // i18n optional during SSR or failed init
+        await clearBrowserCachesOnly();
+        localStorage.setItem(CACHE_VERSION_KEY, BUILD_ID);
+      } catch {
+        // Never block the app if cache APIs fail
+      }
+    })();
   }
+
+  return bootstrapPromise;
 }

@@ -1,6 +1,6 @@
 export const LANGUAGE_STORAGE_KEY = "app-language";
 
-/** Keys kept when clearing site data on app load (language + theme). */
+/** Keys kept when the user manually clears site data from profile (language + theme). */
 export const PRESERVED_STORAGE_KEYS = [LANGUAGE_STORAGE_KEY, "theme"] as const;
 
 export const SUPPORTED_LANGUAGES = ["en", "ar"] as const;

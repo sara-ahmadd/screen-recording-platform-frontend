@@ -109,20 +109,17 @@ export default function Index() {
   }, [toast]);
 
   useEffect(() => {
-    //detect : responseMessage=3DS+authentication+failed or responseMessage=Cancelled+by+User or responseMessage=Success
-    const responseMessage = searchParams.get("responseMessage")?.toLowerCase()??"";
-    if(!responseMessage){
+    const responseMessage = searchParams.get("responseMessage")?.toLowerCase() ?? "";
+    if (!responseMessage) {
       setCancelDialogOpen(false);
       setSuccessDialogOpen(false);
-      return};
-    try{if (responseMessage?.includes('success')) {
+      return;
+    }
+    if (responseMessage.includes("success")) {
       setSuccessDialogOpen(true);
       setCancelDialogOpen(false);
-    } else if (!responseMessage?.includes('success')) {
+    } else {
       setCancelDialogOpen(true);
-      setSuccessDialogOpen(false);
-    }}finally{
-       setCancelDialogOpen(false);
       setSuccessDialogOpen(false);
     }
   }, [searchParams]);

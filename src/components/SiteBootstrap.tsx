@@ -1,28 +1,13 @@
-import { useEffect, useState, type ReactNode } from "react";
-import { runSiteBootstrapReset, SITE_RESET_SESSION_KEY } from "@/lib/siteBootstrapReset";
-
-function isSiteResetDone(): boolean {
-  return typeof window !== "undefined" && sessionStorage.getItem(SITE_RESET_SESSION_KEY) === "1";
-}
+import { useEffect, type ReactNode } from "react";
+import { runSiteBootstrapReset } from "@/lib/siteBootstrapReset";
 
 /**
- * Runs async cache/service-worker cleanup once per tab session before rendering the app.
- * Sync storage is already cleared in index.html; this handles PWA caches and IndexedDB.
+ * Runs deploy cache busting in the background without blocking render.
  */
 export default function SiteBootstrap({ children }: { children: ReactNode }) {
-  const [ready, setReady] = useState(() => typeof window === "undefined" || isSiteResetDone());
-
   useEffect(() => {
-    if (ready) return;
-    let cancelled = false;
-    void runSiteBootstrapReset().then(() => {
-      if (!cancelled) setReady(true);
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [ready]);
+    void runSiteBootstrapReset();
+  }, []);
 
-  if (!ready) return null;
   return <>{children}</>;
 }
