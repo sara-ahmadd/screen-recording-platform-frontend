@@ -263,7 +263,7 @@ export default function Index() {
     <div className="min-h-screen bg-background">
       {/* Nav */}
       <nav className="border-b border-border/50 backdrop-blur-sm sticky top-0 pt-3 z-50 bg-background/80">
-        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+        <div className={`${user ? "max-w-8xl" : "max-w-7xl"} mx-auto px-6 h-16 flex items-center justify-center gap-5`}>
           <Link to="/" className="flex items-center gap-2">
             <Logo imageClassName="h-auto" withText textClassName="text-lg font-bold" />
           </Link>
