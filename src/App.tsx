@@ -7,6 +7,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import SeoManager from "@/components/SeoManager";
+import SiteBootstrap from "@/components/SiteBootstrap";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { VideoCountWarningProvider } from "@/contexts/VideoCountWarningContext";
 import { SubscriptionRenewal3dsProvider } from "@/contexts/SubscriptionRenewal3dsContext";
@@ -60,24 +61,26 @@ import DemoPage from "./pages/Demo";
 const queryClient = new QueryClient();
 
 const RootLayout = () => (
-  <HelmetProvider>
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <SeoManager />
-        <ConfirmDialogProvider>
-          <AuthProvider>
-            <VideoCountWarningProvider>
-              <SubscriptionRenewal3dsProvider>
-                <Outlet />
-              </SubscriptionRenewal3dsProvider>
-            </VideoCountWarningProvider>
-          </AuthProvider>
-        </ConfirmDialogProvider>
-      </TooltipProvider>
-    </QueryClientProvider>
-  </HelmetProvider>
+  <SiteBootstrap>
+    <HelmetProvider>
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <SeoManager />
+          <ConfirmDialogProvider>
+            <AuthProvider>
+              <VideoCountWarningProvider>
+                <SubscriptionRenewal3dsProvider>
+                  <Outlet />
+                </SubscriptionRenewal3dsProvider>
+              </VideoCountWarningProvider>
+            </AuthProvider>
+          </ConfirmDialogProvider>
+        </TooltipProvider>
+      </QueryClientProvider>
+    </HelmetProvider>
+  </SiteBootstrap>
 );
 
 export const routes: RouteRecord[] = [
