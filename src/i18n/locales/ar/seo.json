@@ -3,7 +3,7 @@
   "defaultDescription": "theRec مسجّل شاشة مستقل في المتصفح للفرق للتقاط الفيديو والمشاركة والتعاون غير المتزامن.",
   "defaultKeywords": "تسجيل الشاشة, مسجّل فيديو, تسجيل عبر الإنترنت, تعاون الفريق, تسجيل الشاشة في المتصفح, فيديو غير متزامن",
   "robotsNoIndex": "noindex, nofollow",
-  "robotsIndex": "index, follow",
+  "robotsIndex": "noindex, nofollow",
   "routes": {
     "home": {
       "title": "مسجّل شاشة عبر الإنترنت للفرق",

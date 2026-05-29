@@ -3,7 +3,7 @@
   "defaultDescription": "theRec is an independent browser-based screen recorder for teams to capture, share, and collaborate with async video.",
   "defaultKeywords": "screen recording, video recorder, online recorder, online screen recorder, team collaboration, browser screen recorder, record screen online, async video",
   "robotsNoIndex": "noindex, nofollow",
-  "robotsIndex": "index, follow",
+  "robotsIndex": "noindex, nofollow",
   "routes": {
     "home": {
       "title": "Online Screen Recorder for Teams",
