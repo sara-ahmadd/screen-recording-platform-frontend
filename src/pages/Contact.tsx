@@ -15,9 +15,7 @@ import {
 export default function ContactPage() {
   const { t } = useTranslation(["marketing", "common"]);
   const phone = import.meta.env.VITE_CONTACT_PHONE || "+20 1211716865";
-  const address =
-    import.meta.env.VITE_CONTACT_ADDRESS ||
-    "51 memfais - Bab sharqi - Alexandria, Egypt";
+  const address = import.meta.env.VITE_CONTACT_ADDRESS || t("marketing:contact.address");
 
   const trustItems = ["contact.trust1", "contact.trust2", "contact.trust3"] as const;
 

@@ -127,7 +127,6 @@ export default function AcceptInvitePage() {
         <AlertDialogContent
           className="sm:max-w-md"
           onEscapeKeyDown={(e) => e.preventDefault()}
-          onPointerDownOutside={(e) => e.preventDefault()}
         >
           <AlertDialogHeader className="sm:text-center">
             <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-emerald-500/15">
