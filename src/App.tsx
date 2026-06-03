@@ -36,6 +36,9 @@ import SelectWorkspacePage from "./pages/SelectWorkspace";
 import ProfilePage from "./pages/Profile";
 import PrivacyPolicyPage from "./pages/PrivacyPolicy";
 import TermsAndConditionsPage from "./pages/TermsAndConditions";
+import CopyrightPolicyPage from "./pages/CopyrightPolicy";
+import AbuseReportingPolicyPage from "./pages/AbuseReportingPolicy";
+import RefundPolicyPage from "./pages/RefundPolicy";
 import ContactPage from "./pages/Contact";
 import AboutPage from "./pages/About";
 import BlogsPage from "./pages/Blogs";
@@ -101,6 +104,9 @@ export const routes: RouteRecord[] = [
       { path: "workspace/accept-invite", element: <AcceptInvitePage /> },
       { path: "privacy-policy", element: <PrivacyPolicyPage /> },
       { path: "terms-and-conditions", element: <TermsAndConditionsPage /> },
+      { path: "copyright-policy", element: <CopyrightPolicyPage /> },
+      { path: "abuse-reporting-policy", element: <AbuseReportingPolicyPage /> },
+      { path: "refund-policy", element: <RefundPolicyPage /> },
       { path: "contact", element: <ContactPage /> },
       { path: "demo", element: <DemoPage /> },
       { path: "about", element: <AboutPage /> },

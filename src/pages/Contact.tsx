@@ -106,13 +106,21 @@ export default function ContactPage() {
         <section className="glass rounded-2xl border border-border/50 p-6 md:p-8">
           <h2 className="text-xl font-bold text-foreground">{t("marketing:contact.businessTitle")}</h2>
           <p className="mt-3 text-muted-foreground leading-relaxed">{t("marketing:contact.businessBody")}</p>
-          <p className="mt-4 text-sm text-muted-foreground">
+          <p className="mt-4 text-sm text-muted-foreground flex flex-wrap gap-x-3 gap-y-1">
             <Link to="/privacy-policy" className="text-violet-600 dark:text-violet-400 hover:underline">
               {t("common:nav.privacyPolicy")}
             </Link>
-            {" · "}
             <Link to="/terms-and-conditions" className="text-violet-600 dark:text-violet-400 hover:underline">
               {t("common:nav.termsConditions")}
+            </Link>
+            <Link to="/refund-policy" className="text-violet-600 dark:text-violet-400 hover:underline">
+              {t("common:nav.refundPolicy")}
+            </Link>
+            <Link to="/copyright-policy" className="text-violet-600 dark:text-violet-400 hover:underline">
+              {t("common:nav.copyrightPolicy")}
+            </Link>
+            <Link to="/abuse-reporting-policy" className="text-violet-600 dark:text-violet-400 hover:underline">
+              {t("common:nav.abusePolicy")}
             </Link>
           </p>
         </section>

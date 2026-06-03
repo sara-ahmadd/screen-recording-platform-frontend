@@ -73,7 +73,10 @@
     "securityPrivacy": "الأمان والخصوصية",
     "howItWorks": "كيف يعمل",
     "privacyPolicy": "سياسة الخصوصية",
-    "termsConditions": "الشروط والأحكام"
+    "termsConditions": "الشروط والأحكام",
+    "refundPolicy": "سياسة الاسترداد",
+    "copyrightPolicy": "سياسة حقوق النشر",
+    "abusePolicy": "الإبلاغ عن الإساءة"
   },
   "cookie": {
     "title": "إشعار ملفات تعريف الارتباط",

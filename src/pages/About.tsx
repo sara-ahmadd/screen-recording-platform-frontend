@@ -27,10 +27,37 @@ export default function AboutPage() {
   ] as const;
   const expertiseItems = ["eeat.expertise1", "eeat.expertise2", "eeat.expertise3"] as const;
 
+  const commitmentItems = [
+    "about.commitment1",
+    "about.commitment2",
+    "about.commitment3",
+    "about.commitment4",
+  ] as const;
+
   return (
     <PublicPageLayout title={t("about.title")} subtitle={t("about.subtitle")}>
       <div className="max-w-full mx-auto space-y-10 md:space-y-12">
         <p className="text-muted-foreground leading-relaxed">{t("about.editorialNote")}</p>
+
+        <section className="rounded-3xl border border-violet-500/20 bg-gradient-to-br from-violet-500/[0.06] to-transparent p-8 md:p-10">
+          <div className="inline-flex items-center gap-2 rounded-full border border-violet-500/20 bg-violet-500/10 px-4 py-1.5 font-semibold uppercase tracking-wider text-violet-700 dark:text-violet-300 mb-6">
+            <ShieldCheck className="h-3.5 w-3.5" />
+            {t("about.transparencyTitle")}
+          </div>
+          <p className="text-lg leading-relaxed text-foreground font-medium">{t("about.transparencyBody")}</p>
+          <p className="mt-6 text-muted-foreground leading-relaxed">{t("about.transparencyNote")}</p>
+          <h4 className="mt-8 text-sm font-semibold uppercase tracking-wider text-violet-600 dark:text-violet-400">
+            {t("about.commitmentTitle")}
+          </h4>
+          <ul className="mt-4 space-y-3">
+            {commitmentItems.map((key) => (
+              <li key={key} className="flex gap-3 text-muted-foreground">
+                <CheckCircle2 className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                <span>{t(key)}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
 
         {/* Why */}
         <section className="glass rounded-3xl border border-border/50 p-8 md:p-10 relative overflow-hidden">

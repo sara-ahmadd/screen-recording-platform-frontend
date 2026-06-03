@@ -18,7 +18,7 @@
     "/assets/logo-Bbe7nbNw.png"
   ],
   "\u0000/Users/saraahmad/Documents/screen-recorder-frontend-lovable/node_modules/react-dom/client.js?commonjs-exports": [
-    "/assets/client-CyR9pGxy.js"
+    "/assets/client-CboOUYk1.js"
   ],
   "\u0000/Users/saraahmad/Documents/screen-recorder-frontend-lovable/node_modules/react-dom/index.js?commonjs-module": [
     "/assets/logo-Bbe7nbNw.png"
@@ -1646,6 +1646,9 @@
   "node_modules/lucide-react/dist/esm/defaultAttributes.js": [
     "/assets/logo-Bbe7nbNw.png"
   ],
+  "node_modules/lucide-react/dist/esm/icons/activity.js": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
   "node_modules/lucide-react/dist/esm/icons/app-window.js": [
     "/assets/logo-Bbe7nbNw.png"
   ],
@@ -1662,6 +1665,9 @@
     "/assets/logo-Bbe7nbNw.png"
   ],
   "node_modules/lucide-react/dist/esm/icons/bell.js": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
+  "node_modules/lucide-react/dist/esm/icons/book-open.js": [
     "/assets/logo-Bbe7nbNw.png"
   ],
   "node_modules/lucide-react/dist/esm/icons/building-2.js": [
@@ -1715,6 +1721,9 @@
   "node_modules/lucide-react/dist/esm/icons/cloud-upload.js": [
     "/assets/logo-Bbe7nbNw.png"
   ],
+  "node_modules/lucide-react/dist/esm/icons/copyright.js": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
   "node_modules/lucide-react/dist/esm/icons/cpu.js": [
     "/assets/logo-Bbe7nbNw.png"
   ],
@@ -1745,10 +1754,16 @@
   "node_modules/lucide-react/dist/esm/icons/eye.js": [
     "/assets/logo-Bbe7nbNw.png"
   ],
+  "node_modules/lucide-react/dist/esm/icons/file-text.js": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
   "node_modules/lucide-react/dist/esm/icons/file-video.js": [
     "/assets/logo-Bbe7nbNw.png"
   ],
   "node_modules/lucide-react/dist/esm/icons/fingerprint.js": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
+  "node_modules/lucide-react/dist/esm/icons/gavel.js": [
     "/assets/logo-Bbe7nbNw.png"
   ],
   "node_modules/lucide-react/dist/esm/icons/globe.js": [
@@ -1772,6 +1787,9 @@
   "node_modules/lucide-react/dist/esm/icons/layout-grid.js": [
     "/assets/logo-Bbe7nbNw.png"
   ],
+  "node_modules/lucide-react/dist/esm/icons/lightbulb.js": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
   "node_modules/lucide-react/dist/esm/icons/link-2.js": [
     "/assets/logo-Bbe7nbNw.png"
   ],
@@ -1788,6 +1806,9 @@
     "/assets/logo-Bbe7nbNw.png"
   ],
   "node_modules/lucide-react/dist/esm/icons/map-pin.js": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
+  "node_modules/lucide-react/dist/esm/icons/message-square-reply.js": [
     "/assets/logo-Bbe7nbNw.png"
   ],
   "node_modules/lucide-react/dist/esm/icons/message-square.js": [
@@ -1841,10 +1862,16 @@
   "node_modules/lucide-react/dist/esm/icons/rotate-ccw.js": [
     "/assets/logo-Bbe7nbNw.png"
   ],
+  "node_modules/lucide-react/dist/esm/icons/scale.js": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
   "node_modules/lucide-react/dist/esm/icons/search-x.js": [
     "/assets/logo-Bbe7nbNw.png"
   ],
   "node_modules/lucide-react/dist/esm/icons/share-2.js": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
+  "node_modules/lucide-react/dist/esm/icons/shield-alert.js": [
     "/assets/logo-Bbe7nbNw.png"
   ],
   "node_modules/lucide-react/dist/esm/icons/shield-check.js": [
@@ -1878,6 +1905,9 @@
     "/assets/logo-Bbe7nbNw.png"
   ],
   "node_modules/lucide-react/dist/esm/icons/user-minus.js": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
+  "node_modules/lucide-react/dist/esm/icons/users-round.js": [
     "/assets/logo-Bbe7nbNw.png"
   ],
   "node_modules/lucide-react/dist/esm/icons/users.js": [
@@ -1929,7 +1959,7 @@
     "/assets/logo-Bbe7nbNw.png"
   ],
   "node_modules/react-dom/client.js": [
-    "/assets/client-CyR9pGxy.js"
+    "/assets/client-CboOUYk1.js"
   ],
   "node_modules/react-dom/index.js": [
     "/assets/logo-Bbe7nbNw.png"
@@ -2462,7 +2492,16 @@
   "src/components/Badge.tsx": [
     "/assets/logo-Bbe7nbNw.png"
   ],
+  "src/components/CookieConsent.tsx": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
+  "src/components/EditorialByline.tsx": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
   "src/components/Footer.tsx": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
+  "src/components/GoogleIcon.tsx": [
     "/assets/logo-Bbe7nbNw.png"
   ],
   "src/components/HowItWorks.tsx": [
@@ -2492,6 +2531,9 @@
   "src/components/SeoManager.tsx": [
     "/assets/logo-Bbe7nbNw.png"
   ],
+  "src/components/SiteBootstrap.tsx": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
   "src/components/StarRating.tsx": [
     "/assets/logo-Bbe7nbNw.png"
   ],
@@ -2508,6 +2550,15 @@
     "/assets/logo-Bbe7nbNw.png"
   ],
   "src/components/billing/SubscriptionBillingDialog.tsx": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
+  "src/components/home/HomeBlogSection.tsx": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
+  "src/components/legal/LegalSectionList.tsx": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
+  "src/components/seo/StructuredDataScripts.tsx": [
     "/assets/logo-Bbe7nbNw.png"
   ],
   "src/components/ui/alert-dialog.tsx": [
@@ -2594,7 +2645,7 @@
   "src/hooks/useAvatarSrc.ts": [
     "/assets/logo-Bbe7nbNw.png"
   ],
-  "src/hooks/useHomePageSiteReset.ts": [
+  "src/hooks/useGoogleAuth.ts": [
     "/assets/logo-Bbe7nbNw.png"
   ],
   "src/hooks/usePaidToFreeSubscribe.ts": [
@@ -2613,6 +2664,9 @@
     "/assets/logo-Bbe7nbNw.png"
   ],
   "src/i18n/locales/ar/billing.json": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
+  "src/i18n/locales/ar/blogPosts.json": [
     "/assets/logo-Bbe7nbNw.png"
   ],
   "src/i18n/locales/ar/common.json": [
@@ -2655,6 +2709,9 @@
     "/assets/logo-Bbe7nbNw.png"
   ],
   "src/i18n/locales/en/billing.json": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
+  "src/i18n/locales/en/blogPosts.json": [
     "/assets/logo-Bbe7nbNw.png"
   ],
   "src/i18n/locales/en/common.json": [
@@ -2708,6 +2765,9 @@
   "src/lib/appToast.ts": [
     "/assets/logo-Bbe7nbNw.png"
   ],
+  "src/lib/blogPosts.ts": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
   "src/lib/clearSiteData.ts": [
     "/assets/logo-Bbe7nbNw.png"
   ],
@@ -2729,7 +2789,16 @@
   "src/lib/resumeScreenUpload.ts": [
     "/assets/logo-Bbe7nbNw.png"
   ],
+  "src/lib/siteBootstrapReset.ts": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
+  "src/lib/siteConfig.ts": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
   "src/lib/socket.ts": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
+  "src/lib/trustLinks.ts": [
     "/assets/logo-Bbe7nbNw.png"
   ],
   "src/lib/utils.ts": [
@@ -2742,6 +2811,9 @@
     "/assets/logo-Bbe7nbNw.png"
   ],
   "src/pages/About.tsx": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
+  "src/pages/AbuseReportingPolicy.tsx": [
     "/assets/logo-Bbe7nbNw.png"
   ],
   "src/pages/AcceptInvite.tsx": [
@@ -2757,6 +2829,9 @@
     "/assets/logo-Bbe7nbNw.png"
   ],
   "src/pages/Contact.tsx": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
+  "src/pages/CopyrightPolicy.tsx": [
     "/assets/logo-Bbe7nbNw.png"
   ],
   "src/pages/Dashboard.tsx": [
@@ -2814,6 +2889,9 @@
     "/assets/logo-Bbe7nbNw.png"
   ],
   "src/pages/RecordingDetail.tsx": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
+  "src/pages/RefundPolicy.tsx": [
     "/assets/logo-Bbe7nbNw.png"
   ],
   "src/pages/Register.tsx": [

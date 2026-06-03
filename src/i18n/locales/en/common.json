@@ -73,7 +73,10 @@
     "securityPrivacy": "Security/Privacy",
     "howItWorks": "How it works",
     "privacyPolicy": "Privacy Policy",
-    "termsConditions": "Terms & Conditions"
+    "termsConditions": "Terms & Conditions",
+    "refundPolicy": "Refund Policy",
+    "copyrightPolicy": "Copyright Policy",
+    "abusePolicy": "Abuse Reporting"
   },
   "cookie": {
     "title": "Cookie notice",

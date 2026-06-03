@@ -27,4 +27,7 @@ export const PUBLIC_INDEXABLE_PATHS = [
   "/how-it-works",
   "/privacy-policy",
   "/terms-and-conditions",
+  "/refund-policy",
+  "/copyright-policy",
+  "/abuse-reporting-policy",
 ] as const;

@@ -54,6 +54,21 @@
       "description": "Terms governing use of theRec screen recording platform, subscriptions, refunds, and acceptable use.",
       "keywords": "theRec terms of service, subscription terms"
     },
+    "copyrightPolicy": {
+      "title": "Copyright & Intellectual Property Policy",
+      "description": "Rules for uploading content on theRec, copyright complaints, and repeat infringement enforcement.",
+      "keywords": "theRec copyright policy, DMCA, intellectual property"
+    },
+    "abusePolicy": {
+      "title": "Abuse Reporting & Content Safety Policy",
+      "description": "How to report abuse on theRec and how we investigate malware, fraud, harassment, and security threats.",
+      "keywords": "theRec abuse policy, content safety, report abuse"
+    },
+    "refundPolicy": {
+      "title": "Refund Policy",
+      "description": "Monthly and annual subscription refund eligibility, including the 25% usage threshold for annual plans, cancellation rules, and system-recorded usage review on theRec.",
+      "keywords": "theRec refund policy, subscription cancellation"
+    },
     "contact": {
       "title": "Contact Support & General Inquiries",
       "description": "Reach theRec support team for technical help, billing questions, partnerships, and product feedback. Based in Alexandria, Egypt.",

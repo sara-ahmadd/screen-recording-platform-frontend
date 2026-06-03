@@ -19,6 +19,9 @@ type RouteSeoKey =
   | "blogs"
   | "privacyPolicy"
   | "terms"
+  | "copyrightPolicy"
+  | "abusePolicy"
+  | "refundPolicy"
   | "contact"
   | "dashboard"
   | "howItWorks"
@@ -38,6 +41,9 @@ const PATH_TO_ROUTE: Record<string, RouteSeoKey> = {
   "/blogs": "blogs",
   "/privacy-policy": "privacyPolicy",
   "/terms-and-conditions": "terms",
+  "/copyright-policy": "copyrightPolicy",
+  "/abuse-reporting-policy": "abusePolicy",
+  "/refund-policy": "refundPolicy",
   "/contact": "contact",
   "/dashboard": "dashboard",
   "/how-it-works": "howItWorks",
