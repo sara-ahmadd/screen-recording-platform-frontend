@@ -51,7 +51,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       { href: "/super-admin/workspaces", icon: Shield, label: t("layout:nav.allWorkspaces") },
       { href: "/super-admin/users", icon: Shield, label: t("layout:nav.allUsers") },
       { href: "/super-admin/plans", icon: Shield, label: t("layout:nav.allPlans") },
-      { href: "/super-admin/paymob-plans", icon: Shield, label: t("layout:nav.paymobPlans") },
       { href: "/super-admin/promocodes", icon: Shield, label: t("layout:nav.allPromocodes") },
       { href: "/super-admin/analytics", icon: Shield, label: t("layout:nav.analyticsOverview") },
       { href: "/super-admin/analytics-visuals", icon: Shield, label: t("layout:nav.analyticsVisuals") },

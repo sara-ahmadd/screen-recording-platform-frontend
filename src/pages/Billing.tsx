@@ -32,7 +32,7 @@ export default function BillingPage() {
   const { toast } = useToast();
   const [workspaceDetails, setWorkspaceDetails] = useState<any>(null);
   const [historyLoading, setHistoryLoading] = useState(false);
-  const [actionLoading, setActionLoading] = useState<"cancel" | null>(null);
+  const [actionLoading, setActionLoading] = useState<"cancel" | "portal" | null>(null);
 
   const selectedWorkspace = useMemo(() => {
     if (!selectedWorkspaceId) return null;
@@ -155,12 +155,33 @@ export default function BillingPage() {
   };
 
   const getPriceLabel = (subscription: any) => {
-    const monthly = Number(subscription?.plan?.monthlyPrice || 0);
-    const yearly = Number(subscription?.plan?.yearlyPrice || 0);
+    const monthly = Number(subscription?.plan?.monthlyPriceUSD ?? subscription?.plan?.monthlyPrice ?? 0);
+    const yearly = Number(subscription?.plan?.yearlyPriceUSD ?? subscription?.plan?.yearlyPrice ?? 0);
     const type = (subscription?.type || "").toLowerCase();
-    if (type === "yearly") return `$${yearly}/year`;
-    if (type === "monthly") return `$${monthly}/month`;
-    return monthly > 0 ? `$${monthly}/month` : t("freePrice");
+    if (type === "yearly") {
+      return `${t("priceUsd", { amount: yearly.toLocaleString() })}${t("perYear")}`;
+    }
+    if (type === "monthly") {
+      return `${t("priceUsd", { amount: monthly.toLocaleString() })}${t("perMonth")}`;
+    }
+    return monthly > 0
+      ? `${t("priceUsd", { amount: monthly.toLocaleString() })}${t("perMonth")}`
+      : t("freePrice");
+  };
+
+  const handleOpenBillingPortal = async () => {
+    if (!currentSubscription?.id) return;
+    setActionLoading("portal");
+    try {
+      const res = await subscriptionApi.billingPortal(Number(currentSubscription.id));
+      const url = res?.data?.url ?? res?.url;
+      if (url) window.open(url, "_blank", "noopener,noreferrer");
+      else toast({ title: t("billingPortalUnavailable"), variant: "destructive" });
+    } catch (err: any) {
+      toast({ title: t("billingPortalUnavailable"), description: err?.message, variant: "destructive" });
+    } finally {
+      setActionLoading(null);
+    }
   };
 
   const handleCancelSubscription = async () => {
@@ -265,7 +286,7 @@ export default function BillingPage() {
                             ? currentSubscription.autoRenewal
                               ? t("on")
                               : t("off")
-                            : currentSubscription.stripeSubscriptionId
+                            : currentSubscription.paddleSubscriptionId
                               ? t("on")
                               : t("off")}
                         </p>
@@ -286,14 +307,24 @@ export default function BillingPage() {
                     {isCurrentActive && (
                       <div className="flex flex-wrap gap-3 pt-2">
                         {!isCurrentFree && (
-                          <Button
-                            variant="destructive"
-                            onClick={handleCancelSubscription}
-                            disabled={actionLoading !== null}
-                          >
-                            {actionLoading === "cancel" ? <Loader2 className="h-4 w-4 animate-spin" /> : t("cancelSubscription")}
-                          </Button>
+                          <>
+                            <Button
+                              variant="outline"
+                              onClick={handleOpenBillingPortal}
+                              disabled={actionLoading !== null}
+                            >
+                              {actionLoading === "portal" ? <Loader2 className="h-4 w-4 animate-spin" /> : t("openBillingPortal")}
+                            </Button>
+                            <Button
+                              variant="destructive"
+                              onClick={handleCancelSubscription}
+                              disabled={actionLoading !== null}
+                            >
+                              {actionLoading === "cancel" ? <Loader2 className="h-4 w-4 animate-spin" /> : t("cancelSubscription")}
+                            </Button>
+                          </>
                         )}
+                        <p className="w-full text-xs text-muted-foreground">{t("paddleMorDisclosure")}</p>
                         {!isCurrentFree && (
                           <>
                             {(["monthly", "yearly"] as const).map((cycle) => {

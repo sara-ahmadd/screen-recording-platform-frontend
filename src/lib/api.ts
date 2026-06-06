@@ -264,6 +264,7 @@ export const authApi = {
       method: "DELETE",
       body: JSON.stringify({}),
     }),
+  exportMyData: () => apiFetch("/auth/me/export"),
 };
 
 // Recordings
@@ -570,7 +571,7 @@ export const subscriptionApi = {
       body: JSON.stringify(data),
     }),
   details: (id: number) => apiFetch(`/subscription/details/${id}`),
-  paymobStatus: (id: number) => apiFetch(`/subscription/paymob/status/${id}`),
+  billingPortal: (id: number) => apiFetch(`/subscription/billing-portal/${id}`),
   upgrade: (
     id: number,
     data: {
@@ -603,6 +604,9 @@ export const subscriptionApi = {
 };
 
 export const paymentsApi = {
+  getPaddleConfig: () => apiFetch("/subscription/paddle-config"),
+  getCheckoutReview: (transactionId: string) =>
+    apiFetch(`/subscription/checkout-review/${encodeURIComponent(transactionId)}`),
   createCheckoutSession: (data: {
     planId: string;
     workspaceId: string;
@@ -908,39 +912,6 @@ export const superAdminApi = {
     delete: (id: number) =>
       apiFetch(`/plan/delete/${id}`, {
         method: "DELETE",
-        body: JSON.stringify({}),
-      }),
-  },
-  paymobSubscriptionPlans: {
-    list: () => apiFetch("/super-admin/paymob/subscription-plans"),
-    update: (
-      planId: string | number,
-      data: {
-        amountCents: number;
-        integration: number;
-        numberOfDeductions?: number | null;
-      },
-    ) =>
-      apiFetch(`/super-admin/paymob/subscription-plans/${planId}`, {
-        method: "PATCH",
-        body: JSON.stringify(data),
-      }),
-    suspend: (planId: string | number) =>
-      apiFetch(`/super-admin/paymob/subscription-plans/${planId}/suspend`, {
-        method: "POST",
-        body: JSON.stringify({}),
-      }),
-    resume: (planId: string | number) =>
-      apiFetch(`/super-admin/paymob/subscription-plans/${planId}/resume`, {
-        method: "POST",
-        body: JSON.stringify({}),
-      }),
-  },
-  paymobSubscriptions: {
-    incomplete: () => apiFetch("/subscription/paymob/incomplete"),
-    repair: (mode: "relink" | "mark_invalid" = "relink") =>
-      apiFetch(`/subscription/paymob/repair?mode=${encodeURIComponent(mode)}`, {
-        method: "POST",
         body: JSON.stringify({}),
       }),
   },

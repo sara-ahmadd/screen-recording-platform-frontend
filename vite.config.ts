@@ -14,6 +14,12 @@ export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
     port: 3000,
+    allowedHosts: [
+      "compactible-jowly-mayme.ngrok-free.dev",
+      ".ngrok-free.dev",
+      ".ngrok.io",
+      "therec.site",
+    ],
     proxy: {
       "/__avatar_proxy": {
         target: process.env.VITE_API_BASE_URL || "http://localhost:8000",
@@ -30,6 +36,9 @@ export default defineConfig(({ mode }) => ({
       registerType: "autoUpdate",
       injectRegister: false,
       manifestFilename: "site.webmanifest",
+      workbox: {
+        maximumFileSizeToCacheInBytes: 3 * 1024 * 1024, // 3 MiB (default 2 MiB; main bundle ~2.1 MB)
+      },
       includeAssets: [
         "favicon.ico",
         "favicon-16x16.png",

@@ -52,7 +52,7 @@ import SuperAdminAnalyticsPage from "./pages/admin/SuperAdminAnalytics";
 import SuperAdminFeedbackPage from "./pages/admin/SuperAdminFeedback";
 import SuperAdminAnalyticsVisualsPage from "./pages/admin/SuperAdminAnalyticsVisuals";
 import SuperAdminSubscriptionsPage from "./pages/admin/SuperAdminSubscriptions";
-import SuperAdminPaymobPlansPage from "./pages/admin/SuperAdminPaymobPlans";
+import CookiePolicyPage from "./pages/CookiePolicy";
 import NotFound from "./pages/NotFound";
 import RecordScreenCopy from "./pages/RecordScreenCopy";
 import PaymentSuccessPage from "./pages/PaymentSuccess";
@@ -103,6 +103,7 @@ export const routes: RouteRecord[] = [
       { path: "accept-invite", element: <AcceptInvitePage /> },
       { path: "workspace/accept-invite", element: <AcceptInvitePage /> },
       { path: "privacy-policy", element: <PrivacyPolicyPage /> },
+      { path: "cookie-policy", element: <CookiePolicyPage /> },
       { path: "terms-and-conditions", element: <TermsAndConditionsPage /> },
       { path: "copyright-policy", element: <CopyrightPolicyPage /> },
       { path: "abuse-reporting-policy", element: <AbuseReportingPolicyPage /> },
@@ -167,10 +168,6 @@ export const routes: RouteRecord[] = [
       {
         path: "super-admin/subscriptions",
         element: <ProtectedRoute requireSuperAdmin><SuperAdminSubscriptionsPage /></ProtectedRoute>,
-      },
-      {
-        path: "super-admin/paymob-plans",
-        element: <ProtectedRoute requireSuperAdmin><SuperAdminPaymobPlansPage /></ProtectedRoute>,
       },
       { path: "*", element: <NotFound /> },
     ],

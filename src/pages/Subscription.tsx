@@ -166,8 +166,11 @@ export default function SubscriptionPage() {
             type,
             ...(checkoutSubscriptionId ? { subscriptionId: checkoutSubscriptionId } : {}),
           } as any);
-      const checkoutSessionId =
-        subscriptionRes.checkoutSessionId || subscriptionRes.checkoutUrl;
+      const checkoutSessionId = subscriptionRes.checkoutSessionId;
+      const checkoutUrl = String(subscriptionRes.checkoutUrl ?? "").trim();
+      const redirectUrl = String(
+        subscriptionRes.redirectUrl ?? subscriptionRes.checkoutUrl ?? "",
+      ).trim();
       const result = subscriptionRes?.result ?? {};
       const amountProvider = Number(
         result?.checkoutAmountProvider ?? subscriptionRes?.amount_provider ?? 0,
@@ -176,22 +179,20 @@ export default function SubscriptionPage() {
         result?.checkoutAmountUsd?? 0,
       );
       const currency = String(
-        result?.checkoutCurrency ?? subscriptionRes?.provider_currency ?? "EGP",
+        result?.checkoutCurrency ?? subscriptionRes?.provider_currency ?? "USD",
       ).toUpperCase();
     
-      if (checkoutSessionId) {
+      if (checkoutSessionId || checkoutUrl || redirectUrl) {
         navigate("/checkout/review", {
           state: {
-            checkoutSessionId:checkoutSessionId??
-              subscriptionRes?.checkoutSessionId ??
-              null,
-            redirectUrl: String(subscriptionRes?.redirectUrl || checkoutSessionId),
+            checkoutSessionId: checkoutSessionId ?? null,
+            transactionId: checkoutSessionId ?? null,
+            checkoutUrl: checkoutUrl || null,
+            redirectUrl: redirectUrl || null,
             plan: subscriptionRes?.plan ?? {
               name: String(plan?.name || t("subscriptionPlanFallback")),
               monthlyPriceUSD: Number(plan?.monthlyPriceUSD ?? plan?.monthlyPrice ?? 0),
-              monthlyPriceEGP: Number(plan?.monthlyPriceEGP ?? 0),
               yearlyPriceUSD: Number(plan?.yearlyPriceUSD ?? plan?.yearlyPrice ?? 0),
-              yearlyPriceEGP: Number(plan?.yearlyPriceEGP ?? 0),
               billingCycle: type,
             },
             amountProvider,
@@ -410,8 +411,7 @@ export default function SubscriptionPage() {
                         onClick={() => setType("monthly")}
                       >
                         {t("monthlyCycle", {
-                          egp: plan.monthlyPriceEGP || 0,
-                          usd: plan.monthlyPrice || 0,
+                          usd: Number(plan.monthlyPriceUSD ?? plan.monthlyPrice ?? 0).toLocaleString(),
                         })}
                       </Button>
                       <Button
@@ -421,8 +421,7 @@ export default function SubscriptionPage() {
                         onClick={() => setType("yearly")}
                       >
                         {t("yearlyCycle", {
-                          egp: plan.yearlyPriceEGP || 0,
-                          usd: plan.yearlyPrice || 0,
+                          usd: Number(plan.yearlyPriceUSD ?? plan.yearlyPrice ?? 0).toLocaleString(),
                         })}
                       </Button>
                     </div>

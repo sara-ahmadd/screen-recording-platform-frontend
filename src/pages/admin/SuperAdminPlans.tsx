@@ -24,16 +24,9 @@ import {
 } from "@/components/ui/dialog";
 import { Eye, Loader2, Pencil, Plus, Trash2 } from "lucide-react";
 
-type BillingProviderChoice = "stripe" | "paymob" | "geidea";
+type BillingProviderChoice = "paddle";
 
-const defaultPlanBillingProvider = (): BillingProviderChoice => {
-  const v = String(
-    import.meta.env.VITE_DEFAULT_PLAN_BILLING ?? "geidea",
-  ).toLowerCase();
-  if (v === "stripe") return "stripe";
-  if (v === "geidea") return "geidea";
-  return "paymob";
-};
+const defaultPlanBillingProvider = (): BillingProviderChoice => "paddle";
 
 type PlanForm = {
   name: string;
@@ -42,8 +35,9 @@ type PlanForm = {
   defaultBillingCycle: "" | "monthly" | "yearly";
   monthlyPrice: number;
   yearlyPrice: number;
-  monthlyPriceEGP?: number;
-  yearlyPriceEGP?: number;
+  monthlyPriceId: string;
+  yearlyPriceId: string;
+  paddleProductId: string;
   maxVideosPerMonth: number;
   maxVideoDuration: number;
   maxStorageGB: number;
@@ -61,8 +55,9 @@ const emptyForm = (): PlanForm => ({
   defaultBillingCycle: "",
   monthlyPrice: 0,
   yearlyPrice: 0,
-  monthlyPriceEGP: undefined,
-  yearlyPriceEGP: undefined,
+  monthlyPriceId: "",
+  yearlyPriceId: "",
+  paddleProductId: "",
   maxVideosPerMonth: 0,
   maxVideoDuration: 0,
   maxStorageGB: 0,
@@ -123,15 +118,7 @@ export default function SuperAdminPlansPage() {
 
   const openEditDialog = (plan: any) => {
     setEditingPlanId(Number(plan?.id));
-    const bpRaw = String(plan?.billingProvider ?? "").toLowerCase();
-    const billingProvider: BillingProviderChoice =
-      bpRaw === "stripe"
-        ? "stripe"
-        : bpRaw === "geidea"
-          ? "geidea"
-          : bpRaw === "paymob"
-            ? "paymob"
-            : defaultPlanBillingProvider();
+    const billingProvider: BillingProviderChoice = defaultPlanBillingProvider();
     const dbc = String(plan?.defaultBillingCycle ?? "").toLowerCase();
     const defaultBillingCycle =
       dbc === "monthly" || dbc === "yearly" ? (dbc as "monthly" | "yearly") : "";
@@ -140,10 +127,11 @@ export default function SuperAdminPlansPage() {
       description: String(plan?.description || ""),
       billingProvider,
       defaultBillingCycle,
-      monthlyPrice: Number(plan?.monthlyPrice || 0),
-      yearlyPrice: Number(plan?.yearlyPrice || 0),
-      monthlyPriceEGP: Number(plan?.monthlyPriceEGP || 0),
-      yearlyPriceEGP: Number(plan?.yearlyPriceEGP || 0),
+      monthlyPrice: Number(plan?.monthlyPriceUSD ?? plan?.monthlyPrice ?? 0),
+      yearlyPrice: Number(plan?.yearlyPriceUSD ?? plan?.yearlyPrice ?? 0),
+      monthlyPriceId: String(plan?.monthlyPriceId ?? ""),
+      yearlyPriceId: String(plan?.yearlyPriceId ?? ""),
+      paddleProductId: String(plan?.paddleProductId ?? ""),
       maxVideosPerMonth: Number(plan?.maxVideosPerMonth || 0),
       maxVideoDuration: Number(plan?.maxVideoDuration || 0),
       maxStorageGB: Number(plan?.maxStorageGB || 0),
@@ -171,10 +159,9 @@ export default function SuperAdminPlansPage() {
         defaultBillingCycle: form.defaultBillingCycle,
         monthlyPrice: Number(form.monthlyPrice || 0),
         yearlyPrice: Number(form.yearlyPrice || 0),
-        monthlyPriceEGP:
-          form.monthlyPriceEGP != null ? Number(form.monthlyPriceEGP || 0) : undefined,
-        yearlyPriceEGP:
-          form.yearlyPriceEGP != null ? Number(form.yearlyPriceEGP || 0) : undefined,
+        monthlyPriceId: String(form.monthlyPriceId || "").trim(),
+        yearlyPriceId: String(form.yearlyPriceId || "").trim(),
+        paddleProductId: String(form.paddleProductId || "").trim(),
         maxVideosPerMonth: Number(form.maxVideosPerMonth || 0),
         maxVideoDuration: Number(form.maxVideoDuration || 0),
         maxStorageGB: Number(form.maxStorageGB || 0),
@@ -198,13 +185,12 @@ export default function SuperAdminPlansPage() {
         payload.append("description", normalizedForm.description);
         payload.append("monthlyPrice", String(normalizedForm.monthlyPrice));
         payload.append("yearlyPrice", String(normalizedForm.yearlyPrice));
-        if (normalizedForm.monthlyPriceEGP != null) {
-          payload.append("monthlyPriceEGP", String(normalizedForm.monthlyPriceEGP));
+        payload.append("monthlyPriceId", normalizedForm.monthlyPriceId);
+        payload.append("yearlyPriceId", normalizedForm.yearlyPriceId);
+        if (normalizedForm.paddleProductId) {
+          payload.append("paddleProductId", normalizedForm.paddleProductId);
         }
-        if (normalizedForm.yearlyPriceEGP != null) {
-          payload.append("yearlyPriceEGP", String(normalizedForm.yearlyPriceEGP));
-        }
-        payload.append("billingProvider", normalizedForm.billingProvider);
+        payload.append("billingProvider", "paddle");
         if (normalizedForm.defaultBillingCycle) {
           payload.append("defaultBillingCycle", normalizedForm.defaultBillingCycle);
         }
@@ -228,14 +214,9 @@ export default function SuperAdminPlansPage() {
               defaultBillingCycle: originalEditForm.defaultBillingCycle,
               monthlyPrice: Number(originalEditForm.monthlyPrice || 0),
               yearlyPrice: Number(originalEditForm.yearlyPrice || 0),
-              monthlyPriceEGP:
-                originalEditForm.monthlyPriceEGP != null
-                  ? Number(originalEditForm.monthlyPriceEGP || 0)
-                  : undefined,
-              yearlyPriceEGP:
-                originalEditForm.yearlyPriceEGP != null
-                  ? Number(originalEditForm.yearlyPriceEGP || 0)
-                  : undefined,
+              monthlyPriceId: String(originalEditForm.monthlyPriceId || "").trim(),
+              yearlyPriceId: String(originalEditForm.yearlyPriceId || "").trim(),
+              paddleProductId: String(originalEditForm.paddleProductId || "").trim(),
               maxVideosPerMonth: Number(originalEditForm.maxVideosPerMonth || 0),
               maxVideoDuration: Number(originalEditForm.maxVideoDuration || 0),
               maxStorageGB: Number(originalEditForm.maxStorageGB || 0),
@@ -353,16 +334,14 @@ export default function SuperAdminPlansPage() {
                       {plan.billingProvider || "—"}
                     </TableCell>
                     <TableCell>
-                      EGP {Number(plan.monthlyPriceEGP || 0).toLocaleString()}
-                      <div className="text-xs text-muted-foreground">
-                        {t("plans.approxUsd", { amount: Number(plan.monthlyPriceUSD ?? plan.monthlyPrice ?? 0) })}
-                      </div>
+                      {t("plans.priceUsd", {
+                        amount: Number(plan.monthlyPriceUSD ?? plan.monthlyPrice ?? 0).toLocaleString(),
+                      })}
                     </TableCell>
                     <TableCell>
-                      EGP {Number(plan.yearlyPriceEGP || 0).toLocaleString()}
-                      <div className="text-xs text-muted-foreground">
-                        {t("plans.approxUsd", { amount: Number(plan.yearlyPriceUSD ?? plan.yearlyPrice ?? 0) })}
-                      </div>
+                      {t("plans.priceUsd", {
+                        amount: Number(plan.yearlyPriceUSD ?? plan.yearlyPrice ?? 0).toLocaleString(),
+                      })}
                     </TableCell>
                     <TableCell className="text-xs text-muted-foreground">
                       {t("plans.limitsSummary", {
@@ -420,35 +399,10 @@ export default function SuperAdminPlansPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div className="space-y-2 md:col-span-2">
               <label className="text-sm font-medium">{t("plans.paymentProvider")}</label>
-              <div className="flex flex-wrap gap-2">
-                <Button
-                  type="button"
-                  variant={form.billingProvider === "stripe" ? "default" : "outline"}
-                  className={form.billingProvider === "stripe" ? "gradient-primary" : ""}
-                  onClick={() => setForm((p) => ({ ...p, billingProvider: "stripe" }))}
-                >
-                  Stripe
-                </Button>
-                <Button
-                  type="button"
-                  variant={form.billingProvider === "paymob" ? "default" : "outline"}
-                  className={form.billingProvider === "paymob" ? "gradient-primary" : ""}
-                  onClick={() => setForm((p) => ({ ...p, billingProvider: "paymob" }))}
-                >
-                  Paymob
-                </Button>
-                <Button
-                  type="button"
-                  variant={form.billingProvider === "geidea" ? "default" : "outline"}
-                  className={form.billingProvider === "geidea" ? "gradient-primary" : ""}
-                  onClick={() => setForm((p) => ({ ...p, billingProvider: "geidea" }))}
-                >
-                  Geidea
-                </Button>
-              </div>
-              <p className="text-xs text-muted-foreground">
-                {t("plans.paymentProviderHint")}
+              <p className="rounded-md border border-border/60 bg-muted/30 px-3 py-2 text-sm font-medium">
+                Paddle (USD)
               </p>
+              <p className="text-xs text-muted-foreground">{t("plans.paymentProviderHint")}</p>
             </div>
             <div className="space-y-1 md:col-span-2">
               <label className="text-sm font-medium">{t("plans.billingCycleDefault")}</label>
@@ -513,9 +467,7 @@ export default function SuperAdminPlansPage() {
                   setNum("monthlyPrice", e.target.value);
                 }}
               />
-              {(form.billingProvider === "paymob" || form.billingProvider === "geidea") && (
-                <p className="text-xs text-muted-foreground">{t("plans.egpConversionHint")}</p>
-              )}
+              <p className="text-xs text-muted-foreground">{t("plans.usdPriceHint")}</p>
             </div>
             <div className="space-y-1">
               <label className="text-sm font-medium">{t("plans.yearlyPriceUsd")}</label>
@@ -529,40 +481,31 @@ export default function SuperAdminPlansPage() {
                   setNum("yearlyPrice", e.target.value);
                 }}
               />
-              {(form.billingProvider === "paymob" || form.billingProvider === "geidea") && (
-                <p className="text-xs text-muted-foreground">{t("plans.egpConversionHint")}</p>
-              )}
+              <p className="text-xs text-muted-foreground">{t("plans.usdPriceHint")}</p>
             </div>
-            <div className="space-y-1">
-              <label className="text-sm font-medium">{t("plans.monthlyPriceEgp")}</label>
+            <div className="space-y-1 md:col-span-2">
+              <label className="text-sm font-medium">{t("plans.monthlyPriceId")}</label>
               <Input
-                type="number"
-                value={form.monthlyPriceEGP ?? ""}
-                onChange={(e) =>
-                  setForm((p) => ({
-                    ...p,
-                    monthlyPriceEGP:
-                      e.target.value === ""
-                        ? undefined
-                        : (ensureNumericInput(e.target.value) ?? p.monthlyPriceEGP),
-                  }))
-                }
+                value={form.monthlyPriceId}
+                placeholder="pri_..."
+                onChange={(e) => setForm((p) => ({ ...p, monthlyPriceId: e.target.value }))}
               />
             </div>
-            <div className="space-y-1">
-              <label className="text-sm font-medium">{t("plans.yearlyPriceEgp")}</label>
+            <div className="space-y-1 md:col-span-2">
+              <label className="text-sm font-medium">{t("plans.yearlyPriceId")}</label>
               <Input
-                type="number"
-                value={form.yearlyPriceEGP ?? ""}
-                onChange={(e) =>
-                  setForm((p) => ({
-                    ...p,
-                    yearlyPriceEGP:
-                      e.target.value === ""
-                        ? undefined
-                        : (ensureNumericInput(e.target.value) ?? p.yearlyPriceEGP),
-                  }))
-                }
+                value={form.yearlyPriceId}
+                placeholder="pri_..."
+                onChange={(e) => setForm((p) => ({ ...p, yearlyPriceId: e.target.value }))}
+              />
+              <p className="text-xs text-muted-foreground">{t("plans.paddlePriceIdHint")}</p>
+            </div>
+            <div className="space-y-1 md:col-span-2">
+              <label className="text-sm font-medium">{t("plans.paddleProductId")}</label>
+              <Input
+                value={form.paddleProductId}
+                placeholder="pro_... (optional)"
+                onChange={(e) => setForm((p) => ({ ...p, paddleProductId: e.target.value }))}
               />
             </div>
             <div className="space-y-1">

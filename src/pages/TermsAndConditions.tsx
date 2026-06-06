@@ -67,7 +67,7 @@ export default function TermsAndConditionsPage() {
     { href: "/copyright-policy", label: t("terms.s9Copyright") },
     { href: "/abuse-reporting-policy", label: t("terms.s9Abuse") },
     { href: "/refund-policy", label: t("terms.s9Refund") },
-  ];
+  ] as const;
 
   return (
     <PublicPageLayout title={t("terms.title")} subtitle={t("terms.subtitle")}>
@@ -86,6 +86,10 @@ export default function TermsAndConditionsPage() {
           <p className="leading-relaxed text-lg mt-4 border-s-2 border-violet-500/30 ps-4 py-2 bg-violet-500/[0.03] rounded-r-lg text-foreground">
             {t("terms.introP4")}
           </p>
+          <div className="mt-6 rounded-2xl border border-border/40 bg-background/60 p-5">
+            <h3 className="text-lg font-bold text-foreground mb-2">{t("terms.introLegalTitle")}</h3>
+            <p className="text-base leading-relaxed">{t("terms.introLegalBody")}</p>
+          </div>
         </section>
 
         <section className="glass rounded-3xl border border-border/50 p-8">
@@ -219,6 +223,15 @@ export default function TermsAndConditionsPage() {
               <p className="text-sm text-muted-foreground">{t("terms.s4RenewalsBody")}</p>
             </div>
 
+            <div className="rounded-2xl border border-emerald-500/20 bg-emerald-500/[0.03] p-6 space-y-3">
+              <h3 className="text-lg font-bold text-foreground">{t("terms.s4MorTitle")}</h3>
+              <p className="text-sm text-muted-foreground">{t("terms.s4MorBody")}</p>
+              <p className="text-sm text-muted-foreground">{t("terms.s4Descriptor")}</p>
+              <p className="text-sm text-muted-foreground">{t("terms.s4CancelHow")}</p>
+              <p className="text-sm text-muted-foreground">{t("terms.s4Chargebacks")}</p>
+              <p className="text-sm text-muted-foreground">{t("terms.s4ConsumerEu")}</p>
+            </div>
+
             <p className="font-medium text-foreground italic">{t("terms.s4PaymentNote")}</p>
           </div>
         </section>
@@ -281,6 +294,7 @@ export default function TermsAndConditionsPage() {
               ))}
             </ul>
             <p className="text-sm font-semibold text-foreground">{t("terms.s8Footnote")}</p>
+            <p className="text-sm text-muted-foreground">{t("terms.s8ConsumerEu")}</p>
           </div>
         </section>
 
@@ -298,7 +312,20 @@ export default function TermsAndConditionsPage() {
                 </Link>
               </li>
             ))}
+            <li>
+              <Link to="/cookie-policy" className="text-violet-600 dark:text-violet-400 hover:underline font-medium">
+                {t("terms.s9Cookie")}
+              </Link>
+            </li>
           </ul>
+        </section>
+
+        <section className="glass rounded-3xl border border-border/50 p-8">
+          <div className="flex items-center gap-3 mb-6">
+            <Gavel className="h-5 w-5 text-violet-600 dark:text-violet-400" />
+            <h2 className="text-2xl font-bold text-foreground tracking-tight">{t("terms.s10Title")}</h2>
+          </div>
+          <p className="text-base leading-relaxed">{t("terms.s10Body")}</p>
         </section>
 
         <section className="rounded-3xl border border-violet-500/20 bg-gradient-to-br from-violet-500/[0.06] to-transparent p-8 md:p-10 max-w-3xl mx-auto">

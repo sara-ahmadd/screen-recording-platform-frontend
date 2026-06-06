@@ -18,7 +18,7 @@
     "/assets/logo-Bbe7nbNw.png"
   ],
   "\u0000/Users/saraahmad/Documents/screen-recorder-frontend-lovable/node_modules/react-dom/client.js?commonjs-exports": [
-    "/assets/client-CboOUYk1.js"
+    "/assets/client-Dh-7r6qX.js"
   ],
   "\u0000/Users/saraahmad/Documents/screen-recorder-frontend-lovable/node_modules/react-dom/index.js?commonjs-module": [
     "/assets/logo-Bbe7nbNw.png"
@@ -1703,12 +1703,6 @@
   "node_modules/lucide-react/dist/esm/icons/circle-help.js": [
     "/assets/logo-Bbe7nbNw.png"
   ],
-  "node_modules/lucide-react/dist/esm/icons/circle-pause.js": [
-    "/assets/logo-Bbe7nbNw.png"
-  ],
-  "node_modules/lucide-react/dist/esm/icons/circle-play.js": [
-    "/assets/logo-Bbe7nbNw.png"
-  ],
   "node_modules/lucide-react/dist/esm/icons/circle-user-round.js": [
     "/assets/logo-Bbe7nbNw.png"
   ],
@@ -1719,6 +1713,9 @@
     "/assets/logo-Bbe7nbNw.png"
   ],
   "node_modules/lucide-react/dist/esm/icons/cloud-upload.js": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
+  "node_modules/lucide-react/dist/esm/icons/cookie.js": [
     "/assets/logo-Bbe7nbNw.png"
   ],
   "node_modules/lucide-react/dist/esm/icons/copyright.js": [
@@ -1746,6 +1743,9 @@
     "/assets/logo-Bbe7nbNw.png"
   ],
   "node_modules/lucide-react/dist/esm/icons/eraser.js": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
+  "node_modules/lucide-react/dist/esm/icons/external-link.js": [
     "/assets/logo-Bbe7nbNw.png"
   ],
   "node_modules/lucide-react/dist/esm/icons/eye-off.js": [
@@ -1844,9 +1844,6 @@
   "node_modules/lucide-react/dist/esm/icons/pencil.js": [
     "/assets/logo-Bbe7nbNw.png"
   ],
-  "node_modules/lucide-react/dist/esm/icons/phone.js": [
-    "/assets/logo-Bbe7nbNw.png"
-  ],
   "node_modules/lucide-react/dist/esm/icons/play.js": [
     "/assets/logo-Bbe7nbNw.png"
   ],
@@ -1904,6 +1901,9 @@
   "node_modules/lucide-react/dist/esm/icons/upload.js": [
     "/assets/logo-Bbe7nbNw.png"
   ],
+  "node_modules/lucide-react/dist/esm/icons/user-check.js": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
   "node_modules/lucide-react/dist/esm/icons/user-minus.js": [
     "/assets/logo-Bbe7nbNw.png"
   ],
@@ -1959,7 +1959,7 @@
     "/assets/logo-Bbe7nbNw.png"
   ],
   "node_modules/react-dom/client.js": [
-    "/assets/client-CboOUYk1.js"
+    "/assets/client-Dh-7r6qX.js"
   ],
   "node_modules/react-dom/index.js": [
     "/assets/logo-Bbe7nbNw.png"
@@ -2831,6 +2831,9 @@
   "src/pages/Contact.tsx": [
     "/assets/logo-Bbe7nbNw.png"
   ],
+  "src/pages/CookiePolicy.tsx": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
   "src/pages/CopyrightPolicy.tsx": [
     "/assets/logo-Bbe7nbNw.png"
   ],
@@ -2925,9 +2928,6 @@
     "/assets/logo-Bbe7nbNw.png"
   ],
   "src/pages/admin/SuperAdminFeedback.tsx": [
-    "/assets/logo-Bbe7nbNw.png"
-  ],
-  "src/pages/admin/SuperAdminPaymobPlans.tsx": [
     "/assets/logo-Bbe7nbNw.png"
   ],
   "src/pages/admin/SuperAdminPlans.tsx": [
