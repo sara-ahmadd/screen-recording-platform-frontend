@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Check, Loader2 } from "lucide-react";
 import { SubscriptionBillingDialog, type BillingSubmitPayload } from "@/components/billing/SubscriptionBillingDialog";
 import { trackClientEvent } from "@/lib/analyticsClient";
+import { resolvePaddleTransactionId } from "@/lib/paddle";
 import {
   Dialog,
   DialogContent,
@@ -172,6 +173,13 @@ export default function SubscriptionPage() {
         subscriptionRes.redirectUrl ?? subscriptionRes.checkoutUrl ?? "",
       ).trim();
       const result = subscriptionRes?.result ?? {};
+      const resolvedTransactionId = resolvePaddleTransactionId(
+        checkoutSessionId,
+        subscriptionRes.transactionId,
+        result?.sessionId,
+        checkoutUrl,
+        redirectUrl,
+      );
       const amountProvider = Number(
         result?.checkoutAmountProvider ?? subscriptionRes?.amount_provider ?? 0,
       );
@@ -182,11 +190,13 @@ export default function SubscriptionPage() {
         result?.checkoutCurrency ?? subscriptionRes?.provider_currency ?? "USD",
       ).toUpperCase();
     
-      if (checkoutSessionId || checkoutUrl || redirectUrl) {
+      if (resolvedTransactionId || checkoutUrl || redirectUrl || (result?.requiresCheckout && result?.sessionId)) {
         navigate("/checkout/review", {
           state: {
-            checkoutSessionId: checkoutSessionId ?? null,
-            transactionId: checkoutSessionId ?? null,
+            checkoutSessionId:
+              resolvedTransactionId || checkoutSessionId || result?.sessionId || null,
+            transactionId:
+              resolvedTransactionId || checkoutSessionId || result?.sessionId || null,
             checkoutUrl: checkoutUrl || null,
             redirectUrl: redirectUrl || null,
             plan: subscriptionRes?.plan ?? {

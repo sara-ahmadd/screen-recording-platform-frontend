@@ -12,6 +12,7 @@ import {
   initPaddleJs,
   openPaddleCheckout,
   resolvePaddleConfig,
+  resolvePaddleTransactionId,
 } from "@/lib/paddle";
 
 type ReviewPayload = {
@@ -32,19 +33,7 @@ type ReviewPayload = {
 function resolveTransactionId(
   ...sources: Array<string | number | null | undefined>
 ): string {
-  for (const raw of sources) {
-    const value = String(raw ?? "").trim();
-    if (!value) continue;
-    if (value.startsWith("txn_")) return value;
-    try {
-      const url = new URL(value);
-      const ptxn = url.searchParams.get("_ptxn");
-      if (ptxn?.startsWith("txn_")) return ptxn;
-    } catch {
-      // not a URL
-    }
-  }
-  return "";
+  return resolvePaddleTransactionId(...sources);
 }
 
 export default function CheckoutReviewPage() {
@@ -64,6 +53,8 @@ export default function CheckoutReviewPage() {
   const transactionId = resolveTransactionId(
     resolvedPayload?.transactionId,
     resolvedPayload?.checkoutSessionId,
+    resolvedPayload?.checkoutUrl,
+    resolvedPayload?.redirectUrl,
     queryTransactionId,
   );
 

@@ -604,6 +604,10 @@ export const subscriptionApi = {
 };
 
 export const paymentsApi = {
+  syncCheckout: (transactionId: string) =>
+    apiFetch(`/subscription/sync-checkout/${encodeURIComponent(transactionId)}`, {
+      method: "POST",
+    }),
   getPaddleConfig: () => apiFetch("/subscription/paddle-config"),
   getCheckoutReview: (transactionId: string) =>
     apiFetch(`/subscription/checkout-review/${encodeURIComponent(transactionId)}`),

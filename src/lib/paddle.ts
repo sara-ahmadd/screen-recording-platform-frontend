@@ -96,8 +96,55 @@ export async function initPaddleJs(
 export function openPaddleCheckout(transactionId: string): boolean {
   const txnId = String(transactionId ?? "").trim();
   if (!txnId.startsWith("txn_") || !window.Paddle?.Checkout) return false;
+  rememberPendingPaddleTransaction(txnId);
   window.Paddle.Checkout.open({ transactionId: txnId });
   return true;
+}
+
+export function rememberPendingPaddleTransaction(transactionId: string) {
+  const id = String(transactionId ?? "").trim();
+  if (!id.startsWith("txn_")) return;
+  try {
+    sessionStorage.setItem("paddle_pending_transaction_id", id);
+  } catch {
+    // ignore
+  }
+}
+
+export function readPendingPaddleTransaction(): string {
+  try {
+    const stored = sessionStorage.getItem("paddle_pending_transaction_id");
+    return stored?.startsWith("txn_") ? stored : "";
+  } catch {
+    return "";
+  }
+}
+
+export function clearPendingPaddleTransaction() {
+  try {
+    sessionStorage.removeItem("paddle_pending_transaction_id");
+  } catch {
+    // ignore
+  }
+}
+
+/** Extract Paddle txn_ id from API fields or checkout review URLs (?_ptxn=). */
+export function resolvePaddleTransactionId(
+  ...sources: Array<string | number | null | undefined>
+): string {
+  for (const raw of sources) {
+    const value = String(raw ?? "").trim();
+    if (!value) continue;
+    if (value.startsWith("txn_")) return value;
+    try {
+      const url = new URL(value);
+      const ptxn = url.searchParams.get("_ptxn");
+      if (ptxn?.startsWith("txn_")) return ptxn;
+    } catch {
+      // not a URL
+    }
+  }
+  return "";
 }
 
 /** Paddle checkout URLs point back to our review page — not a payment form. */
