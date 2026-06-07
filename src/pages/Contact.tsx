@@ -75,7 +75,7 @@ export default function ContactPage() {
             </p>
           </div>
 
-          <div className="glass rounded-2xl p-6 border border-border/50 flex items-center gap-4 sm:col-span-1">
+          {/* <div className="glass rounded-2xl p-6 border border-border/50 flex items-center gap-4 sm:col-span-1">
             <div className="h-10 w-10 shrink-0 rounded-xl bg-violet-500/10 flex items-center justify-center">
               <MessageSquareReplyIcon className="h-5 w-5 text-violet-600 dark:text-violet-400" />
             </div>
@@ -90,9 +90,9 @@ export default function ContactPage() {
                 {phone}
               </a>
             </div>
-          </div>
+          </div> */}
 
-          <div className="glass rounded-2xl p-6 border border-border/50 flex items-center gap-4 sm:col-span-2">
+          {/* <div className="glass rounded-2xl p-6 border border-border/50 flex items-center gap-4 sm:col-span-2">
             <div className="h-10 w-10 shrink-0 rounded-xl bg-violet-500/10 flex items-center justify-center">
               <MapPin className="h-5 w-5 text-violet-600 dark:text-violet-400" />
             </div>
@@ -100,7 +100,7 @@ export default function ContactPage() {
               <h4 className="font-bold text-sm text-foreground">{t("marketing:contact.location")}</h4>
               <p className="text-sm text-muted-foreground font-medium">{address}</p>
             </div>
-          </div>
+          </div> */}
         </div>
 
         <section className="glass rounded-2xl border border-border/50 p-6 md:p-8">
