@@ -76,11 +76,12 @@
     "termsConditions": "Terms & Conditions",
     "refundPolicy": "Refund Policy",
     "copyrightPolicy": "Copyright Policy",
-    "abusePolicy": "Abuse Reporting"
+    "abusePolicy": "Abuse Reporting",
+    "cookiePolicy": "Cookie Policy"
   },
   "cookie": {
     "title": "Cookie notice",
-    "message": "We use essential cookies and similar technologies to keep you signed in, remember language preferences, and measure site performance. By continuing, you agree to our policies.",
+    "message": "We use essential cookies for sign-in, security, and preferences, and analytics cookies to improve performance. See our Cookie Policy. By continuing, you agree to our Privacy Policy and Terms.",
     "accept": "Accept"
   },
   "plans": {
@@ -160,7 +161,7 @@
   "perMonthShort": "/mo",
   "perYearShort": "/year",
   "membersUpTo": "Up to {{count}} members",
-  "yearlySave": "({{egp}} EGP ≈ ${{usd}} USD) /year (save {{percent}}%)",
+  "yearlySave": "${{usd}} USD /year (save {{percent}}%)",
   "storage": {
     "zero": "0 B",
     "b": "B",

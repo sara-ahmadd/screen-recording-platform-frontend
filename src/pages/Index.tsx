@@ -594,29 +594,22 @@ export default function Index() {
                   <div className="text-center">
                     <h3 className="font-semibold text-lg capitalize">{plan.name || t("home:pricing.planFallback")}</h3>
                     <div className="mt-4 flex flex-col items-center">
-                    {/* Primary: EGP */}
                     <div className="text-2xl font-bold">
-                      {Number(plan.monthlyPriceEGP).toLocaleString() ?? 0} {t("home:pricing.egp")}{" "}
-                      <span className="text-muted-foreground text-base font-normal">{t("home:pricing.perMonth")}</span>
-                    </div>
-
-                    {/* Secondary: USD */}
-                    <div className="text-sm text-muted-foreground mt-1">
-                    {t("home:pricing.usdApprox", {
-                      amount: Number(plan.monthlyPriceUSD).toLocaleString() ?? plan.monthlyPrice ?? 0,
-                    })}
+                      ${Number(plan.monthlyPriceUSD ?? plan.monthlyPrice ?? 0).toLocaleString()} {t("home:pricing.perMonthUsd")}
                     </div>
                   </div>
                     <p className="text-xs text-muted-foreground mt-1">
                       {t("home:pricing.membersUpTo", { count: Number(plan.maxTeamMembers || 0) })}
                     </p>
-                    {plan.yearlyPrice > 0 && (
+                    {Number(plan.yearlyPriceUSD ?? plan.yearlyPrice ?? 0) > 0 && (
                       <p className="text-xs text-muted-foreground mt-1">
                         {t("common:yearlySave", {
-                          egp: Number(plan.yearlyPriceEGP).toLocaleString(),
-                          usd: plan.yearlyPrice,
+                          usd: Number(plan.yearlyPriceUSD ?? plan.yearlyPrice ?? 0).toLocaleString(),
                           percent: Math.round(
-                            (1 - plan.yearlyPrice / (plan.monthlyPrice * 12)) * 100,
+                            (1 -
+                              Number(plan.yearlyPriceUSD ?? plan.yearlyPrice ?? 0) /
+                                (Number(plan.monthlyPriceUSD ?? plan.monthlyPrice ?? 0) * 12)) *
+                              100,
                           ),
                         })}
                       </p>

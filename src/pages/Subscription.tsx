@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Check, Loader2 } from "lucide-react";
 import { SubscriptionBillingDialog, type BillingSubmitPayload } from "@/components/billing/SubscriptionBillingDialog";
 import { trackClientEvent } from "@/lib/analyticsClient";
+import { resolvePaddleTransactionId } from "@/lib/paddle";
 import {
   Dialog,
   DialogContent,
@@ -166,36 +167,58 @@ export default function SubscriptionPage() {
             type,
             ...(checkoutSubscriptionId ? { subscriptionId: checkoutSubscriptionId } : {}),
           } as any);
-      const checkoutSessionId =
-        subscriptionRes.checkoutSessionId || subscriptionRes.checkoutUrl;
+      const checkoutSessionId = subscriptionRes.checkoutSessionId;
+      const checkoutUrl = String(subscriptionRes.checkoutUrl ?? "").trim();
+      const redirectUrl = String(
+        subscriptionRes.redirectUrl ?? subscriptionRes.checkoutUrl ?? "",
+      ).trim();
       const result = subscriptionRes?.result ?? {};
+      const resolvedTransactionId = resolvePaddleTransactionId(
+        checkoutSessionId,
+        subscriptionRes.transactionId,
+        result?.sessionId,
+        checkoutUrl,
+        redirectUrl,
+      );
       const amountProvider = Number(
         result?.checkoutAmountProvider ?? subscriptionRes?.amount_provider ?? 0,
       );
+      const targetPlan = subscriptionRes?.target_plan ?? subscriptionRes?.plan;
       const amountUsd = Number(
-        result?.checkoutAmountUsd?? 0,
+        result?.checkoutAmountUsd ??
+          subscriptionRes?.amountUsd ??
+          (type === "yearly"
+            ? targetPlan?.yearlyPriceUSD ?? plan?.yearlyPrice ?? 0
+            : targetPlan?.monthlyPriceUSD ?? plan?.monthlyPrice ?? 0),
+      );
+      const renewalAmountUsd = Number(
+        subscriptionRes?.renewalAmountUsd ??
+          (type === "yearly"
+            ? targetPlan?.yearlyPriceUSD ?? plan?.yearlyPrice ?? 0
+            : targetPlan?.monthlyPriceUSD ?? plan?.monthlyPrice ?? 0),
       );
       const currency = String(
-        result?.checkoutCurrency ?? subscriptionRes?.provider_currency ?? "EGP",
+        result?.checkoutCurrency ?? subscriptionRes?.provider_currency ?? "USD",
       ).toUpperCase();
     
-      if (checkoutSessionId) {
+      if (resolvedTransactionId || checkoutUrl || redirectUrl || (result?.requiresCheckout && result?.sessionId)) {
         navigate("/checkout/review", {
           state: {
-            checkoutSessionId:checkoutSessionId??
-              subscriptionRes?.checkoutSessionId ??
-              null,
-            redirectUrl: String(subscriptionRes?.redirectUrl || checkoutSessionId),
-            plan: subscriptionRes?.plan ?? {
+            checkoutSessionId:
+              resolvedTransactionId || checkoutSessionId || result?.sessionId || null,
+            transactionId:
+              resolvedTransactionId || checkoutSessionId || result?.sessionId || null,
+            checkoutUrl: checkoutUrl || null,
+            redirectUrl: redirectUrl || null,
+            plan: targetPlan ?? {
               name: String(plan?.name || t("subscriptionPlanFallback")),
               monthlyPriceUSD: Number(plan?.monthlyPriceUSD ?? plan?.monthlyPrice ?? 0),
-              monthlyPriceEGP: Number(plan?.monthlyPriceEGP ?? 0),
               yearlyPriceUSD: Number(plan?.yearlyPriceUSD ?? plan?.yearlyPrice ?? 0),
-              yearlyPriceEGP: Number(plan?.yearlyPriceEGP ?? 0),
               billingCycle: type,
             },
             amountProvider,
             amountUsd,
+            renewalAmountUsd,
             billingData:
               subscriptionRes?.billingData ??
               (paymentData
@@ -410,8 +433,7 @@ export default function SubscriptionPage() {
                         onClick={() => setType("monthly")}
                       >
                         {t("monthlyCycle", {
-                          egp: plan.monthlyPriceEGP || 0,
-                          usd: plan.monthlyPrice || 0,
+                          usd: Number(plan.monthlyPriceUSD ?? plan.monthlyPrice ?? 0).toLocaleString(),
                         })}
                       </Button>
                       <Button
@@ -421,8 +443,7 @@ export default function SubscriptionPage() {
                         onClick={() => setType("yearly")}
                       >
                         {t("yearlyCycle", {
-                          egp: plan.yearlyPriceEGP || 0,
-                          usd: plan.yearlyPrice || 0,
+                          usd: Number(plan.yearlyPriceUSD ?? plan.yearlyPrice ?? 0).toLocaleString(),
                         })}
                       </Button>
                     </div>

@@ -1,87 +1,237 @@
 import { useTranslation } from "react-i18next";
-import { useEffect, useMemo } from "react";
-import { useLocation } from "react-router-dom";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { Link, useLocation } from "react-router-dom";
 import AppLayout from "@/components/AppLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { CreditCard, Mail, MapPin, Phone, ShieldCheck } from "lucide-react";
+import { CreditCard, ExternalLink, ShieldCheck } from "lucide-react";
+import { paymentsApi } from "@/lib/api";
+import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/hooks/use-toast";
+import {
+  initPaddleJs,
+  openPaddleCheckout,
+  resolvePaddleConfig,
+  resolvePaddleTransactionId,
+} from "@/lib/paddle";
 
 type ReviewPayload = {
   checkoutSessionId?: string | number | null;
+  transactionId?: string | null;
   redirectUrl?: string | null;
+  checkoutUrl?: string | null;
   plan?: {
     name?: string;
     billingCycle?: "monthly" | "yearly" | string;
     monthlyPriceUSD?: number;
     yearlyPriceUSD?: number;
-    monthlyPriceEGP?: number;
-    yearlyPriceEGP?: number;
   };
-  amountProvider?:number,
-  amountUsd?:number,
-  billingData?: {
-    name?: string;
-    email?: string;
-    phone?: string;
-    address?: string;
-  };
+  amountUsd?: number;
+  renewalAmountUsd?: number;
+  customerEmail?: string;
+  paddleCustomerId?: string;
+  paddleAddressId?: string;
 };
+
+function resolveTransactionId(
+  ...sources: Array<string | number | null | undefined>
+): string {
+  return resolvePaddleTransactionId(...sources);
+}
 
 export default function CheckoutReviewPage() {
   const { t } = useTranslation(["billing", "common"]);
+  const { user } = useAuth();
+  const { toast } = useToast();
   const location = useLocation();
-  const payload = (location.state as ReviewPayload) || null;
+  const navigationPayload = (location.state as ReviewPayload) || null;
+  const [resolvedPayload, setResolvedPayload] = useState<ReviewPayload | null>(
+    navigationPayload,
+  );
+  const [loadingReview, setLoadingReview] = useState(false);
+  const [paddleReady, setPaddleReady] = useState(false);
+  const [paddleLoading, setPaddleLoading] = useState(true);
+  const [paddleError, setPaddleError] = useState<string | null>(null);
+  const [lockingCheckout, setLockingCheckout] = useState(false);
 
+  const queryTransactionId = new URLSearchParams(location.search).get("_ptxn");
+  const transactionId = resolveTransactionId(
+    resolvedPayload?.transactionId,
+    resolvedPayload?.checkoutSessionId,
+    resolvedPayload?.checkoutUrl,
+    resolvedPayload?.redirectUrl,
+    queryTransactionId,
+  );
+
+  useEffect(() => {
+    if (!transactionId) {
+      if (navigationPayload) setResolvedPayload(navigationPayload);
+      return;
+    }
+
+    let cancelled = false;
+    setLoadingReview(true);
+    if (navigationPayload) {
+      setResolvedPayload(navigationPayload);
+    }
+
+    paymentsApi
+      .getCheckoutReview(transactionId)
+      .then((res: any) => {
+        if (cancelled) return;
+        const apiPlan = res?.target_plan ?? res?.plan;
+        setResolvedPayload({
+          checkoutSessionId: res?.checkoutSessionId ?? transactionId,
+          transactionId: res?.transactionId ?? transactionId,
+          plan: apiPlan ?? navigationPayload?.plan,
+          amountUsd:
+            res?.amountUsd ??
+            navigationPayload?.amountUsd ??
+            undefined,
+          renewalAmountUsd:
+            res?.renewalAmountUsd ??
+            navigationPayload?.renewalAmountUsd ??
+            res?.amountUsd ??
+            navigationPayload?.amountUsd,
+          customerEmail: res?.customerEmail ?? user?.email ?? null,
+          paddleCustomerId: res?.paddleCustomerId ?? navigationPayload?.paddleCustomerId ?? null,
+          paddleAddressId: res?.paddleAddressId ?? navigationPayload?.paddleAddressId ?? null,
+        });
+      })
+      .catch(() => {
+        if (!cancelled && !navigationPayload) setResolvedPayload(null);
+      })
+      .finally(() => {
+        if (!cancelled) setLoadingReview(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [navigationPayload, transactionId, user?.email]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    (async () => {
+      setPaddleLoading(true);
+      setPaddleError(null);
+
+      const config = await resolvePaddleConfig();
+      if (cancelled) return;
+
+      if (!config) {
+        setPaddleError(t("paddleNotConfigured"));
+        setPaddleLoading(false);
+        return;
+      }
+
+      try {
+        const ready = await initPaddleJs(config);
+        if (cancelled) return;
+        setPaddleReady(ready);
+        if (!ready) setPaddleError(t("paddleInitFailed"));
+      } catch (err: any) {
+        if (cancelled) return;
+        setPaddleError(String(err?.message ?? t("paddleInitFailed")));
+      } finally {
+        if (!cancelled) setPaddleLoading(false);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [t]);
+
+  const payload = resolvedPayload;
   const cycle = String(payload?.plan?.billingCycle || "monthly").toLowerCase();
-  const egp = useMemo(
-    () =>
-      cycle === "yearly"
-        ? Number(payload?.plan?.yearlyPriceEGP || 0)
-        : Number(payload?.plan?.monthlyPriceEGP || 0),
-    [cycle, payload],
-  );
-  const usd = useMemo(
-    () =>
-      cycle === "yearly"
-        ? Number(payload?.plan?.yearlyPriceUSD || 0)
-        : Number(payload?.plan?.monthlyPriceUSD || 0),
-    [cycle, payload],
-  );
+  const amountUsd = useMemo(() => {
+    if (payload?.amountUsd != null) return Number(payload.amountUsd);
+    return cycle === "yearly"
+      ? Number(payload?.plan?.yearlyPriceUSD || 0)
+      : Number(payload?.plan?.monthlyPriceUSD || 0);
+  }, [cycle, payload]);
+
+  const renewalAmountUsd = useMemo(() => {
+    if (payload?.renewalAmountUsd != null) return Number(payload.renewalAmountUsd);
+    return cycle === "yearly"
+      ? Number(payload?.plan?.yearlyPriceUSD || 0)
+      : Number(payload?.plan?.monthlyPriceUSD || 0);
+  }, [cycle, payload]);
+
   const cycleKey = cycle === "yearly" ? "yearly" : "monthly";
   const cycleLabel = t(`cycle.${cycleKey}`);
   const periodLabel = cycle === "yearly" ? t("yearShort") : t("monthShort");
-  const hasRedirect = Boolean(String(payload?.redirectUrl ?? "").trim());
-  useEffect(() => {
-    const script = document.createElement("script");
-    script.src =  "https://www.merchant.geidea.net/hpp/geideaCheckout.min.js";
-    script.async = true;
-    document.body.appendChild(script);
+  const canCheckout = Boolean(transactionId && paddleReady);
 
-       const geidea = new (window as any).GeideaCheckout({
-      merchantPublicKey: import.meta.env.VITE_GEIDEA_PUBLIC_KEY,
-      environment: "sandbox", // switch to production when live
-    });
-  }, []);
-
-  const handlePayment = async () => {
-    if (!(window as any).GeideaCheckout) {
-      console.error("Geidea SDK not loaded");
+  const handlePayment = useCallback(async () => {
+    if (!transactionId) {
+      toast({
+        title: t("paymentLinkMissing"),
+        variant: "destructive",
+      });
       return;
     }
-  
-    const geidea = new (window as any).GeideaCheckout({
-      merchantPublicKey: import.meta.env.VITE_GEIDEA_PUBLIC_KEY,
-      environment: "sandbox", // switch to production when live
-    });
-    const sessionId = payload?.checkoutSessionId;
-   
-    console.log(sessionId)
-    geidea.startPayment(
-     sessionId?.toString()
-    );
-   
-  };
+
+    if (!paddleReady) {
+      toast({
+        title: t("paddleCheckoutUnavailable"),
+        description: paddleError ?? t("paddleLoading"),
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const checkoutEmail = String(
+      user?.email ?? payload?.customerEmail ?? "",
+    ).trim().toLowerCase();
+    if (!checkoutEmail) {
+      toast({
+        title: t("paddleCheckoutUnavailable"),
+        description: t("signInRequired", { defaultValue: "Sign in to continue checkout." }),
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setLockingCheckout(true);
+    try {
+      const locked = await paymentsApi.lockCheckout(transactionId);
+      const opened = openPaddleCheckout(transactionId, {
+        customerId: String(locked?.paddleCustomerId ?? payload?.paddleCustomerId ?? "").trim(),
+        addressId: String(locked?.paddleAddressId ?? payload?.paddleAddressId ?? "").trim(),
+        email: checkoutEmail,
+      });
+      if (!opened) {
+        toast({
+          title: t("paddleCheckoutUnavailable"),
+          description: t("paddleInitFailed"),
+          variant: "destructive",
+        });
+      }
+    } catch (err: any) {
+      toast({
+        title: t("paddleCheckoutUnavailable"),
+        description: String(err?.message ?? t("paddleInitFailed")),
+        variant: "destructive",
+      });
+    } finally {
+      setLockingCheckout(false);
+    }
+  }, [
+    transactionId,
+    paddleReady,
+    paddleError,
+    toast,
+    t,
+    payload?.customerEmail,
+    payload?.paddleCustomerId,
+    payload?.paddleAddressId,
+    user?.email,
+  ]);
+
   return (
     <AppLayout>
       <div className="mx-auto max-w-3xl p-6 md:p-8">
@@ -101,9 +251,7 @@ export default function CheckoutReviewPage() {
           </CardHeader>
           <CardContent className="space-y-5 p-5 md:p-6">
             <div className="rounded-xl border border-border/70 bg-card/40 p-4">
-              <p className="text-sm text-muted-foreground mb-1">
-                {t("aboutToSubscribe")}
-              </p>
+              <p className="text-sm text-muted-foreground mb-1">{t("aboutToSubscribe")}</p>
               <p className="text-xl font-semibold">
                 {t("planWithCycle", {
                   name: payload?.plan?.name || t("subscription"),
@@ -112,58 +260,67 @@ export default function CheckoutReviewPage() {
               </p>
             </div>
 
-            <div className="rounded-xl border border-primary/30 bg-gradient-to-br from-primary/10 via-primary/5 to-card p-5 shadow-sm">
-              <p className="text-xs uppercase tracking-wide text-muted-foreground">
-                {t("totalDueNow")}
-              </p>
-              <p className="mt-2 text-3xl md:text-4xl font-bold">
-                {t("priceEgp", { amount: Number(payload?.amountProvider || 0).toLocaleString() })} /{" "}
-                {periodLabel}
-              </p>
-              <p className="mt-1 text-sm text-muted-foreground">
-                {t("approxUsd", { amount: Number(payload?.amountUsd || 0).toLocaleString() })}
-              </p>
-            </div>
-
-            <div className="rounded-xl border border-border/70 p-4">
-              <p className="font-medium mb-3">{t("billingInformation")}</p>
-              <div className="grid gap-2 text-sm">
-                <p className="flex items-start gap-2">
-                  <Mail className="h-4 w-4 mt-0.5 text-muted-foreground" />
-                  <span>{payload?.billingData?.email || "—"}</span>
+            <div className="rounded-xl border border-primary/30 bg-gradient-to-br from-primary/10 via-primary/5 to-card p-5 shadow-sm space-y-3">
+              <div>
+                <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                  {t("totalDueNow")}
                 </p>
-                <p className="flex items-start gap-2">
-                  <Phone className="h-4 w-4 mt-0.5 text-muted-foreground" />
-                  <span>{payload?.billingData?.phone || "—"}</span>
-                </p>
-                <p className="flex items-start gap-2">
-                  <MapPin className="h-4 w-4 mt-0.5 text-muted-foreground" />
-                  <span>{payload?.billingData?.address || "—"}</span>
-                </p>
-                <p className="flex items-start gap-2">
-                  <ShieldCheck className="h-4 w-4 mt-0.5 text-muted-foreground" />
-                  <span>{payload?.billingData?.name || "—"}</span>
+                <p className="mt-2 text-3xl md:text-4xl font-bold">
+                  {t("priceUsd", { amount: amountUsd.toLocaleString() })} / {periodLabel}
                 </p>
               </div>
+              <div className="text-sm text-muted-foreground space-y-1 border-t border-border/50 pt-3">
+                <p>{t("renewalDisclosure", { amount: renewalAmountUsd.toLocaleString(), cycle: cycleLabel })}</p>
+                <p>{t("cancelAnytimeNote")}</p>
+              </div>
+            </div>
+
+            <div className="rounded-xl border border-border/70 p-4 text-sm space-y-2">
+              <p className="flex items-start gap-2">
+                <ShieldCheck className="h-4 w-4 mt-0.5 text-muted-foreground shrink-0" />
+                <span>{t("paddleMorDisclosure")}</span>
+              </p>
+              <p className="text-muted-foreground">
+                <Link to="/refund-policy" className="underline underline-offset-2 text-foreground">
+                  {t("common:nav.refundPolicy")}
+                </Link>
+                {" · "}
+                <Link to="/terms-and-conditions" className="underline underline-offset-2 text-foreground">
+                  {t("common:nav.termsConditions")}
+                </Link>
+              </p>
             </div>
 
             <Button
               type="button"
               className="w-full h-11 gradient-primary text-base font-semibold"
-              disabled={!hasRedirect&&!payload?.checkoutSessionId}
-              onClick={() => {
-               
-                handlePayment()
-              }}
+              disabled={
+                !transactionId ||
+                loadingReview ||
+                paddleLoading ||
+                lockingCheckout ||
+                !paddleReady
+              }
+              onClick={() => void handlePayment()}
             >
               <CreditCard className="h-4 w-4 me-2" />
-              {t("continueToPayment")}
+              {paddleLoading || lockingCheckout
+                ? t("paddleLoading")
+                : t("continueToPayment")}
             </Button>
-            {!hasRedirect&&!payload?.checkoutSessionId ? (
-              <p className="text-xs text-destructive text-center">
-                {t("paymentLinkMissing")}
-              </p>
+
+            {!transactionId ? (
+              <p className="text-xs text-destructive text-center">{t("paymentLinkMissing")}</p>
             ) : null}
+
+            {paddleError ? (
+              <p className="text-xs text-destructive text-center">{paddleError}</p>
+            ) : null}
+
+            <p className="text-xs text-center text-muted-foreground flex items-center justify-center gap-1">
+              <ExternalLink className="h-3 w-3" />
+              {t("paddleSecureOverlay")}
+            </p>
           </CardContent>
         </Card>
       </div>

@@ -32,7 +32,9 @@ export default function BillingPage() {
   const { toast } = useToast();
   const [workspaceDetails, setWorkspaceDetails] = useState<any>(null);
   const [historyLoading, setHistoryLoading] = useState(false);
-  const [actionLoading, setActionLoading] = useState<"cancel" | null>(null);
+  const [actionLoading, setActionLoading] = useState<
+    "cancel" | "portal" | "reactivate" | null
+  >(null);
 
   const selectedWorkspace = useMemo(() => {
     if (!selectedWorkspaceId) return null;
@@ -79,7 +81,19 @@ export default function BillingPage() {
     );
   }, [currentSubscription, planNameById]);
 
+  const pendingPlanChange = currentSubscription?.pendingPlanChange ?? null;
+  const pendingPlanLabel = useMemo(() => {
+    if (!pendingPlanChange) return "";
+    const name =
+      pendingPlanChange.planName ||
+      planNameById.get(Number(pendingPlanChange.planId)) ||
+      `Plan ${pendingPlanChange.planId}`;
+    const cycle = String(pendingPlanChange.billingCycle || "").toLowerCase();
+    return cycle ? `${name} (${cycle})` : name;
+  }, [pendingPlanChange, planNameById]);
+
   const isCurrentActive = isSubscriptionActiveForDisplay(currentSubscription);
+  const isPendingCancellation = Boolean(currentSubscription?.cancelAtPeriodEnd);
   const currentSubscriptionType = String(currentSubscription?.type || "").toLowerCase();
   const getCyclePrice = (plan: any, cycle: "monthly" | "yearly") =>
     Number(cycle === "yearly" ? plan?.yearlyPrice || 0 : plan?.monthlyPrice || 0);
@@ -155,12 +169,60 @@ export default function BillingPage() {
   };
 
   const getPriceLabel = (subscription: any) => {
-    const monthly = Number(subscription?.plan?.monthlyPrice || 0);
-    const yearly = Number(subscription?.plan?.yearlyPrice || 0);
+    const monthly = Number(subscription?.plan?.monthlyPriceUSD ?? subscription?.plan?.monthlyPrice ?? 0);
+    const yearly = Number(subscription?.plan?.yearlyPriceUSD ?? subscription?.plan?.yearlyPrice ?? 0);
     const type = (subscription?.type || "").toLowerCase();
-    if (type === "yearly") return `$${yearly}/year`;
-    if (type === "monthly") return `$${monthly}/month`;
-    return monthly > 0 ? `$${monthly}/month` : t("freePrice");
+    if (type === "yearly") {
+      return `${t("priceUsd", { amount: yearly.toLocaleString() })}${t("perYear")}`;
+    }
+    if (type === "monthly") {
+      return `${t("priceUsd", { amount: monthly.toLocaleString() })}${t("perMonth")}`;
+    }
+    return monthly > 0
+      ? `${t("priceUsd", { amount: monthly.toLocaleString() })}${t("perMonth")}`
+      : t("freePrice");
+  };
+
+  const syncSubscriptionFromPaddle = useCallback(async () => {
+    if (!currentSubscription?.id) return;
+    try {
+      await subscriptionApi.syncPaddleSubscription(Number(currentSubscription.id));
+      await loadWorkspaceDetails();
+    } catch {
+      // Non-blocking — portal return sync is best-effort.
+    }
+  }, [currentSubscription?.id, loadWorkspaceDetails]);
+
+  useEffect(() => {
+    if (!currentSubscription?.id || !currentSubscription?.cancelAtPeriodEnd) return;
+    void syncSubscriptionFromPaddle();
+  }, [
+    currentSubscription?.id,
+    currentSubscription?.cancelAtPeriodEnd,
+    syncSubscriptionFromPaddle,
+  ]);
+
+  const handleOpenBillingPortal = async () => {
+    if (!currentSubscription?.id) return;
+    setActionLoading("portal");
+    try {
+      const res = await subscriptionApi.billingPortal(Number(currentSubscription.id));
+      const url = res?.data?.url ?? res?.url;
+      if (!url) {
+        toast({ title: t("billingPortalUnavailable"), variant: "destructive" });
+        return;
+      }
+      window.open(url, "_blank", "noopener,noreferrer");
+      const onFocus = () => {
+        window.removeEventListener("focus", onFocus);
+        void syncSubscriptionFromPaddle();
+      };
+      window.addEventListener("focus", onFocus);
+    } catch (err: any) {
+      toast({ title: t("billingPortalUnavailable"), description: err?.message, variant: "destructive" });
+    } finally {
+      setActionLoading(null);
+    }
   };
 
   const handleCancelSubscription = async () => {
@@ -175,6 +237,27 @@ export default function BillingPage() {
       await loadWorkspaceDetails();
     } catch (err: any) {
       toast({ title: t("cancelFailed"), description: err?.message, variant: "destructive" });
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleReactivateSubscription = async () => {
+    if (!currentSubscription?.id) return;
+    setActionLoading("reactivate");
+    try {
+      const res = await subscriptionApi.reactivate(Number(currentSubscription.id));
+      toastApiSuccess(res, {
+        title: t("reactivated"),
+        fallbackDescription: t("reactivatedDesc"),
+      });
+      await loadWorkspaceDetails();
+    } catch (err: any) {
+      toast({
+        title: t("reactivateFailed"),
+        description: err?.message,
+        variant: "destructive",
+      });
     } finally {
       setActionLoading(null);
     }
@@ -225,7 +308,20 @@ export default function BillingPage() {
                     <div className="flex flex-wrap items-center justify-between gap-3">
                       <div>
                         <p className="text-sm text-muted-foreground">{t("currentPlan")}</p>
-                        <p className="text-xl font-semibold capitalize">{currentSubscription.plan?.name || "Free"}</p>
+                        <p className="text-xl font-semibold capitalize">
+                          {currentPlanName || currentSubscription.plan?.name || "Free"}
+                          {currentSubscription.type && currentSubscription.type !== "null"
+                            ? ` (${String(currentSubscription.type).toLowerCase()})`
+                            : ""}
+                        </p>
+                        {pendingPlanChange ? (
+                          <p className="mt-2 text-sm text-muted-foreground">
+                            {t("scheduledPlanChange", {
+                              plan: pendingPlanLabel,
+                              date: formatDate(pendingPlanChange.effectiveAt),
+                            })}
+                          </p>
+                        ) : null}
                       </div>
                       <Badge
                         variant={isSubscriptionActiveForDisplay(currentSubscription) ? "default" : "secondary"}
@@ -265,7 +361,7 @@ export default function BillingPage() {
                             ? currentSubscription.autoRenewal
                               ? t("on")
                               : t("off")
-                            : currentSubscription.stripeSubscriptionId
+                            : currentSubscription.paddleSubscriptionId
                               ? t("on")
                               : t("off")}
                         </p>
@@ -286,14 +382,42 @@ export default function BillingPage() {
                     {isCurrentActive && (
                       <div className="flex flex-wrap gap-3 pt-2">
                         {!isCurrentFree && (
-                          <Button
-                            variant="destructive"
-                            onClick={handleCancelSubscription}
-                            disabled={actionLoading !== null}
-                          >
-                            {actionLoading === "cancel" ? <Loader2 className="h-4 w-4 animate-spin" /> : t("cancelSubscription")}
-                          </Button>
+                          <>
+                            <Button
+                              variant="outline"
+                              onClick={handleOpenBillingPortal}
+                              disabled={actionLoading !== null}
+                            >
+                              {actionLoading === "portal" ? <Loader2 className="h-4 w-4 animate-spin" /> : t("openBillingPortal")}
+                            </Button>
+                            {isPendingCancellation ? (
+                              <Button
+                                className="gradient-primary"
+                                onClick={handleReactivateSubscription}
+                                disabled={actionLoading !== null}
+                              >
+                                {actionLoading === "reactivate" ? (
+                                  <Loader2 className="h-4 w-4 animate-spin" />
+                                ) : (
+                                  t("reactivateSubscription")
+                                )}
+                              </Button>
+                            ) : (
+                              <Button
+                                variant="destructive"
+                                onClick={handleCancelSubscription}
+                                disabled={actionLoading !== null}
+                              >
+                                {actionLoading === "cancel" ? (
+                                  <Loader2 className="h-4 w-4 animate-spin" />
+                                ) : (
+                                  t("cancelSubscription")
+                                )}
+                              </Button>
+                            )}
+                          </>
                         )}
+                        <p className="w-full text-xs text-muted-foreground">{t("paddleMorDisclosure")}</p>
                         {!isCurrentFree && (
                           <>
                             {(["monthly", "yearly"] as const).map((cycle) => {

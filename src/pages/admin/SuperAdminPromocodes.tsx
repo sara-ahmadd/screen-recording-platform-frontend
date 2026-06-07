@@ -87,22 +87,53 @@ export default function SuperAdminPromocodesPage() {
           onRefresh={load}
           onCreate={async (payload) => {
             try {
+              const code = String(payload.code ?? "").trim();
+              const expirationDate = String(payload.expirationDate ?? "").trim();
+              if (!code) {
+                toast({
+                  title: t("failed"),
+                  description: t("promocodeCodeRequired"),
+                  variant: "destructive",
+                });
+                throw new Error(t("promocodeCodeRequired"));
+              }
+              if (!expirationDate) {
+                toast({
+                  title: t("failed"),
+                  description: t("promocodeExpirationRequired"),
+                  variant: "destructive",
+                });
+                throw new Error(t("promocodeExpirationRequired"));
+              }
               const createPayload = {
                 type: payload.type,
-                ...(payload.status != null && payload.status !== "" ? { status: payload.status } : {}),
+                ...(payload.status != null && payload.status !== ""
+                  ? { status: payload.status }
+                  : {}),
                 duration: Number(payload.duration || 0),
                 amount: Number(payload.amount || 0),
-                code: payload.code,
-                expirationDate: payload.expirationDate,
+                code,
+                expirationDate,
                 usageLimit: Number(payload.usageLimit || 0),
                 usagePerUserLimit: Number(payload.usagePerUserLimit || 0),
-                ...(payload.planId != null && payload.planId !== "" ? { planId: Number(payload.planId) } : {}),
+                ...(payload.planId != null && payload.planId !== ""
+                  ? { planId: Number(payload.planId) }
+                  : {}),
               };
               await superAdminApi.promocodes.create(createPayload);
               toast({ title: t("success"), description: t("promocodeCreated") });
               await load();
             } catch (err: any) {
-              toast({ title: t("failed"), description: err?.message || t("promocodeCreateFailed"), variant: "destructive" });
+              if (
+                err?.message !== t("promocodeCodeRequired") &&
+                err?.message !== t("promocodeExpirationRequired")
+              ) {
+                toast({
+                  title: t("failed"),
+                  description: err?.message || t("promocodeCreateFailed"),
+                  variant: "destructive",
+                });
+              }
               throw err;
             }
           }}
@@ -165,7 +196,7 @@ export default function SuperAdminPromocodesPage() {
               await load();
             } catch (err: any) {
               toast({ title: t("failed"), description: err?.message || t("promocodeUpdateFailed"), variant: "destructive" });
-              throw err;
+              throw new Error(err?.message || t("promocodeUpdateFailed"));
             }
           }}
           onDelete={async (id) => { await superAdminApi.promocodes.delete(id); await load(); }}

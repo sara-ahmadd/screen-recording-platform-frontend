@@ -90,13 +90,6 @@ export default function PlansPage() {
         ? plan?.yearlyPriceUSD ?? plan?.yearlyPrice ?? 0
         : plan?.monthlyPriceUSD ?? plan?.monthlyPrice ?? 0,
     );
-  const getCyclePriceEgp = (plan: any, cycle: "monthly" | "yearly") =>
-    Number(
-      cycle === "yearly"
-        ? plan?.yearlyPriceEGP ?? 0
-        : plan?.monthlyPriceEGP ?? 0,
-    );
-
   const currentCyclePrice =
     currentWorkspaceSubscription && (currentSubscriptionType === "monthly" || currentSubscriptionType === "yearly")
       ? getCyclePriceUsd(currentWorkspaceSubscription?.plan, currentSubscriptionType as "monthly" | "yearly")
@@ -130,7 +123,7 @@ export default function PlansPage() {
     }
     return t("planActionWithPrice", {
       action: actionLabel,
-      egp: getCyclePriceEgp(plan, cycle).toLocaleString(),
+      usd: getCyclePriceUsd(plan, cycle).toLocaleString(),
       period: cycle === "yearly" ? t("yearShort") : t("monthShort"),
     });
   };
@@ -179,12 +172,9 @@ export default function PlansPage() {
                     <CardTitle className="text-lg capitalize">{plan.name}</CardTitle>
                     <div className="mt-4">
                       <span className="text-3xl font-bold">
-                        {t("priceEgp", { amount: getCyclePriceEgp(plan, "monthly").toLocaleString() })}
+                        {t("priceUsd", { amount: getCyclePriceUsd(plan, "monthly").toLocaleString() })}
                       </span>
                       <span className="text-muted-foreground">{t("perMonth")}</span>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        {t("approxUsd", { amount: getCyclePriceUsd(plan, "monthly").toLocaleString() })}
-                      </p>
                     </div>
                     <p className="text-xs text-muted-foreground">
                       {t("membersUpTo", { count: Number(plan.maxTeamMembers || 0) })}
@@ -192,7 +182,6 @@ export default function PlansPage() {
                     {plan.yearlyPrice > 0 && (
                       <p className="text-xs text-muted-foreground">
                         {t("yearlyPriceLine", {
-                          egp: getCyclePriceEgp(plan, "yearly").toLocaleString(),
                           perYear: t("perYear"),
                           usd: getCyclePriceUsd(plan, "yearly").toLocaleString(),
                         })}

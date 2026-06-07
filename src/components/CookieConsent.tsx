@@ -42,6 +42,10 @@ export default function CookieConsent() {
             {t("nav.privacyPolicy")}
           </Link>
           {" · "}
+          <Link to="/cookie-policy" className="underline underline-offset-2 text-foreground hover:text-primary">
+            {t("nav.cookiePolicy")}
+          </Link>
+          {" · "}
           <Link to="/terms-and-conditions" className="underline underline-offset-2 text-foreground hover:text-primary">
             {t("nav.termsConditions")}
           </Link>

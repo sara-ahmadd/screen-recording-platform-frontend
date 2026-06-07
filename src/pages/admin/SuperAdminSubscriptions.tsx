@@ -84,6 +84,7 @@ export default function SuperAdminSubscriptionsPage() {
     nextPlanName?: string | null;
     simulationAllowed?: boolean;
   } | null>(null);
+  const [refundingId, setRefundingId] = useState<number | null>(null);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -237,32 +238,37 @@ export default function SuperAdminSubscriptionsPage() {
     }
   };
 
-  const runRefund = async () => {
-    if (!detailRow?.id) return;
+  const runRefund = async (subscriptionId: number) => {
+    if (!subscriptionId) return;
     const amountRaw = window.prompt(t("subscriptions.refundAmountPrompt"), "");
+    if (amountRaw === null) return;
     const reasonRaw = window.prompt(t("subscriptions.refundReasonPrompt"), "admin_refund");
+    if (reasonRaw === null) return;
     const amount =
-      amountRaw != null && amountRaw.trim() !== ""
-        ? Number(amountRaw)
-        : undefined;
+      amountRaw.trim() !== "" ? Number(amountRaw) : undefined;
+    setRefundingId(subscriptionId);
     try {
-      const res = await superAdminApi.subscriptions.refund(Number(detailRow.id), {
+      const res = await superAdminApi.subscriptions.refund(subscriptionId, {
         ...(amount != null && Number.isFinite(amount) && amount > 0
           ? { amount }
           : {}),
-        ...(reasonRaw && reasonRaw.trim() ? { reason: reasonRaw.trim() } : {}),
+        ...(reasonRaw.trim() ? { reason: reasonRaw.trim() } : {}),
       });
       toast({
         title: t("refundSubmitted"),
         description: res?.message || t("common:actions.ok"),
       });
-      await refreshDetail();
+      if (detailRow?.id === subscriptionId) {
+        await refreshDetail();
+      }
     } catch (err: any) {
       toast({
         title: t("refundFailed"),
         description: err?.message || t("common:errors.tryAgain"),
         variant: "destructive",
       });
+    } finally {
+      setRefundingId(null);
     }
   };
 
@@ -397,7 +403,7 @@ export default function SuperAdminSubscriptionsPage() {
                         <TableHead>{t("table.type")}</TableHead>
                         <TableHead>{t("table.startDate")}</TableHead>
                         <TableHead>{t("table.endDate")}</TableHead>
-                        <TableHead className="w-[100px]">{t("table.details")}</TableHead>
+                        <TableHead className="w-[200px]">{t("table.actions")}</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -420,14 +426,29 @@ export default function SuperAdminSubscriptionsPage() {
                             <TableCell>{formatDate(row.currentPeriodStart)}</TableCell>
                             <TableCell>{formatDate(row.currentPeriodEnd)}</TableCell>
                             <TableCell>
-                              <Button
-                                type="button"
-                                size="sm"
-                                variant="outline"
-                                onClick={() => void openDetail(row)}
-                              >
-                                {t("open")}
-                              </Button>
+                              <div className="flex flex-wrap gap-2">
+                                <Button
+                                  type="button"
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => void openDetail(row)}
+                                >
+                                  {t("open")}
+                                </Button>
+                                <Button
+                                  type="button"
+                                  size="sm"
+                                  variant="destructive"
+                                  disabled={refundingId === Number(row.id)}
+                                  onClick={() => void runRefund(Number(row.id))}
+                                >
+                                  {refundingId === Number(row.id) ? (
+                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                  ) : (
+                                    t("subscriptions.refundPayment")
+                                  )}
+                                </Button>
+                              </div>
                             </TableCell>
                           </TableRow>
                         ))
@@ -519,13 +540,34 @@ export default function SuperAdminSubscriptionsPage() {
 
                 {Boolean(detailPayload?.subscription?.changeAtPeriodEnd) &&
                 detailPayload?.nextPlanName ? (
-                  <div className="rounded-lg border border-amber-500/40 bg-amber-500/10 p-3 text-amber-200">
-                    {t("subscriptions.scheduledDowngrade", {
-                      plan: detailPayload.nextPlanName,
-                      date: formatDateTime(detailPayload?.subscription?.currentPeriodEnd),
-                    })}
+                  <div className="rounded-lg border border-amber-500/50 bg-amber-500/15 p-3 text-amber-800 dark:text-amber-300">
+                    <p className="font-medium text-orange-700 dark:text-orange-300">
+                      {t("subscriptions.scheduledDowngrade", {
+                        plan: detailPayload.nextPlanName,
+                        date: formatDateTime(detailPayload?.subscription?.currentPeriodEnd),
+                      })}
+                    </p>
                   </div>
                 ) : null}
+
+                <div className="rounded-lg border border-border/80 p-3 space-y-2">
+                  <p className="font-medium">{t("subscriptions.billingActions")}</p>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    onClick={() =>
+                      detailRow?.id != null && void runRefund(Number(detailRow.id))
+                    }
+                    disabled={detailLoading || refundingId === Number(detailRow?.id)}
+                  >
+                    {refundingId === Number(detailRow?.id) ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      t("subscriptions.refundPayment")
+                    )}
+                  </Button>
+                </div>
 
                 <div className="rounded-lg border border-border/80 p-3 space-y-2">
                   <p className="font-medium flex items-center gap-2">
@@ -556,15 +598,6 @@ export default function SuperAdminSubscriptionsPage() {
                         disabled={detailLoading}
                       >
                         {t("subscriptions.simulateFailure")}
-                      </Button>
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="outline"
-                        onClick={() => void runRefund()}
-                        disabled={detailLoading}
-                      >
-                        {t("subscriptions.refundPayment")}
                       </Button>
                     </div>
                   )}

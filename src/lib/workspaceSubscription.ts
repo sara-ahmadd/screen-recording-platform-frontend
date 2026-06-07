@@ -32,15 +32,22 @@ export function buildPlanNameByIdFromWorkspaces(
   return map;
 }
 
+const TERMINATED_SUBSCRIPTION_STATUSES = new Set([
+  "expired",
+  "canceled",
+  "cancelled",
+  "failed",
+]);
+
 /**
- * Subscription rows that should be shown as the workspace's current plan (Stripe-aligned).
- * Cancelled / ended rows are excluded so a stale workspace.subscriptionId does not win.
+ * Subscription rows that should be shown as the workspace's current plan.
  */
 export function isSubscriptionActiveForDisplay(sub: any | null): boolean {
   if (!sub) return false;
   const raw = sub.status;
   const s = raw == null || raw === "" ? "" : String(raw).toLowerCase();
-  if (s === "active") return true;
+  if (TERMINATED_SUBSCRIPTION_STATUSES.has(s)) return false;
+  if (s === "active" || s === "pending") return true;
 
   // Backends sometimes omit status on free-tier rows; still treat as current.
   if (!s && isFreePlan(sub.plan)) return true;
@@ -113,7 +120,21 @@ export function getCurrentWorkspaceSubscription(
   let activeSubscriptions = subscriptions.filter(
     isSubscriptionActiveForDisplay,
   );
-  // If nothing "billable-active" yet, still show the row pointed to by workspace.subscriptionId (e.g. pending).
+
+  // Prefer in-progress Paddle checkout over stale workspace pointer (e.g. expired yearly).
+  const pendingCheckout = [...subscriptions]
+    .filter((s) => {
+      const status = String(s?.status ?? "").toLowerCase();
+      return status === "pending" && Boolean(s?.paddleTransactionId || s?.sessionId);
+    })
+    .sort(newestFirst);
+  if (pendingCheckout.length > 0) {
+    activeSubscriptions = [pendingCheckout[0], ...activeSubscriptions.filter(
+      (s) => Number(s?.id) !== Number(pendingCheckout[0]?.id),
+    )];
+  }
+
+  // If nothing billable yet, pin workspace.subscriptionId only when not terminated.
   if (
     activeSubscriptions.length === 0 &&
     workspace.subscriptionId &&
@@ -122,7 +143,9 @@ export function getCurrentWorkspaceSubscription(
     const pinned = subscriptions.find(
       (s) => Number(s?.id) === Number(workspace.subscriptionId),
     );
-    if (pinned) activeSubscriptions = [pinned];
+    if (pinned && isSubscriptionActiveForDisplay(pinned)) {
+      activeSubscriptions = [pinned];
+    }
   }
   if (activeSubscriptions.length === 0) return null;
 
