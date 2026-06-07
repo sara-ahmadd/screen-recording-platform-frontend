@@ -86,10 +86,10 @@ export default function TermsAndConditionsPage() {
           <p className="leading-relaxed text-lg mt-4 border-s-2 border-violet-500/30 ps-4 py-2 bg-violet-500/[0.03] rounded-r-lg text-foreground">
             {t("terms.introP4")}
           </p>
-          <div className="mt-6 rounded-2xl border border-border/40 bg-background/60 p-5">
+          {/* <div className="mt-6 rounded-2xl border border-border/40 bg-background/60 p-5">
             <h3 className="text-lg font-bold text-foreground mb-2">{t("terms.introLegalTitle")}</h3>
             <p className="text-base leading-relaxed">{t("terms.introLegalBody")}</p>
-          </div>
+          </div> */}
         </section>
 
         <section className="glass rounded-3xl border border-border/50 p-8">
