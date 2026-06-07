@@ -86,7 +86,7 @@
   },
   "plans": {
     "videosPerMonth": "{{count}} فيديو/شهر",
-    "minMaxDuration": "{{min}}–{{max}} دقيقة كحد أقصى",
+    "minMaxDuration": "{{max}} دقيقة - الحد الأقصى للمدة",
     "storageGb": "{{gb}} جيجابايت تخزين",
     "teamMembers": "{{count}} أعضاء فريق",
     "videoDownloads": "تنزيل الفيديو",

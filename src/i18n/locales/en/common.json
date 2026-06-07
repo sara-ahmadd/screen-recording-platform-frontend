@@ -86,7 +86,7 @@
   },
   "plans": {
     "videosPerMonth": "{{count}} videos/month",
-    "minMaxDuration": "{{min}}–{{max}} min max duration",
+    "minMaxDuration": "{{max}} mins - max duration",
     "storageGb": "{{gb}} GB storage",
     "teamMembers": "{{count}} team members",
     "videoDownloads": "Video downloads",
