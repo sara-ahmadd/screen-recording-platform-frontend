@@ -9,7 +9,7 @@ import {
   Pie,
   PieChart,
   ResponsiveContainer,
-  Tooltip,
+  Tooltip as ChartTooltip,
   XAxis,
   YAxis,
 } from "recharts";
@@ -35,6 +35,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import SuperAdminRefundDialog, {
+  isKnownNonRefundable,
+  isPaddleRefundable,
+  mapRefundErrorMessage,
+  type RefundSubscriptionTarget,
+} from "@/components/admin/SuperAdminRefundDialog";
 
 type StatusFilter = "all" | "active" | "canceled" | "past_due" | "pending";
 type TypeFilter = "all" | "monthly" | "yearly" | "none";
@@ -85,6 +92,9 @@ export default function SuperAdminSubscriptionsPage() {
     simulationAllowed?: boolean;
   } | null>(null);
   const [refundingId, setRefundingId] = useState<number | null>(null);
+  const [refundModalOpen, setRefundModalOpen] = useState(false);
+  const [refundTarget, setRefundTarget] = useState<RefundSubscriptionTarget | null>(null);
+  const [refundTargetLoading, setRefundTargetLoading] = useState(false);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -238,38 +248,139 @@ export default function SuperAdminSubscriptionsPage() {
     }
   };
 
-  const runRefund = async (subscriptionId: number) => {
+  const buildRefundTarget = (
+    subscription: any,
+    fallbackRow?: any,
+  ): RefundSubscriptionTarget => ({
+    id: Number(subscription?.id ?? fallbackRow?.id),
+    provider: subscription?.provider ?? fallbackRow?.provider,
+    paddleTransactionId:
+      subscription?.paddleTransactionId ?? fallbackRow?.paddleTransactionId,
+    usdAmount: subscription?.usdAmount ?? fallbackRow?.usdAmount,
+    user: subscription?.user ?? fallbackRow?.user,
+    workspace: subscription?.workspace ?? fallbackRow?.workspace,
+  });
+
+  const openRefundModal = async (subscriptionId: number, fallbackRow?: any) => {
     if (!subscriptionId) return;
-    const amountRaw = window.prompt(t("subscriptions.refundAmountPrompt"), "");
-    if (amountRaw === null) return;
-    const reasonRaw = window.prompt(t("subscriptions.refundReasonPrompt"), "admin_refund");
-    if (reasonRaw === null) return;
-    const amount =
-      amountRaw.trim() !== "" ? Number(amountRaw) : undefined;
+    setRefundModalOpen(true);
+    setRefundTargetLoading(true);
+    setRefundTarget(buildRefundTarget(fallbackRow || { id: subscriptionId }, fallbackRow));
+    try {
+      const res = await superAdminApi.subscriptions.adminDetails(subscriptionId);
+      const target = buildRefundTarget(res?.subscription, fallbackRow);
+      if (!isPaddleRefundable(target)) {
+        toast({
+          title: t("refundFailed"),
+          description: t("subscriptions.refundModal.notRefundable"),
+          variant: "destructive",
+        });
+        setRefundModalOpen(false);
+        setRefundTarget(null);
+        return;
+      }
+      setRefundTarget(target);
+    } catch (err: any) {
+      toast({
+        title: t("couldNotLoadSubscription"),
+        description: err?.message || t("common:errors.tryAgain"),
+        variant: "destructive",
+      });
+      setRefundModalOpen(false);
+      setRefundTarget(null);
+    } finally {
+      setRefundTargetLoading(false);
+    }
+  };
+
+  const submitRefund = async (body: { amount?: number; reason?: string }) => {
+    const subscriptionId = refundTarget?.id;
+    if (!subscriptionId || refundingId != null) return;
+    if (!isPaddleRefundable(refundTarget)) {
+      toast({
+        title: t("refundFailed"),
+        description: t("subscriptions.refundModal.notRefundable"),
+        variant: "destructive",
+      });
+      return;
+    }
+
     setRefundingId(subscriptionId);
     try {
-      const res = await superAdminApi.subscriptions.refund(subscriptionId, {
-        ...(amount != null && Number.isFinite(amount) && amount > 0
-          ? { amount }
-          : {}),
-        ...(reasonRaw.trim() ? { reason: reasonRaw.trim() } : {}),
-      });
+      const res = await superAdminApi.subscriptions.refund(subscriptionId, body);
+      const refund = res?.refund;
+      let description = res?.message || t("common:actions.ok");
+      if (refund?.status === "pending_approval") {
+        description = t("subscriptions.refundPendingApproval");
+      } else if (refund?.status === "approved") {
+        description = t("subscriptions.refundApproved");
+      }
+      if (refund?.providerRefundId) {
+        description = `${description} (${refund.providerRefundId})`;
+      }
       toast({
         title: t("refundSubmitted"),
-        description: res?.message || t("common:actions.ok"),
+        description,
       });
+      setRefundModalOpen(false);
+      setRefundTarget(null);
       if (detailRow?.id === subscriptionId) {
         await refreshDetail();
       }
     } catch (err: any) {
       toast({
         title: t("refundFailed"),
-        description: err?.message || t("common:errors.tryAgain"),
+        description: mapRefundErrorMessage(err?.message, t),
         variant: "destructive",
       });
     } finally {
       setRefundingId(null);
     }
+  };
+
+  const renderRefundButton = (
+    subscription: RefundSubscriptionTarget | null | undefined,
+    subscriptionId: number,
+    fallbackRow?: any,
+    size: "sm" = "sm",
+  ) => {
+    const knownIneligible = isKnownNonRefundable(subscription);
+    const loading =
+      refundTargetLoading && refundTarget?.id === subscriptionId && refundModalOpen;
+    const submitting = refundingId === subscriptionId;
+
+    const button = (
+      <Button
+        type="button"
+        size={size}
+        variant="destructive"
+        disabled={knownIneligible || loading || submitting}
+        onClick={() => void openRefundModal(subscriptionId, fallbackRow)}
+      >
+        {loading || submitting ? (
+          <Loader2 className="h-4 w-4 animate-spin" />
+        ) : (
+          t("subscriptions.refundPayment")
+        )}
+      </Button>
+    );
+
+    if (!knownIneligible) return button;
+
+    const provider = String(subscription?.provider || "").toLowerCase();
+    const tooltipKey =
+      provider && provider !== "paddle"
+        ? "subscriptions.refundModal.paddleOnlyTooltip"
+        : "subscriptions.refundModal.noPaddleTransactionTooltip";
+
+    return (
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <span className="inline-flex">{button}</span>
+        </TooltipTrigger>
+        <TooltipContent>{t(tooltipKey)}</TooltipContent>
+      </Tooltip>
+    );
   };
 
   const dateChartData = useMemo(
@@ -357,7 +468,7 @@ export default function SuperAdminSubscriptionsPage() {
                       />
                     ))}
                   </Pie>
-                  <Tooltip />
+                  <ChartTooltip />
                   <Legend />
                 </PieChart>
               </ResponsiveContainer>
@@ -374,7 +485,7 @@ export default function SuperAdminSubscriptionsPage() {
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="date" />
                   <YAxis />
-                  <Tooltip />
+                  <ChartTooltip />
                   <Legend />
                   <Bar dataKey="count" fill="#3b82f6" />
                 </BarChart>
@@ -435,19 +546,7 @@ export default function SuperAdminSubscriptionsPage() {
                                 >
                                   {t("open")}
                                 </Button>
-                                <Button
-                                  type="button"
-                                  size="sm"
-                                  variant="destructive"
-                                  disabled={refundingId === Number(row.id)}
-                                  onClick={() => void runRefund(Number(row.id))}
-                                >
-                                  {refundingId === Number(row.id) ? (
-                                    <Loader2 className="h-4 w-4 animate-spin" />
-                                  ) : (
-                                    t("subscriptions.refundPayment")
-                                  )}
-                                </Button>
+                                {renderRefundButton(row, Number(row.id), row)}
                               </div>
                             </TableCell>
                           </TableRow>
@@ -550,23 +649,31 @@ export default function SuperAdminSubscriptionsPage() {
                   </div>
                 ) : null}
 
+                <div className="rounded-lg border border-border/80 p-3 space-y-1.5">
+                  <p className="font-medium">{t("subscriptions.paymentDetails")}</p>
+                  <p>
+                    <span className="text-muted-foreground">{t("subscriptions.paymentProvider")} </span>
+                    {detailPayload?.subscription?.provider || "—"}
+                  </p>
+                  <p>
+                    <span className="text-muted-foreground">{t("subscriptions.paddleTransactionId")} </span>
+                    {detailPayload?.subscription?.paddleTransactionId || "—"}
+                  </p>
+                  <p>
+                    <span className="text-muted-foreground">{t("subscriptions.usdAmount")} </span>
+                    {detailPayload?.subscription?.usdAmount != null
+                      ? `$${Number(detailPayload.subscription.usdAmount).toFixed(2)}`
+                      : "—"}
+                  </p>
+                </div>
+
                 <div className="rounded-lg border border-border/80 p-3 space-y-2">
                   <p className="font-medium">{t("subscriptions.billingActions")}</p>
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant="outline"
-                    onClick={() =>
-                      detailRow?.id != null && void runRefund(Number(detailRow.id))
-                    }
-                    disabled={detailLoading || refundingId === Number(detailRow?.id)}
-                  >
-                    {refundingId === Number(detailRow?.id) ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      t("subscriptions.refundPayment")
-                    )}
-                  </Button>
+                  {renderRefundButton(
+                    buildRefundTarget(detailPayload?.subscription, detailRow),
+                    Number(detailRow?.id),
+                    detailRow,
+                  )}
                 </div>
 
                 <div className="rounded-lg border border-border/80 p-3 space-y-2">
@@ -606,6 +713,17 @@ export default function SuperAdminSubscriptionsPage() {
             )}
           </DialogContent>
         </Dialog>
+
+        <SuperAdminRefundDialog
+          open={refundModalOpen}
+          onOpenChange={(open) => {
+            setRefundModalOpen(open);
+            if (!open) setRefundTarget(null);
+          }}
+          subscription={refundTarget}
+          submitting={refundingId != null}
+          onSubmit={(body) => void submitRefund(body)}
+        />
       </div>
     </AppLayout>
   );
