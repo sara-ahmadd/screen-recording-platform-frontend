@@ -557,6 +557,8 @@ export const subscriptionApi = {
     apiFetch("/subscription", { method: "POST", body: JSON.stringify(data) }),
   update: (id: number) =>
     apiFetch(`/subscription/update/${id}`, { method: "PATCH" }),
+  reactivate: (id: number) =>
+    apiFetch(`/subscription/reactivate/${id}`, { method: "POST" }),
   downgrade: (
     id: number,
     data: {
@@ -572,6 +574,8 @@ export const subscriptionApi = {
     }),
   details: (id: number) => apiFetch(`/subscription/details/${id}`),
   billingPortal: (id: number) => apiFetch(`/subscription/billing-portal/${id}`),
+  syncPaddleSubscription: (id: number) =>
+    apiFetch(`/subscription/sync-paddle/${id}`, { method: "POST" }),
   upgrade: (
     id: number,
     data: {
@@ -611,6 +615,10 @@ export const paymentsApi = {
   getPaddleConfig: () => apiFetch("/subscription/paddle-config"),
   getCheckoutReview: (transactionId: string) =>
     apiFetch(`/subscription/checkout-review/${encodeURIComponent(transactionId)}`),
+  lockCheckout: (transactionId: string) =>
+    apiFetch(`/subscription/checkout-lock/${encodeURIComponent(transactionId)}`, {
+      method: "POST",
+    }),
   createCheckoutSession: (data: {
     planId: string;
     workspaceId: string;

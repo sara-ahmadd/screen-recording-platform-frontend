@@ -7,6 +7,12 @@ export type PaddleRuntimeConfig = {
   environment: "sandbox" | "production";
 };
 
+export type PaddleCheckoutCustomer = {
+  customerId?: string;
+  addressId?: string;
+  email?: string;
+};
+
 declare global {
   interface Window {
     Paddle?: {
@@ -15,7 +21,14 @@ declare global {
         token: string;
         checkout?: { settings?: { successUrl?: string } };
       }) => void;
-      Checkout?: { open: (opts: { transactionId: string }) => void };
+      Checkout?: {
+        open: (opts: {
+          transactionId: string;
+          customer?: { id?: string; email?: string };
+          address?: { id?: string };
+          settings?: { allowLogout?: boolean };
+        }) => void;
+      };
     };
   }
 }
@@ -93,11 +106,47 @@ export async function initPaddleJs(
   return paddleInitPromise;
 }
 
-export function openPaddleCheckout(transactionId: string): boolean {
+/**
+ * Open Paddle overlay checkout locked to the authenticated user's Paddle customer.
+ * Prefer customer.id (not email) so receipts cannot route to a browser-default account.
+ */
+export function openPaddleCheckout(
+  transactionId: string,
+  customer: PaddleCheckoutCustomer,
+): boolean {
   const txnId = String(transactionId ?? "").trim();
-  if (!txnId.startsWith("txn_") || !window.Paddle?.Checkout) return false;
+  const customerId = String(customer.customerId ?? "").trim();
+  const addressId = String(customer.addressId ?? "").trim();
+  const email = String(customer.email ?? "").trim().toLowerCase();
+
+  if (!txnId.startsWith("txn_") || !window.Paddle?.Checkout) {
+    return false;
+  }
+
   rememberPendingPaddleTransaction(txnId);
-  window.Paddle.Checkout.open({ transactionId: txnId });
+
+  const openOpts: {
+    transactionId: string;
+    settings: { allowLogout: boolean };
+    customer?: { id: string } | { email: string };
+    address?: { id: string };
+  } = {
+    transactionId: txnId,
+    settings: { allowLogout: false },
+  };
+
+  if (customerId.startsWith("ctm_")) {
+    openOpts.customer = { id: customerId };
+    if (addressId.startsWith("add_")) {
+      openOpts.address = { id: addressId };
+    }
+  } else if (email) {
+    openOpts.customer = { email };
+  } else {
+    return false;
+  }
+
+  window.Paddle.Checkout.open(openOpts);
   return true;
 }
 

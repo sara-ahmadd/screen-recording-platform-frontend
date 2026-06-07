@@ -18,7 +18,7 @@
     "/assets/logo-Bbe7nbNw.png"
   ],
   "\u0000/Users/saraahmad/Documents/screen-recorder-frontend-lovable/node_modules/react-dom/client.js?commonjs-exports": [
-    "/assets/client-Dh-7r6qX.js"
+    "/assets/client-XMSqDnST.js"
   ],
   "\u0000/Users/saraahmad/Documents/screen-recorder-frontend-lovable/node_modules/react-dom/index.js?commonjs-module": [
     "/assets/logo-Bbe7nbNw.png"
@@ -1959,7 +1959,7 @@
     "/assets/logo-Bbe7nbNw.png"
   ],
   "node_modules/react-dom/client.js": [
-    "/assets/client-Dh-7r6qX.js"
+    "/assets/client-XMSqDnST.js"
   ],
   "node_modules/react-dom/index.js": [
     "/assets/logo-Bbe7nbNw.png"
@@ -2781,6 +2781,9 @@
     "/assets/logo-Bbe7nbNw.png"
   ],
   "src/lib/notificationsSync.ts": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
+  "src/lib/paddle.ts": [
     "/assets/logo-Bbe7nbNw.png"
   ],
   "src/lib/plans.ts": [

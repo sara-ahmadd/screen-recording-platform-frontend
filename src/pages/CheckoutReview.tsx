@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { CreditCard, ExternalLink, ShieldCheck } from "lucide-react";
 import { paymentsApi } from "@/lib/api";
+import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import {
   initPaddleJs,
@@ -28,6 +29,9 @@ type ReviewPayload = {
   };
   amountUsd?: number;
   renewalAmountUsd?: number;
+  customerEmail?: string;
+  paddleCustomerId?: string;
+  paddleAddressId?: string;
 };
 
 function resolveTransactionId(
@@ -38,6 +42,7 @@ function resolveTransactionId(
 
 export default function CheckoutReviewPage() {
   const { t } = useTranslation(["billing", "common"]);
+  const { user } = useAuth();
   const { toast } = useToast();
   const location = useLocation();
   const navigationPayload = (location.state as ReviewPayload) || null;
@@ -48,6 +53,7 @@ export default function CheckoutReviewPage() {
   const [paddleReady, setPaddleReady] = useState(false);
   const [paddleLoading, setPaddleLoading] = useState(true);
   const [paddleError, setPaddleError] = useState<string | null>(null);
+  const [lockingCheckout, setLockingCheckout] = useState(false);
 
   const queryTransactionId = new URLSearchParams(location.search).get("_ptxn");
   const transactionId = resolveTransactionId(
@@ -77,6 +83,9 @@ export default function CheckoutReviewPage() {
           plan: res?.plan,
           amountUsd: res?.amountUsd,
           renewalAmountUsd: res?.renewalAmountUsd ?? res?.amountUsd,
+          customerEmail: res?.customerEmail ?? user?.email ?? null,
+          paddleCustomerId: res?.paddleCustomerId ?? null,
+          paddleAddressId: res?.paddleAddressId ?? null,
         });
       })
       .catch(() => {
@@ -146,7 +155,7 @@ export default function CheckoutReviewPage() {
   const periodLabel = cycle === "yearly" ? t("yearShort") : t("monthShort");
   const canCheckout = Boolean(transactionId && paddleReady);
 
-  const handlePayment = useCallback(() => {
+  const handlePayment = useCallback(async () => {
     if (!transactionId) {
       toast({
         title: t("paymentLinkMissing"),
@@ -164,15 +173,53 @@ export default function CheckoutReviewPage() {
       return;
     }
 
-    const opened = openPaddleCheckout(transactionId);
-    if (!opened) {
+    const checkoutEmail = String(
+      user?.email ?? payload?.customerEmail ?? "",
+    ).trim().toLowerCase();
+    if (!checkoutEmail) {
       toast({
         title: t("paddleCheckoutUnavailable"),
-        description: t("paddleInitFailed"),
+        description: t("signInRequired", { defaultValue: "Sign in to continue checkout." }),
         variant: "destructive",
       });
+      return;
     }
-  }, [transactionId, paddleReady, paddleError, toast, t]);
+
+    setLockingCheckout(true);
+    try {
+      const locked = await paymentsApi.lockCheckout(transactionId);
+      const opened = openPaddleCheckout(transactionId, {
+        customerId: String(locked?.paddleCustomerId ?? payload?.paddleCustomerId ?? "").trim(),
+        addressId: String(locked?.paddleAddressId ?? payload?.paddleAddressId ?? "").trim(),
+        email: checkoutEmail,
+      });
+      if (!opened) {
+        toast({
+          title: t("paddleCheckoutUnavailable"),
+          description: t("paddleInitFailed"),
+          variant: "destructive",
+        });
+      }
+    } catch (err: any) {
+      toast({
+        title: t("paddleCheckoutUnavailable"),
+        description: String(err?.message ?? t("paddleInitFailed")),
+        variant: "destructive",
+      });
+    } finally {
+      setLockingCheckout(false);
+    }
+  }, [
+    transactionId,
+    paddleReady,
+    paddleError,
+    toast,
+    t,
+    payload?.customerEmail,
+    payload?.paddleCustomerId,
+    payload?.paddleAddressId,
+    user?.email,
+  ]);
 
   return (
     <AppLayout>
@@ -236,11 +283,19 @@ export default function CheckoutReviewPage() {
             <Button
               type="button"
               className="w-full h-11 gradient-primary text-base font-semibold"
-              disabled={!transactionId || loadingReview || paddleLoading || !paddleReady}
-              onClick={handlePayment}
+              disabled={
+                !transactionId ||
+                loadingReview ||
+                paddleLoading ||
+                lockingCheckout ||
+                !paddleReady
+              }
+              onClick={() => void handlePayment()}
             >
               <CreditCard className="h-4 w-4 me-2" />
-              {paddleLoading ? t("paddleLoading") : t("continueToPayment")}
+              {paddleLoading || lockingCheckout
+                ? t("paddleLoading")
+                : t("continueToPayment")}
             </Button>
 
             {!transactionId ? (
