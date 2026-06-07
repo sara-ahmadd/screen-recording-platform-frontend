@@ -65,31 +65,42 @@ export default function CheckoutReviewPage() {
   );
 
   useEffect(() => {
-    if (navigationPayload) {
-      setResolvedPayload(navigationPayload);
+    if (!transactionId) {
+      if (navigationPayload) setResolvedPayload(navigationPayload);
       return;
     }
-    if (!transactionId) return;
 
     let cancelled = false;
     setLoadingReview(true);
+    if (navigationPayload) {
+      setResolvedPayload(navigationPayload);
+    }
+
     paymentsApi
       .getCheckoutReview(transactionId)
       .then((res: any) => {
         if (cancelled) return;
+        const apiPlan = res?.target_plan ?? res?.plan;
         setResolvedPayload({
           checkoutSessionId: res?.checkoutSessionId ?? transactionId,
           transactionId: res?.transactionId ?? transactionId,
-          plan: res?.plan,
-          amountUsd: res?.amountUsd,
-          renewalAmountUsd: res?.renewalAmountUsd ?? res?.amountUsd,
+          plan: apiPlan ?? navigationPayload?.plan,
+          amountUsd:
+            res?.amountUsd ??
+            navigationPayload?.amountUsd ??
+            undefined,
+          renewalAmountUsd:
+            res?.renewalAmountUsd ??
+            navigationPayload?.renewalAmountUsd ??
+            res?.amountUsd ??
+            navigationPayload?.amountUsd,
           customerEmail: res?.customerEmail ?? user?.email ?? null,
-          paddleCustomerId: res?.paddleCustomerId ?? null,
-          paddleAddressId: res?.paddleAddressId ?? null,
+          paddleCustomerId: res?.paddleCustomerId ?? navigationPayload?.paddleCustomerId ?? null,
+          paddleAddressId: res?.paddleAddressId ?? navigationPayload?.paddleAddressId ?? null,
         });
       })
       .catch(() => {
-        if (!cancelled) setResolvedPayload(null);
+        if (!cancelled && !navigationPayload) setResolvedPayload(null);
       })
       .finally(() => {
         if (!cancelled) setLoadingReview(false);
@@ -98,7 +109,7 @@ export default function CheckoutReviewPage() {
     return () => {
       cancelled = true;
     };
-  }, [navigationPayload, transactionId]);
+  }, [navigationPayload, transactionId, user?.email]);
 
   useEffect(() => {
     let cancelled = false;

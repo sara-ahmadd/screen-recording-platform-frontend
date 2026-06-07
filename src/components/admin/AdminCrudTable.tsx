@@ -140,10 +140,10 @@ export default function AdminCrudTable({
     try {
       const parsed: Record<string, any> = {};
       Object.entries(formValues).forEach(([key, value]) => {
-        const t = fieldTypes[key];
-        if (t === "number") {
+        const fieldType = fieldTypes[key];
+        if (fieldType === "number") {
           parsed[key] = Number(value || 0);
-        } else if (t === "boolean") {
+        } else if (fieldType === "boolean") {
           parsed[key] = Boolean(value);
         } else {
           parsed[key] = typeof value === "string" ? value.trim() : value;
@@ -155,6 +155,8 @@ export default function AdminCrudTable({
         await onUpdate(editId, parsed);
       }
       setDialogOpen(false);
+    } catch {
+      // Parent onCreate/onUpdate handlers surface errors via toast.
     } finally {
       setSaving(false);
     }
@@ -260,8 +262,10 @@ export default function AdminCrudTable({
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {Object.entries(formValues).map(([key, value]) => {
-                const t = fieldTypes[key];
-                if (t === "boolean") {
+                const fieldType = fieldTypes[key];
+                const selectValue =
+                  value == null || value === "" ? "__none__" : String(value);
+                if (fieldType === "boolean") {
                   return (
                     <label key={key} className="flex items-center gap-2 text-sm">
                       <Checkbox
@@ -279,13 +283,19 @@ export default function AdminCrudTable({
                     <label className="text-sm font-medium">{prettifyLabel(key)}</label>
                     {fieldSelectOptions[key]?.length ? (
                       <Select
-                        value={value == null ? "" : String(value)}
-                        onValueChange={(next) => setFormValues((prev) => ({ ...prev, [key]: next }))}
+                        value={selectValue}
+                        onValueChange={(next) =>
+                          setFormValues((prev) => ({
+                            ...prev,
+                            [key]: next === "__none__" ? "" : next,
+                          }))
+                        }
                       >
                         <SelectTrigger>
                           <SelectValue placeholder={t("crudTable.selectField", { field: prettifyLabel(key) })} />
                         </SelectTrigger>
                         <SelectContent>
+                          <SelectItem value="__none__">{t("crudTable.noneOption")}</SelectItem>
                           {fieldSelectOptions[key].map((option) => (
                             <SelectItem key={`${key}-${option.value}`} value={option.value}>
                               {option.label}
@@ -295,13 +305,19 @@ export default function AdminCrudTable({
                       </Select>
                     ) : fieldOptions[key]?.length ? (
                       <Select
-                        value={value == null ? "" : String(value)}
-                        onValueChange={(next) => setFormValues((prev) => ({ ...prev, [key]: next }))}
+                        value={selectValue}
+                        onValueChange={(next) =>
+                          setFormValues((prev) => ({
+                            ...prev,
+                            [key]: next === "__none__" ? "" : next,
+                          }))
+                        }
                       >
                         <SelectTrigger>
                           <SelectValue placeholder={t("crudTable.selectField", { field: prettifyLabel(key) })} />
                         </SelectTrigger>
                         <SelectContent>
+                          <SelectItem value="__none__">{t("crudTable.noneOption")}</SelectItem>
                           {fieldOptions[key].map((option) => (
                             <SelectItem key={option} value={option}>
                               {prettifyLabel(option)}
@@ -311,7 +327,7 @@ export default function AdminCrudTable({
                       </Select>
                     ) : (
                       <Input
-                        type={fieldInputTypes[key] || (t === "number" ? "number" : "text")}
+                        type={fieldInputTypes[key] || (fieldType === "number" ? "number" : "text")}
                         value={
                           fieldInputTypes[key] === "date"
                             ? (value ? String(value).slice(0, 10) : "")

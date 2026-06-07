@@ -183,8 +183,19 @@ export default function SubscriptionPage() {
       const amountProvider = Number(
         result?.checkoutAmountProvider ?? subscriptionRes?.amount_provider ?? 0,
       );
+      const targetPlan = subscriptionRes?.target_plan ?? subscriptionRes?.plan;
       const amountUsd = Number(
-        result?.checkoutAmountUsd?? 0,
+        result?.checkoutAmountUsd ??
+          subscriptionRes?.amountUsd ??
+          (type === "yearly"
+            ? targetPlan?.yearlyPriceUSD ?? plan?.yearlyPrice ?? 0
+            : targetPlan?.monthlyPriceUSD ?? plan?.monthlyPrice ?? 0),
+      );
+      const renewalAmountUsd = Number(
+        subscriptionRes?.renewalAmountUsd ??
+          (type === "yearly"
+            ? targetPlan?.yearlyPriceUSD ?? plan?.yearlyPrice ?? 0
+            : targetPlan?.monthlyPriceUSD ?? plan?.monthlyPrice ?? 0),
       );
       const currency = String(
         result?.checkoutCurrency ?? subscriptionRes?.provider_currency ?? "USD",
@@ -199,7 +210,7 @@ export default function SubscriptionPage() {
               resolvedTransactionId || checkoutSessionId || result?.sessionId || null,
             checkoutUrl: checkoutUrl || null,
             redirectUrl: redirectUrl || null,
-            plan: subscriptionRes?.plan ?? {
+            plan: targetPlan ?? {
               name: String(plan?.name || t("subscriptionPlanFallback")),
               monthlyPriceUSD: Number(plan?.monthlyPriceUSD ?? plan?.monthlyPrice ?? 0),
               yearlyPriceUSD: Number(plan?.yearlyPriceUSD ?? plan?.yearlyPrice ?? 0),
@@ -207,6 +218,7 @@ export default function SubscriptionPage() {
             },
             amountProvider,
             amountUsd,
+            renewalAmountUsd,
             billingData:
               subscriptionRes?.billingData ??
               (paymentData
