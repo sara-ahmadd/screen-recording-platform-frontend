@@ -342,7 +342,10 @@
       "noPaddleTransaction": "This subscription has no refundable Paddle payment.",
       "notCompleted": "Payment is not completed yet; refund unavailable.",
       "amountExceedsTotal": "Amount exceeds refundable total.",
-      "invalidTransactionId": "Invalid payment reference on subscription."
+      "invalidTransactionId": "Invalid payment reference on subscription.",
+      "pendingApproval": "A refund is already pending Paddle approval for this payment.",
+      "alreadyRefunded": "This payment has already been fully refunded.",
+      "paddleInvalidRequest": "Paddle rejected the refund request. Try a full refund or check the payment in the Paddle dashboard."
     },
     "simulateRenewal": "Simulate renewal",
     "simulateFailure": "Simulate failure",

@@ -43,17 +43,30 @@ export function isPaddleRefundable(subscription?: RefundSubscriptionTarget | nul
 
 export function mapRefundErrorMessage(error: string | undefined, t: (key: string) => string) {
   const msg = String(error || "");
-  if (msg.includes("No Paddle transaction found")) {
+  if (msg.includes("No Paddle transaction found") || msg.includes("No refundable Paddle transaction")) {
     return t("subscriptions.refundErrors.noPaddleTransaction");
   }
   if (/Transaction status is/i.test(msg)) {
     return t("subscriptions.refundErrors.notCompleted");
   }
-  if (msg.includes("Refund amount exceeds line item total")) {
+  if (
+    msg.includes("Refund amount exceeds") ||
+    msg.includes("over adjusted") ||
+    msg.includes("adjustment_transaction_item_over_adjustment")
+  ) {
     return t("subscriptions.refundErrors.amountExceedsTotal");
+  }
+  if (msg.includes("pending Paddle approval") || msg.includes("pending_approval")) {
+    return t("subscriptions.refundErrors.pendingApproval");
+  }
+  if (msg.includes("no remaining refundable balance") || msg.includes("already been made in full")) {
+    return t("subscriptions.refundErrors.alreadyRefunded");
   }
   if (msg.includes("Invalid Paddle transaction ID")) {
     return t("subscriptions.refundErrors.invalidTransactionId");
+  }
+  if (/Invalid request/i.test(msg)) {
+    return t("subscriptions.refundErrors.paddleInvalidRequest");
   }
   return msg || t("common:errors.tryAgain");
 }

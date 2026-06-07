@@ -342,7 +342,10 @@
       "noPaddleTransaction": "لا يوجد دفع Paddle قابل للاسترداد لهذا الاشتراك.",
       "notCompleted": "لم يكتمل الدفع بعد؛ الاسترداد غير متاح.",
       "amountExceedsTotal": "المبلغ يتجاوز إجمالي المبلغ القابل للاسترداد.",
-      "invalidTransactionId": "مرجع دفع غير صالح على الاشتراك."
+      "invalidTransactionId": "مرجع دفع غير صالح على الاشتراك.",
+      "pendingApproval": "يوجد استرداد بانتظار موافقة Paddle لهذا الدفع.",
+      "alreadyRefunded": "تم استرداد هذا الدفع بالكامل مسبقاً.",
+      "paddleInvalidRequest": "رفض Paddle طلب الاسترداد. جرّب استرداداً كاملاً أو راجع الدفع في لوحة Paddle."
     },
     "simulateRenewal": "محاكاة التجديد",
     "simulateFailure": "محاكاة الفشل",
