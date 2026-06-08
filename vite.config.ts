@@ -8,7 +8,8 @@ import { VitePWA } from "vite-plugin-pwa";
 export default defineConfig(({ mode }) => ({
   define: {
     "import.meta.env.VITE_BUILD_ID": JSON.stringify(
-      process.env.VITE_BUILD_ID ?? `${process.env.npm_package_version ?? "0.0.0"}-${mode}`,
+      process.env.VITE_BUILD_ID ??
+        `${process.env.npm_package_version ?? "0.0.0"}-${mode}`,
     ),
   },
   server: {
@@ -16,6 +17,7 @@ export default defineConfig(({ mode }) => ({
     port: 3000,
     allowedHosts: [
       "compactible-jowly-mayme.ngrok-free.dev",
+      "screen-recording-platform-frontend.onrender.com",
       ".ngrok-free.dev",
       ".ngrok.io",
       "therec.site",
@@ -31,7 +33,8 @@ export default defineConfig(({ mode }) => ({
       overlay: false,
     },
   },
-  plugins: [react(),
+  plugins: [
+    react(),
     VitePWA({
       registerType: "autoUpdate",
       injectRegister: false,
@@ -56,15 +59,27 @@ export default defineConfig(({ mode }) => ({
         background_color: "#ffffff",
         theme_color: "#4f46e5",
         icons: [
-          { src: "/android-chrome-192x192.png", sizes: "192x192", type: "image/png" },
-          { src: "/android-chrome-512x512.png", sizes: "512x512", type: "image/png" },
-          { src: "/android-chrome-512x512.png", sizes: "512x512", type: "image/png", purpose: "maskable" },
+          {
+            src: "/android-chrome-192x192.png",
+            sizes: "192x192",
+            type: "image/png",
+          },
+          {
+            src: "/android-chrome-512x512.png",
+            sizes: "512x512",
+            type: "image/png",
+          },
+          {
+            src: "/android-chrome-512x512.png",
+            sizes: "512x512",
+            type: "image/png",
+            purpose: "maskable",
+          },
         ],
       },
     }),
-    mode === "development" && componentTagger()].filter(
-    Boolean,
-  ),
+    mode === "development" && componentTagger(),
+  ].filter(Boolean),
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
