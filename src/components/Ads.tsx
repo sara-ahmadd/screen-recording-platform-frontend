@@ -20,13 +20,13 @@ export const Ad = () => {
   
     return (
       <div >
-        {/* <ins ref={adRef} className="adsbygoogle"
+        <ins ref={adRef} className="adsbygoogle"
         style={{ display: "block", maxHeight: "10px" }}
         data-ad-client="ca-pub-7034676662232707"
         data-ad-slot="2452228548"
         data-ad-format="auto"
         data-adtest="on"
-        data-full-width-responsive="true"></ins> */}
+        data-full-width-responsive="true"></ins>
         </div>
     );
   };
