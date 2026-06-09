@@ -23,6 +23,7 @@ import enLegal from "./locales/en/legal.json";
 import enAdmin from "./locales/en/admin.json";
 import enErrors from "./locales/en/errors.json";
 import enSeo from "./locales/en/seo.json";
+import enMeetings from "./locales/en/meetings.json";
 
 import arCommon from "./locales/ar/common.json";
 import arAuth from "./locales/ar/auth.json";
@@ -39,6 +40,7 @@ import arLegal from "./locales/ar/legal.json";
 import arAdmin from "./locales/ar/admin.json";
 import arErrors from "./locales/ar/errors.json";
 import arSeo from "./locales/ar/seo.json";
+import arMeetings from "./locales/ar/meetings.json";
 import { syncDocumentLanguage } from "./syncDocumentLanguage";
 
 const namespaces = [
@@ -56,6 +58,7 @@ const namespaces = [
   "admin",
   "errors",
   "seo",
+  "meetings",
 ] as const;
 
 export type AppNamespace = (typeof namespaces)[number];
@@ -76,6 +79,7 @@ const resources = {
     admin: enAdmin,
     errors: enErrors,
     seo: enSeo,
+    meetings: enMeetings,
   },
   ar: {
     common: arCommon,
@@ -92,6 +96,7 @@ const resources = {
     admin: arAdmin,
     errors: arErrors,
     seo: arSeo,
+    meetings: arMeetings,
   },
 };
 

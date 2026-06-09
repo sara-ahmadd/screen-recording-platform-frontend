@@ -63,6 +63,8 @@ import CheckoutReviewPage from "./pages/CheckoutReview";
 import ErrorPage from "./pages/ErrorPage";
 import HowItWorksPage from "./pages/HowItWorks";
 import DemoPage from "./pages/Demo";
+import MeetingsLobby from "./pages/MeetingsLobby";
+import MeetingRoom from "./pages/MeetingRoom";
 
 const queryClient = new QueryClient();
 
@@ -133,6 +135,8 @@ export const routes: RouteRecord[] = [
       { path: "checkout/review", element: <ProtectedRoute><CheckoutReviewPage /></ProtectedRoute> },
       { path: "notifications", element: <ProtectedRoute><NotificationsPage /></ProtectedRoute> },
       { path: "feedback", element: <ProtectedRoute><FeedbackPage /></ProtectedRoute> },
+      { path: "meetings", element: <ProtectedRoute><MeetingsLobby /></ProtectedRoute> },
+      { path: "meetings/:id", element: <ProtectedRoute><MeetingRoom /></ProtectedRoute> },
       { path: "profile", element: <ProtectedRoute><ProfilePage /></ProtectedRoute> },
       { path: "payment/success", element: <PaymentSuccessPage /> },
       { path: "payment/failed", element: <PaymentFailedPage /> },

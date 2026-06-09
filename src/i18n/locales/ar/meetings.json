@@ -1,0 +1,28 @@
+{
+  "noWorkspace": "اختر مساحة عمل قبل بدء الاجتماع",
+  "created": "تم إنشاء الاجتماع",
+  "lobby": {
+    "title": "الاجتماعات المباشرة",
+    "subtitle": "ابدأ أو انضم إلى اجتماع فيديو مع فريق مساحة العمل",
+    "startTitle": "بدء اجتماع",
+    "startDesc": "إنشاء غرفة اجتماع جديدة لمساحة العمل",
+    "titlePlaceholder": "عنوان الاجتماع (اختياري)",
+    "startButton": "بدء الاجتماع",
+    "joinTitle": "الانضمام برقم الاجتماع",
+    "joinDesc": "أدخل رقم الاجتماع من رابط الدعوة",
+    "joinPlaceholder": "رقم الاجتماع",
+    "joinButton": "انضم",
+    "joiningAs": "الانضمام باسم {{name}}"
+  },
+  "room": {
+    "linkCopied": "تم نسخ رابط الدعوة",
+    "participantCount": "{{count}} مشارك",
+    "state": {
+      "idle": "خامل",
+      "connecting": "جاري الاتصال…",
+      "connected": "متصل",
+      "reconnecting": "إعادة الاتصال…",
+      "failed": "فشل الاتصال"
+    }
+  }
+}

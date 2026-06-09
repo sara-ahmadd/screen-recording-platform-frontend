@@ -18,7 +18,7 @@
     "/assets/logo-Bbe7nbNw.png"
   ],
   "\u0000/Users/saraahmad/Documents/my-apps/screen-recorder-frontend-lovable/node_modules/react-dom/client.js?commonjs-exports": [
-    "/assets/client-DaAxPgTw.js"
+    "/assets/client-B7P5mV6W.js"
   ],
   "\u0000/Users/saraahmad/Documents/my-apps/screen-recorder-frontend-lovable/node_modules/react-dom/index.js?commonjs-module": [
     "/assets/logo-Bbe7nbNw.png"
@@ -186,6 +186,9 @@
     "/assets/logo-Bbe7nbNw.png"
   ],
   "node_modules/@radix-ui/react-roving-focus/dist/index.mjs": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
+  "node_modules/@radix-ui/react-scroll-area/dist/index.mjs": [
     "/assets/logo-Bbe7nbNw.png"
   ],
   "node_modules/@radix-ui/react-select/dist/index.mjs": [
@@ -1844,6 +1847,9 @@
   "node_modules/lucide-react/dist/esm/icons/pencil.js": [
     "/assets/logo-Bbe7nbNw.png"
   ],
+  "node_modules/lucide-react/dist/esm/icons/phone-off.js": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
   "node_modules/lucide-react/dist/esm/icons/play.js": [
     "/assets/logo-Bbe7nbNw.png"
   ],
@@ -1863,6 +1869,9 @@
     "/assets/logo-Bbe7nbNw.png"
   ],
   "node_modules/lucide-react/dist/esm/icons/search-x.js": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
+  "node_modules/lucide-react/dist/esm/icons/send.js": [
     "/assets/logo-Bbe7nbNw.png"
   ],
   "node_modules/lucide-react/dist/esm/icons/share-2.js": [
@@ -1925,6 +1934,12 @@
   "node_modules/lucide-react/dist/esm/icons/volume-x.js": [
     "/assets/logo-Bbe7nbNw.png"
   ],
+  "node_modules/lucide-react/dist/esm/icons/wifi-off.js": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
+  "node_modules/lucide-react/dist/esm/icons/wifi.js": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
   "node_modules/lucide-react/dist/esm/icons/wrench.js": [
     "/assets/logo-Bbe7nbNw.png"
   ],
@@ -1959,7 +1974,7 @@
     "/assets/logo-Bbe7nbNw.png"
   ],
   "node_modules/react-dom/client.js": [
-    "/assets/client-DaAxPgTw.js"
+    "/assets/client-B7P5mV6W.js"
   ],
   "node_modules/react-dom/index.js": [
     "/assets/logo-Bbe7nbNw.png"
@@ -2567,6 +2582,15 @@
   "src/components/legal/LegalSectionList.tsx": [
     "/assets/logo-Bbe7nbNw.png"
   ],
+  "src/components/meetings/MeetingChat.tsx": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
+  "src/components/meetings/MeetingControls.tsx": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
+  "src/components/meetings/VideoGrid.tsx": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
   "src/components/seo/StructuredDataScripts.tsx": [
     "/assets/logo-Bbe7nbNw.png"
   ],
@@ -2615,6 +2639,9 @@
   "src/components/ui/radio-group.tsx": [
     "/assets/logo-Bbe7nbNw.png"
   ],
+  "src/components/ui/scroll-area.tsx": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
   "src/components/ui/select.tsx": [
     "/assets/logo-Bbe7nbNw.png"
   ],
@@ -2660,6 +2687,12 @@
   "src/hooks/useGoogleAuth.ts": [
     "/assets/logo-Bbe7nbNw.png"
   ],
+  "src/hooks/useMeetingChat.ts": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
+  "src/hooks/useMeetingWebRTC.ts": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
   "src/hooks/usePaidToFreeSubscribe.ts": [
     "/assets/logo-Bbe7nbNw.png"
   ],
@@ -2700,6 +2733,9 @@
     "/assets/logo-Bbe7nbNw.png"
   ],
   "src/i18n/locales/ar/marketing.json": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
+  "src/i18n/locales/ar/meetings.json": [
     "/assets/logo-Bbe7nbNw.png"
   ],
   "src/i18n/locales/ar/profile.json": [
@@ -2747,6 +2783,9 @@
   "src/i18n/locales/en/marketing.json": [
     "/assets/logo-Bbe7nbNw.png"
   ],
+  "src/i18n/locales/en/meetings.json": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
   "src/i18n/locales/en/profile.json": [
     "/assets/logo-Bbe7nbNw.png"
   ],
@@ -2787,6 +2826,9 @@
     "/assets/logo-Bbe7nbNw.png"
   ],
   "src/lib/inviteFlow.ts": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
+  "src/lib/meetingsSocket.ts": [
     "/assets/logo-Bbe7nbNw.png"
   ],
   "src/lib/multipartResume.ts": [
@@ -2877,6 +2919,12 @@
     "/assets/logo-Bbe7nbNw.png"
   ],
   "src/pages/Login.tsx": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
+  "src/pages/MeetingRoom.tsx": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
+  "src/pages/MeetingsLobby.tsx": [
     "/assets/logo-Bbe7nbNw.png"
   ],
   "src/pages/NotFound.tsx": [

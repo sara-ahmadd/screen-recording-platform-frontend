@@ -1,0 +1,28 @@
+{
+  "noWorkspace": "Select a workspace before starting a meeting",
+  "created": "Meeting created",
+  "lobby": {
+    "title": "Live Meetings",
+    "subtitle": "Start or join a video meeting with your workspace team",
+    "startTitle": "Start a meeting",
+    "startDesc": "Create a new meeting room for your workspace",
+    "titlePlaceholder": "Meeting title (optional)",
+    "startButton": "Start meeting",
+    "joinTitle": "Join with meeting ID",
+    "joinDesc": "Enter a meeting ID from an invite link",
+    "joinPlaceholder": "Meeting ID",
+    "joinButton": "Join",
+    "joiningAs": "Joining as {{name}}"
+  },
+  "room": {
+    "linkCopied": "Invite link copied",
+    "participantCount": "{{count}} participant(s)",
+    "state": {
+      "idle": "Idle",
+      "connecting": "Connecting…",
+      "connected": "Connected",
+      "reconnecting": "Reconnecting…",
+      "failed": "Connection failed"
+    }
+  }
+}

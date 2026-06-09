@@ -15,6 +15,7 @@ import {
   Upload,
   Users,
   Video,
+  VideoIcon,
   X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -37,6 +38,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     () => [
       { href: "/dashboard", icon: LayoutDashboard, label: t("layout:nav.dashboard") },
       { href: "/record", icon: Video, label: t("layout:nav.record") },
+      { href: "/meetings", icon: VideoIcon, label: t("layout:nav.meetings") },
       { href: "/upload", icon: Upload, label: t("layout:nav.upload") },
       { href: "/workspaces", icon: Users, label: t("layout:nav.workspaces") },
       { href: "/billing", icon: CreditCard, label: t("layout:nav.billing") },

@@ -745,6 +745,37 @@ export const analyticsApi = {
     }),
 };
 
+// Live Meetings
+export const meetingsApi = {
+  create: (data: { workspaceId: number; title?: string }) =>
+    apiFetch("/meetings/create", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+  join: (meetingId: number) =>
+    apiFetch(`/meetings/${meetingId}/join`, {
+      method: "POST",
+      body: JSON.stringify({}),
+    }),
+  get: (meetingId: number) => apiFetch(`/meetings/${meetingId}`),
+  end: (meetingId: number) =>
+    apiFetch(`/meetings/${meetingId}/end`, {
+      method: "PATCH",
+      body: JSON.stringify({}),
+    }),
+  getChat: (
+    meetingId: number,
+    params: { page?: number; limit?: number; order?: "DESC" | "ASC" } = {},
+  ) => {
+    const sp = new URLSearchParams();
+    if (params.page) sp.set("page", String(params.page));
+    if (params.limit) sp.set("limit", String(params.limit));
+    if (params.order) sp.set("order", params.order);
+    const query = sp.toString();
+    return apiFetch(`/meetings/${meetingId}/chat${query ? `?${query}` : ""}`);
+  },
+};
+
 // Feedback
 export const feedbackApi = {
   create: (data: {
