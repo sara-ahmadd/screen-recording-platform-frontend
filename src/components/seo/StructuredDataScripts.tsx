@@ -1,6 +1,7 @@
 import { Helmet } from "react-helmet-async";
 import { useTranslation } from "react-i18next";
-import { BLOG_POST_IDS } from "@/lib/blogPosts";
+import { BLOG_POSTS, getBlogPostBySlug } from "@/lib/blogPosts";
+import { getBlogPostPath } from "@/lib/blogPosts";
 import { ORGANIZATION, SITE_NAME, SITE_URL } from "@/lib/siteConfig";
 
 type StructuredDataScriptsProps = {
@@ -51,7 +52,7 @@ export default function StructuredDataScripts({ routeKey, pathname }: Structured
     });
   }
 
-  if (routeKey === "blogs" || pathname === "/blogs") {
+  if (routeKey === "blogs" && pathname === "/blogs") {
     const blogUrl = `${SITE_URL}/blogs`;
     scripts.push({
       "@context": "https://schema.org",
@@ -61,11 +62,11 @@ export default function StructuredDataScripts({ routeKey, pathname }: Structured
       url: blogUrl,
       inLanguage: lang,
       publisher: { "@type": "Organization", name: ORGANIZATION.name },
-      blogPost: BLOG_POST_IDS.map((id) => ({
+      blogPost: BLOG_POSTS.map((post) => ({
         "@type": "BlogPosting",
-        headline: t(`marketing:blogs.posts.${id}.title`),
-        description: t(`marketing:blogs.posts.${id}.excerpt`),
-        url: `${blogUrl}#${id}`,
+        headline: t(`marketing:blogs.posts.${post.id}.title`),
+        description: t(`marketing:blogs.posts.${post.id}.excerpt`),
+        url: `${SITE_URL}${getBlogPostPath(post.slug)}`,
         inLanguage: lang,
         author: {
           "@type": "Organization",
@@ -96,6 +97,30 @@ export default function StructuredDataScripts({ routeKey, pathname }: Structured
       name: t("seo:routes.contact.title"),
       url: `${SITE_URL}/contact`,
     });
+  }
+
+  const blogSlugMatch = pathname.match(/^\/blogs\/([^/]+)$/);
+  if (blogSlugMatch) {
+    const post = getBlogPostBySlug(blogSlugMatch[1]);
+    if (post) {
+      const articleUrl = `${SITE_URL}${getBlogPostPath(post.slug)}`;
+      scripts.push({
+        "@context": "https://schema.org",
+        "@type": "BlogPosting",
+        headline: t(`marketing:blogs.posts.${post.id}.title`),
+        description: i18n.exists(`marketing:blogs.posts.${post.id}.metaDescription`)
+          ? t(`marketing:blogs.posts.${post.id}.metaDescription`)
+          : t(`marketing:blogs.posts.${post.id}.excerpt`),
+        url: articleUrl,
+        inLanguage: lang,
+        mainEntityOfPage: { "@type": "WebPage", "@id": articleUrl },
+        author: { "@type": "Organization", name: t("marketing:eeat.publisherName") },
+        publisher: { "@type": "Organization", name: ORGANIZATION.name },
+        datePublished: t("marketing:eeat.contentFreshness"),
+        dateModified: t("marketing:eeat.contentFreshness"),
+        keywords: post.primaryKeyword,
+      });
+    }
   }
 
   return (

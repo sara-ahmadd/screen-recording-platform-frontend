@@ -29,11 +29,14 @@ export const ORGANIZATION = {
   sameAs: [] as string[],
 };
 
+import { getAllBlogPostPaths } from "./blogPosts";
+
 /** Public indexable paths for sitemap and internal linking. */
 export const PUBLIC_INDEXABLE_PATHS = [
   "/",
   "/about",
   "/blogs",
+  ...getAllBlogPostPaths(),
   "/contact",
   "/demo",
   "/how-it-works",

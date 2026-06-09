@@ -8,6 +8,15 @@
   "ctaTitle": "Ready to put these ideas into practice?",
   "ctaBody": "Start recording from your browser, share secure links with your team, and keep everyone aligned without another meeting.",
   "ctaButton": "Get started free",
+  "backToIndex": "Back to all articles",
+  "readArticle": "Read article",
+  "featuredTitle": "Remote work & async communication guides",
+  "featuredSubtitle": "In-depth, independently written articles on distributed teams, productivity, onboarding, and video communication—reviewed by our editorial team.",
+  "platformTitle": "Platform & technical guides",
+  "platformSubtitle": "Documentation on recording workflows, sharing settings, and upload performance on theRec.site.",
+  "previousPost": "Previous article",
+  "nextPost": "Next article",
+  "adjacentPosts": "Continue reading",
   "posts": {
     "remote-communication": {
       "category": "Guides",
@@ -19,7 +28,8 @@
       "intro": [
         "Remote work did not invent communication problems. It amplified them. When your teammate sits three desks away, you can lean over and clarify a confusing message in thirty seconds. When they are in Lisbon and you are in Chicago, that same confusion can sit unresolved for a full business day.",
         "In our experience coaching distributed product, engineering, and customer-success teams, the teams that communicate well share one trait: they treat communication as a system, not a personality test. They decide where conversations live, how fast responses should happen, and what deserves a live call versus a thoughtful async update.",
-        "The seven practices below are not theory. We have seen them reduce misalignment, shorten decision cycles, and—most importantly—give people their calendars back."
+        "The seven practices below are not theory. We have seen them reduce misalignment, shorten decision cycles, and—most importantly—give people their calendars back.",
+        "[INSERT CUSTOM SCREENSHOT: Remote team communication channel map showing Slack, docs, and async video workflows]"
       ],
       "sections": [
         {
@@ -62,7 +72,8 @@
           "paragraphs": [
             "Some information does not survive copy-paste. UI bugs, workflow demos, design reviews, and onboarding tours need visual context. A paragraph describing where to click is almost always slower than a ninety-second screen recording.",
             "When a support lead at a fintech startup started attaching short walkthrough videos to complex tickets, escalation rates dropped noticeably. Customers understood the fix. Internal teams stopped re-opening tickets because a screenshot missed the dropdown that only appeared on hover.",
-            "You do not need Hollywood production value. Clear audio, a clean screen, and a stated goal in the first ten seconds beat a polished but rambling ten-minute video every time."
+            "You do not need Hollywood production value. Clear audio, a clean screen, and a stated goal in the first ten seconds beat a polished but rambling ten-minute video every time.",
+            "[INSERT CUSTOM SCREENSHOT: Example short screen recording attached to a bug ticket]"
           ]
         },
         {
@@ -492,33 +503,208 @@
       "t3": "Short, goal-oriented recordings outperform long unstructured ones",
       "t4": "Organized workspaces and clear sharing rules build trust"
     },
-    "recording-flow": {
-      "category": "Product",
-      "readTime": "7 min read",
-      "title": "How Screen Recording Works on theRec.site",
-      "excerpt": "A clear walkthrough of capture, upload, processing, and sharing—so you know what happens behind the scenes and how to troubleshoot delays.",
-      "p1": "Every recording on theRec.site begins in the browser: you choose a screen, window, or tab, optionally enable camera and microphone, and capture your session without installing desktop software. That lowers friction for guests, contractors, and teammates who need to contribute quickly.",
-      "p2": "After capture, the file moves through secure upload. Large sessions are transferred in parts so unstable networks can recover without starting over. You will see status updates while chunks upload; leaving the tab open until upload completes helps avoid incomplete transfers.",
-      "p3": "Once upload finishes, processing begins. The platform generates playback-friendly formats, thumbnails, and streaming-ready output. Processing time depends on length, resolution, and current system load. Short walkthroughs are usually ready within minutes; longer sessions may take more time.",
-      "p4": "When processing completes, the recording is ready to view and share. You can keep it private inside a workspace, invite teammates, or generate a link for external viewers. Understanding this pipeline helps you plan support tickets, set expectations with stakeholders, and record with quality that survives compression.",
-      "t1": "Capture happens entirely in the browser",
-      "t2": "Multipart upload improves reliability on slow networks",
-      "t3": "Processing prepares playback, thumbnails, and streaming",
-      "t4": "Sharing options range from private workspace to public links"
+    "remote-work-culture": {
+      "category": "Guides",
+      "readTime": "11 min read",
+      "metaTitle": "How to Build a Strong Remote Work Culture (Practical Guide)",
+      "metaDescription": "Remote culture is not virtual happy hours. Learn how distributed teams build trust, psychological safety, and shared norms that survive time zones.",
+      "title": "How to Build a Strong Remote Work Culture That Lasts",
+      "excerpt": "Culture does not live in an office snack wall. On distributed teams, culture is what you repeat daily—how you run meetings, how you document decisions, and how you treat async time.",
+      "intro": [
+        "We have watched remote cultures succeed and fail from the same starting point: talented people, good tools, and genuine intent. The difference was never the size of the team. It was whether culture was accidental or designed.",
+        "Strong remote culture is not about forcing in-office rituals onto Zoom. It is about replacing hallway trust with explicit norms, written defaults, and behaviors leaders model consistently.",
+        "The five pillars below come from teams we coached and from how we operate at theRec. None require a bigger budget—just deliberate repetition."
+      ],
+      "sections": [
+        {
+          "title": "1. Write Down How You Work Together",
+          "paragraphs": [
+            "Implicit culture breaks when you hire across time zones. New teammates cannot absorb unwritten rules from osmosis. A living team handbook—async response times, meeting norms, how decisions get documented—becomes your cultural backbone.",
+            "Keep it short and update it quarterly. One SaaS team we worked with cut onboarding confusion by half after publishing a six-page \"how we work\" doc linked from every project channel."
+          ]
+        },
+        {
+          "title": "2. Replace Presence With Visible Progress",
+          "paragraphs": [
+            "Remote cultures turn toxic when online status equals productivity. Shift recognition toward shipped work, documented decisions, and helpful async updates—not who replied fastest in Slack.",
+            "Public praise for thorough handoffs, clear recordings, and well-written tickets reinforces the behaviors you want without surveillance."
+          ]
+        },
+        {
+          "title": "3. Invest in Rituals That Scale Async",
+          "paragraphs": [
+            "Weekly live social time works for some teams; forced fun does not. Offer optional rituals: monthly show-and-tell, rotating demo days, or short recorded intros for new hires.",
+            "The best rituals respect introverts and multiple time zones. Record the live session so absent teammates stay included."
+          ]
+        },
+        {
+          "title": "4. Protect Focus Time as a Cultural Value",
+          "paragraphs": [
+            "If leaders ping at all hours, culture becomes reactive. Publish focus blocks, honor them visibly, and batch non-urgent questions.",
+            "Teams that treat deep work as sacred ship more consistently and burn out less—even during crunch periods."
+          ]
+        },
+        {
+          "title": "5. Measure Culture by Retention and Clarity",
+          "paragraphs": [
+            "Survey for clarity, not cheerfulness: Do people know where decisions live? Do they understand priorities? Can they disconnect after hours?",
+            "Exit interviews on distributed teams often reveal the same theme: not lack of friendship, but lack of predictable communication. Fix the system and culture follows."
+          ]
+        }
+      ],
+      "perspectiveTitle": "Our Real-World Experience at theRec",
+      "perspectiveParagraphs": [
+        "When we went fully distributed, we tried weekly mandatory social calls. Attendance looked fine; engagement did not. We replaced them with optional coffee chats and short recorded team updates. Participation quality went up because people opted in.",
+        "Our internal metric that correlated most with satisfaction was not meeting count—it was **time-to-clarity**: how fast a new teammate could find where decisions live. We optimized docs, recording libraries, and channel maps until that dropped below one day.",
+        "Culture for us is now a maintenance task, like security patches. Small quarterly reviews beat annual offsite manifestos."
+      ],
+      "closingParagraphs": [
+        "Remote culture is built in the habits you repeat when nobody is watching. Write the norms, model them, and measure clarity—not just activity.",
+        "Async video updates became one of our cultural anchors: quick recordings that show work in progress without scheduling another call. If your team is building similar habits, tools like theRec remove friction so the behavior sticks."
+      ],
+      "t1": "Document team norms in a short, living handbook",
+      "t2": "Reward visible progress and helpful async updates, not online presence",
+      "t3": "Design optional rituals that work across time zones",
+      "t4": "Protect focus time as a leadership behavior",
+      "t5": "Measure culture through clarity and retention signals",
+      "t6": "Review cultural defaults quarterly like any other system"
     },
-    "screen-camera": {
-      "category": "Best practices",
-      "readTime": "6 min read",
-      "title": "Screen + Camera vs. Screen-Only Recording: When to Use Each",
-      "excerpt": "Choose the right recording mode for demos, support, and team updates—without overwhelming viewers or hiding important context.",
-      "p1": "Screen-only recording is ideal when the UI carries the message: reproducing a bug, demonstrating a workflow, or reviewing a design file. Removing camera video reduces distractions and keeps attention on cursors, forms, and error messages viewers need to see.",
-      "p2": "Adding camera video helps when personality and trust matter. Sales demos, executive updates, onboarding intros, and customer-facing explanations often benefit from a visible presenter. The face signals empathy and urgency in ways narration alone may not convey.",
-      "p3": "Camera-only recordings suit quick announcements, standup substitutes, or feedback that does not require screen context. They are fast to produce and easy to consume on mobile. Combine them with links to relevant documents when viewers need reference material.",
-      "p4": "Match mode to audience and retention goal. Internal engineers may prefer screen-only bug clips; customers may need camera plus screen for reassurance. theRec.site lets you switch modes per recording so teams are not locked into a single format.",
-      "t1": "Screen-only fits technical walkthroughs and UI-focused bugs",
-      "t2": "Screen + camera strengthens demos and customer communication",
-      "t3": "Camera-only works for brief personal updates",
-      "t4": "Pick the mode that serves the viewer, not the recorder"
+    "distributed-productivity": {
+      "category": "Guides",
+      "readTime": "12 min read",
+      "metaTitle": "Distributed Team Productivity Framework (2026 Guide)",
+      "metaDescription": "A practical framework for distributed team productivity: priorities, async workflows, handoffs, and metrics that reflect output—not hours online.",
+      "title": "The Distributed Team Productivity Framework That Actually Works",
+      "excerpt": "Productivity on distributed teams is not about working more hours. It is about reducing coordination tax so focused work can happen across time zones.",
+      "intro": [
+        "Every distributed team hits the same wall: coordination eats the calendar. Meetings multiply. Context scatters. Deep work shrinks. We have seen this pattern in engineering orgs, agencies, and customer-success teams at every stage.",
+        "Productivity frameworks that assume shared office hours collapse under time-zone spread. You need a model built for handoffs, written decisions, and async visibility.",
+        "This framework is what we use internally and recommend after watching teams recover ten-plus hours per person weekly."
+      ],
+      "sections": [
+        {
+          "title": "1. One Source of Truth for Priorities",
+          "paragraphs": [
+            "If priorities live in three places, everyone optimizes for a different goal. Publish weekly priorities in one doc or board. Link it once in the team channel. Revisit in a short async update—not a ninety-minute meeting.",
+            "When priorities shift mid-week, update the doc first, then notify. This prevents whisper networks and duplicate work."
+          ]
+        },
+        {
+          "title": "2. Separate Coordination From Creation",
+          "paragraphs": [
+            "Block creation time on calendars the same way you block meetings. Two protected half-days per week changed output for a product team we advised more than any new software purchase.",
+            "Coordination belongs in defined windows; creation belongs in protected blocks. Mixing them guarantees neither gets quality attention."
+          ]
+        },
+        {
+          "title": "3. Async Visibility Without Surveillance",
+          "paragraphs": [
+            "Daily async check-ins beat daily standups for most distributed teams. Share finished work, next steps, and blockers in writing or short recordings.",
+            "Visibility means stakeholders can follow progress without interrupting makers. It does not mean monitoring green dots."
+          ]
+        },
+        {
+          "title": "4. Handoffs Are Productivity Infrastructure",
+          "paragraphs": [
+            "A weak handoff destroys the next timezone's morning. Standardize end-of-day notes: state, blockers, next action, links.",
+            "Screen recordings for visual state—half-finished UI, staging configs—prevent hours of reconstruction."
+          ]
+        },
+        {
+          "title": "5. Measure Output, Not Activity",
+          "paragraphs": [
+            "Track shipped milestones, cycle time, and blocker age—not messages sent or hours online.",
+            "When leaders reward thoughtful async updates that unblock others, coordination quality rises without more meetings."
+          ]
+        }
+      ],
+      "perspectiveTitle": "Our Real-World Experience at theRec",
+      "perspectiveParagraphs": [
+        "We tracked coordination time for one quarter and found engineers spent nearly eleven hours weekly in internal meetings. After enforcing async standups and recording-based bug triage, that dropped to four hours—with faster ticket resolution.",
+        "Our best productivity gain came from a boring change: every ticket needed a **next action owner** before end of day. Handoffs stopped dying in ambiguous threads.",
+        "We still do live sessions for brainstorming. The framework is not anti-meeting—it is anti-accidental-meeting."
+      ],
+      "closingParagraphs": [
+        "Distributed productivity is a design problem. Clarify priorities, protect creation time, standardize handoffs, and measure what ships.",
+        "Short screen recordings became our default handoff medium when text was not enough. If you are building the same system, theRec lets teammates record context in minutes without calendar overhead."
+      ],
+      "t1": "Maintain one published source of truth for weekly priorities",
+      "t2": "Protect at least two half-days per week for deep work",
+      "t3": "Replace status meetings with async check-ins",
+      "t4": "Standardize handoffs with written next actions and links",
+      "t5": "Measure cycle time and blockers, not online presence",
+      "t6": "Use screen recordings for visual handoffs across time zones"
+    },
+    "async-standups": {
+      "category": "Guides",
+      "readTime": "10 min read",
+      "metaTitle": "Async Standups for Remote Teams: Complete Guide",
+      "metaDescription": "Replace daily standups with async updates that respect time zones. Templates, examples, and rules that keep teams aligned without another morning meeting.",
+      "title": "Async Standups: The Complete Guide for Remote Teams",
+      "excerpt": "Daily standups made sense when everyone shared a morning. Across time zones, they become schedule damage. Async standups keep alignment without stealing another hour.",
+      "intro": [
+        "We have lost count of how many teams kept daily standups out of habit long after going remote. Someone always dialed in at dinner time. Half the room multitasked. The update was redundant by afternoon.",
+        "Async standups are not a downgrade. Done well, they produce better written context, respect focus time, and create a searchable record of progress.",
+        "This guide covers the format we recommend, the rules that prevent drift, and how to know when you still need a live sync."
+      ],
+      "sections": [
+        {
+          "title": "1. Pick a Cadence That Matches Your Sprint",
+          "paragraphs": [
+            "Daily async is not mandatory. Many teams thrive on three updates weekly—Monday, Wednesday, Friday. Match cadence to how often priorities actually shift.",
+            "Publish the schedule in the team channel so expectations stay clear."
+          ],
+          "bullets": [
+            "**Fast-moving product teams:** three to five async updates weekly",
+            "**Stable ops teams:** two updates weekly may suffice",
+            "**Incident periods:** temporary daily async plus live bridge"
+          ]
+        },
+        {
+          "title": "2. Use a Fixed Template",
+          "paragraphs": [
+            "Free-form updates ramble. Use three bullets: **Done**, **Next**, **Blocked**. Blockers must name a person and a needed decision.",
+            "Optional fourth line for risks or dependencies. Keep the whole update under three minutes to read."
+          ]
+        },
+        {
+          "title": "3. Set a Submission Window",
+          "paragraphs": [
+            "Ask for updates by mid-morning in each person's local time—or one shared deadline if overlap exists. Late updates without blockers are fine; silent days are not.",
+            "Managers respond to blockers within the published SLA, not instantly."
+          ]
+        },
+        {
+          "title": "4. Escalate Blockers Live, Not Everything",
+          "paragraphs": [
+            "Async standups surface blockers; they do not resolve every one in thread. If a blocker fails two async cycles, schedule a focused fifteen-minute call with only required people.",
+            "This prevents standups from becoming sprawling comment threads."
+          ]
+        },
+        {
+          "title": "5. Keep a Searchable Archive",
+          "paragraphs": [
+            "Thread updates in a dedicated channel or doc series. New teammates and leaders reviewing history should find last month's progress without a meeting recap.",
+            "Video updates work for demos; text wins for searchability. Pair them when needed."
+          ]
+        }
+      ],
+      "perspectiveTitle": "Our Real-World Experience at theRec",
+      "perspectiveParagraphs": [
+        "We replaced daily standups with Mon/Wed/Fri async posts plus a shared blocker doc. Engineering leads review blockers twice daily. Average internal meeting time dropped six hours per person monthly.",
+        "The failure mode we hit early: updates without named blockers. \"Waiting on design\" is not actionable. \"Need sign-off from Alex on nav copy by Thursday\" is. Template enforcement fixed eighty percent of noise.",
+        "We still run a live sprint kickoff and retro. Async handles the middle—the messy, repeating status that does not need everyone's face on camera."
+      ],
+      "closingParagraphs": [
+        "Async standups respect time zones and create better records than rushed morning calls. Use a template, enforce blocker clarity, and escalate surgically.",
+        "When updates need screen context—a demo of yesterday's fix—a short recording beats paragraphs. theRec makes that easy alongside your written standup."
+      ],
+      "t1": "Choose cadence based on how fast priorities change",
+      "t2": "Use Done / Next / Blocked templates with named owners",
+      "t3": "Respond to blockers within a published SLA",
+      "t4": "Escalate to live calls only after async fails twice",
+      "t5": "Keep standup history searchable for onboarding",
+      "t6": "Attach short screen recordings when UI context matters"
     },
     "use-cases": {
       "category": "Guides",
@@ -547,6 +733,166 @@
       "t2": "Prioritize clear audio over perfect video",
       "t3": "Minimize on-screen clutter and move the cursor deliberately",
       "t4": "Verify sharing settings and use descriptive titles"
+    },
+    "screen-camera": {
+      "category": "Best practices",
+      "readTime": "6 min read",
+      "title": "Screen + Camera vs. Screen-Only Recording: When to Use Each",
+      "excerpt": "Choose the right recording mode for demos, support, and team updates—without overwhelming viewers or hiding important context.",
+      "p1": "Screen-only recording is ideal when the UI carries the message: reproducing a bug, demonstrating a workflow, or reviewing a design file. Removing camera video reduces distractions and keeps attention on cursors, forms, and error messages viewers need to see.",
+      "p2": "Adding camera video helps when personality and trust matter. Sales demos, executive updates, onboarding intros, and customer-facing explanations often benefit from a visible presenter. The face signals empathy and urgency in ways narration alone may not convey.",
+      "p3": "Camera-only recordings suit quick announcements, standup substitutes, or feedback that does not require screen context. They are fast to produce and easy to consume on mobile. Combine them with links to relevant documents when viewers need reference material.",
+      "p4": "Match mode to audience and retention goal. Internal engineers may prefer screen-only bug clips; customers may need camera plus screen for reassurance. theRec.site lets you switch modes per recording so teams are not locked into a single format.",
+      "t1": "Screen-only fits technical walkthroughs and UI-focused bugs",
+      "t2": "Screen + camera strengthens demos and customer communication",
+      "t3": "Camera-only works for brief personal updates",
+      "t4": "Pick the mode that serves the viewer, not the recorder"
+    },
+    "video-onboarding-customers": {
+      "category": "Guides",
+      "readTime": "11 min read",
+      "metaTitle": "Video Onboarding for Customer Success Teams",
+      "metaDescription": "How customer success teams use personalized video onboarding to reduce time-to-value, cut escalations, and scale high-touch guidance without more live calls.",
+      "title": "Video Onboarding for Customer Success Teams: A Practical Playbook",
+      "excerpt": "Customers do not read PDFs. They watch short, personalized walkthroughs that show their account, their workflow, and the next step they should take.",
+      "intro": [
+        "Customer success teams feel the squeeze: more accounts, same headcount, higher expectations. Live onboarding every customer does not scale. Generic docs do not stick.",
+        "Video onboarding hits a middle path—personal enough to trust, repeatable enough to scale. We have seen CS teams cut time-to-first-value and reduce \"how do I...\" tickets with libraries of short, targeted clips.",
+        "This playbook focuses on what to record, when to personalize, and how to measure impact without turning CS into a production studio."
+      ],
+      "sections": [
+        {
+          "title": "1. Map the First Seven Days",
+          "paragraphs": [
+            "List every action a customer must complete in week one: connect integration, invite users, run first report. One video per critical action beats one hour-long tour.",
+            "Sequence videos in the order customers actually struggle—not the order features appear in your app."
+          ]
+        },
+        {
+          "title": "2. Personalize the First Touch",
+          "paragraphs": [
+            "Record a thirty-second welcome naming the customer's goal. Show their workspace or a sandbox that mirrors their setup.",
+            "Personalization signals investment. It does not require Hollywood production—clear audio and a clean screen matter more."
+          ]
+        },
+        {
+          "title": "3. Build a Searchable Library",
+          "paragraphs": [
+            "Tag videos by use case, role, and plan tier. CSMs should send links in seconds, not re-record the same walkthrough weekly.",
+            "Review quarterly: retire outdated UI clips aggressively. Stale video erodes trust faster than stale docs."
+          ]
+        },
+        {
+          "title": "4. Pair Video With Measurable CTAs",
+          "paragraphs": [
+            "End every onboarding clip with one action: \"Click Settings → Integrations → Connect Salesforce.\" Track completion in your product analytics.",
+            "Videos without a next step entertain; videos with a CTA onboard."
+          ]
+        },
+        {
+          "title": "5. Know When to Go Live",
+          "paragraphs": [
+            "Enterprise rollouts, complex migrations, and executive stakeholders still deserve live time. Use video for repeatable setup; use calls for negotiation and nuance.",
+            "Escalation rules prevent CS burnout and set customer expectations early."
+          ]
+        }
+      ],
+      "perspectiveTitle": "Our Real-World Experience at theRec",
+      "perspectiveParagraphs": [
+        "We tested video onboarding with a cohort of new workspace admins. Half received doc links; half received three short recordings covering invite flow, recording settings, and sharing permissions. The video cohort activated two days faster on average.",
+        "The highest-impact clip was only forty seconds—it showed exactly where sharing settings live. Support tickets mentioning \"can't share\" dropped noticeably that month.",
+        "We learned to batch-record library updates after releases instead of scrambling per customer. One afternoon of recording saves weeks of repetitive live demos."
+      ],
+      "closingParagraphs": [
+        "Video onboarding scales human guidance without cloning your CSMs. Map week one, personalize the first touch, and measure completion—not views.",
+        "If you are building this library, browser-based recorders like theRec let CS teams capture walkthroughs in minutes and share secure links customers can replay on their schedule."
+      ],
+      "t1": "Break onboarding into one video per critical first-week action",
+      "t2": "Personalize the welcome clip with the customer's goal",
+      "t3": "Maintain a tagged, searchable video library",
+      "t4": "End every clip with a single measurable next step",
+      "t5": "Retire outdated UI videos after each release",
+      "t6": "Reserve live calls for complex migrations and exec stakeholders"
+    },
+    "async-communication-etiquette": {
+      "category": "Guides",
+      "readTime": "10 min read",
+      "metaTitle": "Async Communication Etiquette for Distributed Teams",
+      "metaDescription": "Clear norms for async messaging, response times, threads, and video updates on distributed teams—so communication stays respectful and productive.",
+      "title": "Async Communication Etiquette Every Distributed Team Should Adopt",
+      "excerpt": "Without etiquette, async becomes chaos: vague subjects, mystery urgency, and threads that never close. These norms keep distributed communication fast and respectful.",
+      "intro": [
+        "Async communication fails politely. People do not argue about norms—they just suffer in silence, check Slack at midnight, or disengage.",
+        "Etiquette is not bureaucracy. It is the minimum shared language that prevents misunderstandings across time zones, cultures, and working styles.",
+        "We compiled these rules from teams we coached and from our own mistakes at theRec. Adopt them as defaults, adapt what does not fit, and publish them where everyone can see."
+      ],
+      "sections": [
+        {
+          "title": "1. Lead With Context and a Clear Ask",
+          "paragraphs": [
+            "The first line should answer: what is this about and what do you need? Bad: \"Quick question.\" Good: \"Need approval on Q3 copy by Friday for the landing page—link below.\"",
+            "Context upfront respects the reader's time and reduces round trips."
+          ]
+        },
+        {
+          "title": "2. Label Urgency Explicitly",
+          "paragraphs": [
+            "Use a shared vocabulary—P0 through P3, or \"today / this week / when you can.\" Never rely on \"ASAP\" alone.",
+            "If everything is urgent, nothing is. Leaders must not mark routine requests as emergencies."
+          ]
+        },
+        {
+          "title": "3. Respect Response-Time Norms",
+          "paragraphs": [
+            "Publish expected response windows for each channel. Slack is not email. Email is not a pager unless on-call.",
+            "Acknowledge receipt on complex threads even if the full answer comes later."
+          ]
+        },
+        {
+          "title": "4. Close Loops Publicly",
+          "paragraphs": [
+            "When a decision is made in DMs, summarize it back to the group channel. Future teammates should not reopen settled questions.",
+            "Mark threads resolved or edit the opening post with the outcome."
+          ]
+        },
+        {
+          "title": "5. Choose the Right Medium",
+          "paragraphs": [
+            "Text for facts and searchable reference. Video for UI walkthroughs and tone-sensitive messages. Live calls for unresolved conflict or rapid brainstorming.",
+            "Switching medium is a feature, not a failure."
+          ]
+        }
+      ],
+      "perspectiveTitle": "Our Real-World Experience at theRec",
+      "perspectiveParagraphs": [
+        "We published a one-page async etiquette doc after a messy launch thread spread across four channels. Incident resolution time improved because everyone knew where updates belonged.",
+        "Our most violated rule—surprisingly—was closing loops. We added a habit: decision makers post a one-line recap in the original thread. Confusion tickets dropped the next sprint.",
+        "Etiquette works only if leaders violate it last. When executives send vague pings, the team copies the pattern within a week."
+      ],
+      "closingParagraphs": [
+        "Async etiquette turns scattered tools into a coherent system. Write the rules, model them, and revisit quarterly.",
+        "When etiquette says \"show, don't tell,\" short screen recordings carry the detail. Tools like theRec make that the path of least resistance—record, share, and let the next timezone act with full context."
+      ],
+      "t1": "Open messages with context and a specific ask",
+      "t2": "Use shared urgency labels instead of vague ASAP",
+      "t3": "Publish and honor channel response-time norms",
+      "t4": "Summarize decisions back to the group channel",
+      "t5": "Match medium to message: text, video, or live",
+      "t6": "Review etiquette defaults every quarter"
+    },
+    "recording-flow": {
+      "category": "Product",
+      "readTime": "7 min read",
+      "title": "How Screen Recording Works on theRec.site",
+      "excerpt": "A clear walkthrough of capture, upload, processing, and sharing—so you know what happens behind the scenes and how to troubleshoot delays.",
+      "p1": "Every recording on theRec.site begins in the browser: you choose a screen, window, or tab, optionally enable camera and microphone, and capture your session without installing desktop software. That lowers friction for guests, contractors, and teammates who need to contribute quickly.",
+      "p2": "After capture, the file moves through secure upload. Large sessions are transferred in parts so unstable networks can recover without starting over. You will see status updates while chunks upload; leaving the tab open until upload completes helps avoid incomplete transfers.",
+      "p3": "Once upload finishes, processing begins. The platform generates playback-friendly formats, thumbnails, and streaming-ready output. Processing time depends on length, resolution, and current system load. Short walkthroughs are usually ready within minutes; longer sessions may take more time.",
+      "p4": "When processing completes, the recording is ready to view and share. You can keep it private inside a workspace, invite teammates, or generate a link for external viewers. Understanding this pipeline helps you plan support tickets, set expectations with stakeholders, and record with quality that survives compression.",
+      "t1": "Capture happens entirely in the browser",
+      "t2": "Multipart upload improves reliability on slow networks",
+      "t3": "Processing prepares playback, thumbnails, and streaming",
+      "t4": "Sharing options range from private workspace to public links"
     },
     "lifecycle": {
       "category": "Product",

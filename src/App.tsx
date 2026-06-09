@@ -42,6 +42,8 @@ import RefundPolicyPage from "./pages/RefundPolicy";
 import ContactPage from "./pages/Contact";
 import AboutPage from "./pages/About";
 import BlogsPage from "./pages/Blogs";
+import BlogPostPage from "./pages/BlogPost";
+import { getAllBlogPostPaths } from "@/lib/blogPosts";
 import SuperAdminRecordingsPage from "./pages/admin/SuperAdminRecordings";
 import SuperAdminWorkspacesPage from "./pages/admin/SuperAdminWorkspaces";
 import SuperAdminUsersPage from "./pages/admin/SuperAdminUsers";
@@ -113,6 +115,11 @@ export const routes: RouteRecord[] = [
       { path: "about", element: <AboutPage /> },
       { path: "how-it-works", element: <HowItWorksPage /> },
       { path: "blogs", element: <BlogsPage /> },
+      {
+        path: "blogs/:slug",
+        element: <BlogPostPage />,
+        getStaticPaths: () => getAllBlogPostPaths(),
+      },
       { path: "select-workspace", element: <ProtectedRoute><SelectWorkspacePage /></ProtectedRoute> },
       { path: "dashboard", element: <ProtectedRoute><Dashboard /></ProtectedRoute> },
       { path: "record", element: <ProtectedRoute><RecordScreen /></ProtectedRoute> },

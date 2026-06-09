@@ -4,7 +4,7 @@ import { ArrowRight, BookOpen, Clock } from "lucide-react";
 import { Badge } from "@/components/Badge";
 import { Button } from "@/components/ui/button";
 import { Reveal } from "@/components/Reveal";
-import { BLOG_POST_IDS } from "@/lib/blogPosts";
+import { BLOG_POST_IDS, getBlogPostPathById } from "@/lib/blogPosts";
 
 export default function HomeBlogSection() {
   const { t } = useTranslation(["home", "marketing"]);
@@ -38,7 +38,7 @@ export default function HomeBlogSection() {
           {featuredIds.map((id, index) => (
             <Link
               key={id}
-              to={`/blogs#${id}`}
+              to={getBlogPostPathById(id) ?? "/blogs"}
               className={`group glass rounded-3xl border border-border/60 p-6 md:p-7 transition-all duration-300 hover:-translate-y-1 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 ${
                 index === 0 ? "md:row-span-1 bg-gradient-to-br from-primary/5 via-transparent to-transparent" : ""
               }`}

@@ -91,7 +91,12 @@ function resolveRouteKey(pathname: string): RouteSeoKey | undefined {
   if (PATH_TO_ROUTE[pathname]) return PATH_TO_ROUTE[pathname];
   if (pathname.startsWith("/preview/")) return "preview";
   if (pathname.startsWith("/share/")) return "share";
+  if (/^\/blogs\/[^/]+$/.test(pathname)) return "blogs";
   return undefined;
+}
+
+function isIndividualBlogPost(pathname: string): boolean {
+  return /^\/blogs\/[^/]+$/.test(pathname);
 }
 
 export default function SeoManager() {
@@ -102,7 +107,12 @@ export default function SeoManager() {
   const meta = useMemo(() => {
     const routeKey = resolveRouteKey(location.pathname);
     const isPrivate = PRIVATE_PATH_PREFIXES.some((p) => location.pathname.startsWith(p));
-    const is404 = !routeKey && !location.pathname.startsWith("/preview/") && !location.pathname.startsWith("/share/");
+    const isBlogPost = isIndividualBlogPost(location.pathname);
+    const is404 =
+      !routeKey &&
+      !isBlogPost &&
+      !location.pathname.startsWith("/preview/") &&
+      !location.pathname.startsWith("/share/");
 
     let pageTitle = t("defaultTitle");
     let description = t("defaultDescription");
@@ -133,6 +143,12 @@ export default function SeoManager() {
   const canonical = `${SITE_URL}${location.pathname === "/" ? "" : location.pathname}`;
   const ogLocale = lang === "ar" ? "ar_EG" : "en_US";
   const ogLocaleAlt = lang === "ar" ? "en_US" : "ar_EG";
+
+  const isBlogPost = isIndividualBlogPost(location.pathname);
+
+  if (isBlogPost) {
+    return <StructuredDataScripts routeKey="blogs" pathname={location.pathname} />;
+  }
 
   return (
     <>
