@@ -75,7 +75,10 @@ export type RecordingEvent =
   | "processing_initiated"
   | "video_ready"
   | "video_deleted"
-  | "processing_failed";
+  | "processing_failed"
+  | "comment_created"
+  | "comment_replied"
+  | "comment_deleted";
 
 export type PlanEvent = "limit_warning";
 

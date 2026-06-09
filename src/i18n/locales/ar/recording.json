@@ -171,6 +171,17 @@
     "cameraRecordingFailed": "فشل تسجيل الكاميرا.",
     "screenRecordingFailed": "فشل تسجيل الشاشة."
   },
+  "comments": {
+    "title": "التعليقات",
+    "placeholder": "أضف تعليقاً…",
+    "post": "نشر التعليق",
+    "reply": "رد",
+    "replyPlaceholder": "اكتب رداً…",
+    "postReply": "نشر الرد",
+    "empty": "لا توجد تعليقات بعد. ابدأ المحادثة.",
+    "deleteTitle": "حذف التعليق؟",
+    "deleteDesc": "سيُزال هذا التعليق وردوده."
+  },
   "upload": {
     "dropVideoOnly": "يرجى إسقاط ملف فيديو.",
     "workspaceRequired": "مساحة عمل مطلوبة",

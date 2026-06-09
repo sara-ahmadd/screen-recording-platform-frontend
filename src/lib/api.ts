@@ -110,7 +110,9 @@ export async function apiFetch<T = any>(
     !path.startsWith("/workspace/accept-invite") &&
     path !== "/analytics/events" &&
     !path.startsWith("/feedback") &&
-    !path.includes("/subscription/paymob/repair?")
+    !path.includes("/subscription/paymob/repair?") &&
+    !/\/recordings\/\d+\/comments$/.test(path) &&
+    !path.startsWith("/comments")
   ) {
     try {
       const parsed = JSON.parse(String(requestBody));
@@ -742,6 +744,27 @@ export const analyticsApi = {
     apiFetch("/analytics/events", {
       method: "POST",
       body: JSON.stringify(data),
+    }),
+};
+
+// Recording comments
+export const commentsApi = {
+  list: (recordingId: number) =>
+    apiFetch(`/recordings/${recordingId}/comments`),
+  create: (recordingId: number, content: string) =>
+    apiFetch(`/recordings/${recordingId}/comments`, {
+      method: "POST",
+      body: JSON.stringify({ content }),
+    }),
+  reply: (commentId: number, content: string) =>
+    apiFetch(`/comments/${commentId}/reply`, {
+      method: "POST",
+      body: JSON.stringify({ content }),
+    }),
+  delete: (commentId: number) =>
+    apiFetch(`/comments/${commentId}`, {
+      method: "DELETE",
+      body: JSON.stringify({}),
     }),
 };
 

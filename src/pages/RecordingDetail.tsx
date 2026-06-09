@@ -23,6 +23,7 @@ import {
 } from "@/lib/workspaceSubscription";
 import { resumeScreenRecordingFromServer } from "@/lib/resumeScreenUpload";
 import { trackClientEvent } from "@/lib/analyticsClient";
+import RecordingComments from "@/components/recordings/RecordingComments";
 
 export default function RecordingDetailPage() {
   const { t } = useTranslation(["dashboard", "recording", "common"]);
@@ -615,6 +616,10 @@ export default function RecordingDetailPage() {
 
           </CardContent>
         </Card>
+
+        {recordingId > 0 && recording?.status === "ready" && (
+          <RecordingComments recordingId={recordingId} />
+        )}
 
         <Dialog open={shareDialogOpen} onOpenChange={setShareDialogOpen}>
           <DialogContent>

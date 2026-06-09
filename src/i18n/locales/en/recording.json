@@ -171,6 +171,17 @@
     "cameraRecordingFailed": "Camera recording failed.",
     "screenRecordingFailed": "Screen recording failed."
   },
+  "comments": {
+    "title": "Comments",
+    "placeholder": "Add a comment…",
+    "post": "Post comment",
+    "reply": "Reply",
+    "replyPlaceholder": "Write a reply…",
+    "postReply": "Post reply",
+    "empty": "No comments yet. Start the conversation.",
+    "deleteTitle": "Delete comment?",
+    "deleteDesc": "This comment and its replies will be removed."
+  },
   "upload": {
     "dropVideoOnly": "Please drop a video file.",
     "workspaceRequired": "Workspace required",
