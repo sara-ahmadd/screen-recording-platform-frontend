@@ -1,5 +1,11 @@
 /** Ordered blog post ids — shared by home teaser and blogs page. */
 export const BLOG_POST_IDS = [
+  "remote-communication",
+  "timezone-collaboration",
+  "meeting-fatigue",
+  "async-onboarding",
+  "video-vs-text",
+  "remote-feedback",
   "async-video",
   "recording-flow",
   "screen-camera",

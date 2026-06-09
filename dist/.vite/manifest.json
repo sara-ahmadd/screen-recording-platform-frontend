@@ -1,6 +1,6 @@
 {
-  "_client-XMSqDnST.js": {
-    "file": "assets/client-XMSqDnST.js",
+  "_client-HJto5AFr.js": {
+    "file": "assets/client-HJto5AFr.js",
     "name": "client",
     "isDynamicEntry": true,
     "imports": [
@@ -8,15 +8,15 @@
     ]
   },
   "index.html": {
-    "file": "assets/app-4FScVCdA.js",
+    "file": "assets/app-Bb2hrL5C.js",
     "name": "app",
     "src": "index.html",
     "isEntry": true,
     "dynamicImports": [
-      "_client-XMSqDnST.js"
+      "_client-HJto5AFr.js"
     ],
     "css": [
-      "assets/app-tti6yQd8.css"
+      "assets/app-tnbqpDJ1.css"
     ],
     "assets": [
       "assets/logo-Bbe7nbNw.png"

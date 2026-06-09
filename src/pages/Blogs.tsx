@@ -9,7 +9,33 @@ import { BLOG_POST_IDS, type BlogPostId } from "@/lib/blogPosts";
 import EditorialByline from "@/components/EditorialByline";
 
 const PARAGRAPH_KEYS = ["p1", "p2", "p3", "p4"] as const;
-const TAKEAWAY_KEYS = ["t1", "t2", "t3", "t4"] as const;
+const TAKEAWAY_KEYS = ["t1", "t2", "t3", "t4", "t5", "t6"] as const;
+
+type BlogSubsection = {
+  title: string;
+  paragraphs?: string[];
+  bullets?: string[];
+};
+
+type BlogSection = {
+  title: string;
+  paragraphs?: string[];
+  bullets?: string[];
+  subsections?: BlogSubsection[];
+};
+
+function asStringArray(value: unknown): string[] {
+  if (Array.isArray(value)) return value.filter((item): item is string => typeof item === "string");
+  return [];
+}
+
+function asSections(value: unknown): BlogSection[] {
+  if (!Array.isArray(value)) return [];
+  return value.filter(
+    (item): item is BlogSection =>
+      typeof item === "object" && item !== null && typeof (item as BlogSection).title === "string",
+  );
+}
 
 function scrollToHash(hash: string) {
   const id = hash.replace(/^#/, "");
@@ -18,6 +44,32 @@ function scrollToHash(hash: string) {
   if (el) {
     window.setTimeout(() => el.scrollIntoView({ behavior: "smooth", block: "start" }), 80);
   }
+}
+
+function RichText({ text }: { text: string }) {
+  const parts = text.split(/(\*\*[^*]+\*\*)/g);
+  return (
+    <>
+      {parts.map((part, index) => {
+        if (part.startsWith("**") && part.endsWith("**")) {
+          return (
+            <strong key={index} className="font-semibold text-foreground">
+              {part.slice(2, -2)}
+            </strong>
+          );
+        }
+        return <span key={index}>{part}</span>;
+      })}
+    </>
+  );
+}
+
+function slugifyHeading(text: string, index: number) {
+  const slug = text
+    .toLowerCase()
+    .replace(/[^a-z0-9\u0600-\u06FF]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+  return slug || `section-${index}`;
 }
 
 export default function BlogsPage() {
@@ -103,6 +155,14 @@ type BlogArticleProps = {
 
 function BlogArticle({ id, showAdAfter, t }: BlogArticleProps) {
   const prefix = `marketing:blogs.posts.${id}`;
+  const sections = asSections(t(`${prefix}.sections`, { returnObjects: true }));
+  const intro = asStringArray(t(`${prefix}.intro`, { returnObjects: true }));
+  const perspectiveParagraphs = asStringArray(t(`${prefix}.perspectiveParagraphs`, { returnObjects: true }));
+  const closingParagraphs = asStringArray(t(`${prefix}.closingParagraphs`, { returnObjects: true }));
+  const isRichPost = sections.length > 0;
+  const perspectiveTitle = t(`${prefix}.perspectiveTitle`, { defaultValue: "" });
+  const metaDescription = t(`${prefix}.metaDescription`, { defaultValue: "" });
+  const takeaways = TAKEAWAY_KEYS.map((key) => t(`${prefix}.${key}`, { defaultValue: "" })).filter(Boolean);
 
   return (
     <>
@@ -123,26 +183,100 @@ function BlogArticle({ id, showAdAfter, t }: BlogArticleProps) {
         <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-foreground">{t(`${prefix}.title`)}</h2>
         <EditorialByline variant="compact" className="mt-3" />
         <p className="mt-3 text-muted-foreground leading-relaxed">{t(`${prefix}.excerpt`)}</p>
+        {metaDescription ? (
+          <p className="sr-only">{metaDescription}</p>
+        ) : null}
 
         <div className="mt-8 space-y-5 text-base leading-relaxed text-muted-foreground">
-          {PARAGRAPH_KEYS.map((key) => (
-            <p key={key}>{t(`${prefix}.${key}`)}</p>
-          ))}
+          {isRichPost ? (
+            <>
+              {intro.map((paragraph) => (
+                <p key={paragraph.slice(0, 48)}>
+                  <RichText text={paragraph} />
+                </p>
+              ))}
+              {sections.map((section, sectionIndex) => {
+                const sectionId = `${id}-${slugifyHeading(section.title, sectionIndex)}`;
+                return (
+                  <section key={sectionId} id={sectionId} className="scroll-mt-28 pt-4">
+                    <h3 className="text-xl md:text-2xl font-semibold text-foreground mb-4">{section.title}</h3>
+                    {asStringArray(section.paragraphs).map((paragraph) => (
+                      <p key={paragraph.slice(0, 48)} className="mb-4">
+                        <RichText text={paragraph} />
+                      </p>
+                    ))}
+                    {asStringArray(section.bullets).length > 0 ? (
+                      <ul className="mb-4 list-disc ps-6 space-y-2">
+                        {asStringArray(section.bullets).map((bullet) => (
+                          <li key={bullet.slice(0, 48)}>
+                            <RichText text={bullet} />
+                          </li>
+                        ))}
+                      </ul>
+                    ) : null}
+                    {(section.subsections ?? []).length > 0
+                      ? (section.subsections ?? []).map((subsection, subIndex) => (
+                          <div key={`${sectionId}-sub-${subIndex}`} className="mt-6">
+                            <h4 className="text-lg font-semibold text-foreground mb-3">{subsection.title}</h4>
+                            {asStringArray(subsection.paragraphs).map((paragraph) => (
+                              <p key={paragraph.slice(0, 48)} className="mb-4">
+                                <RichText text={paragraph} />
+                              </p>
+                            ))}
+                            {asStringArray(subsection.bullets).length > 0 ? (
+                              <ul className="mb-4 list-disc ps-6 space-y-2">
+                                {asStringArray(subsection.bullets).map((bullet) => (
+                                  <li key={bullet.slice(0, 48)}>
+                                    <RichText text={bullet} />
+                                  </li>
+                                ))}
+                              </ul>
+                            ) : null}
+                          </div>
+                        ))
+                      : null}
+                  </section>
+                );
+              })}
+              {perspectiveTitle && perspectiveParagraphs.length > 0 ? (
+                <section className="pt-6 border-t border-border/50">
+                  <h3 className="text-xl md:text-2xl font-semibold text-foreground mb-4">{perspectiveTitle}</h3>
+                  {perspectiveParagraphs.map((paragraph) => (
+                    <p key={paragraph.slice(0, 48)} className="mb-4">
+                      <RichText text={paragraph} />
+                    </p>
+                  ))}
+                </section>
+              ) : null}
+              {closingParagraphs.map((paragraph) => (
+                <p key={paragraph.slice(0, 48)} className="mb-4">
+                  <RichText text={paragraph} />
+                </p>
+              ))}
+            </>
+          ) : (
+            PARAGRAPH_KEYS.map((key) => {
+              const value = t(`${prefix}.${key}`, { defaultValue: "" });
+              return value ? <p key={key}>{value}</p> : null;
+            })
+          )}
         </div>
 
-        <div className="mt-10 rounded-2xl border border-border/60 bg-muted/30 p-5 md:p-6">
-          <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground mb-4">
-            {t("marketing:blogs.takeawaysTitle")}
-          </h3>
-          <ul className="space-y-3">
-            {TAKEAWAY_KEYS.map((key) => (
-              <li key={key} className="flex gap-3 text-sm text-muted-foreground">
-                <CheckCircle2 className="h-4 w-4 text-primary shrink-0 mt-0.5" />
-                <span>{t(`${prefix}.${key}`)}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
+        {takeaways.length > 0 ? (
+          <div className="mt-10 rounded-2xl border border-border/60 bg-muted/30 p-5 md:p-6">
+            <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground mb-4">
+              {t("marketing:blogs.takeawaysTitle")}
+            </h3>
+            <ul className="space-y-3">
+              {takeaways.map((takeaway) => (
+                <li key={takeaway} className="flex gap-3 text-sm text-muted-foreground">
+                  <CheckCircle2 className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                  <span>{takeaway}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
       </article>
       {showAdAfter && (
         <div className="py-2">
