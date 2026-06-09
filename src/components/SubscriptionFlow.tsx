@@ -1,10 +1,8 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { ZoomIn, X } from "lucide-react";
 
 const SubscriptionWorkflow: React.FC = () => {
   const { t } = useTranslation("marketing");
-  const [previewImage, setPreviewImage] = useState<string | null>(null);
 
   const subscriptionSteps = useMemo(
     () =>
@@ -46,29 +44,12 @@ const SubscriptionWorkflow: React.FC = () => {
           </div>
 
           {/* FLOW IMAGE */}
-          <div
-            onClick={() =>
-              setPreviewImage("/assets/how-it-works/subscription-flow.png")
-            }
-            className="group relative rounded-[34px] overflow-hidden border border-border shadow-[0_20px_80px_rgba(0,0,0,0.08)] dark:shadow-[0_20px_80px_rgba(0,0,0,0.45)] mb-24 bg-background cursor-pointer"
-          >
-
+          <div className="relative rounded-[34px] overflow-hidden border border-border shadow-[0_20px_80px_rgba(0,0,0,0.08)] dark:shadow-[0_20px_80px_rgba(0,0,0,0.45)] mb-24 bg-background">
             <img
               src="/assets/how-it-works/subscription-flow.png"
               alt={t("subscriptionFlow.imageAlt")}
-              className="w-full h-auto object-cover transition-all duration-500 group-hover:scale-[1.02]"
+              className="w-full h-auto object-cover"
             />
-
-            {/* Overlay */}
-            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 dark:group-hover:bg-black/40 transition-all duration-300 flex items-center justify-center">
-
-              <div className="opacity-0 group-hover:opacity-100 transition-all duration-300 bg-white/90 dark:bg-black/70 backdrop-blur-xl rounded-full p-5 shadow-2xl">
-
-                <ZoomIn className="h-10 w-10 text-[#6C47FF] dark:text-violet-300" />
-
-              </div>
-            </div>
-
           </div>
 
           {/* BOTTOM DETAILED STEPS */}
@@ -100,27 +81,6 @@ const SubscriptionWorkflow: React.FC = () => {
 
         </div>
       </section>
-
-      {/* PREVIEW MODAL */}
-      {previewImage && (
-        <div className="fixed inset-0 z-[9999] bg-black/80 backdrop-blur-md flex items-center justify-center p-6">
-
-          {/* Close Button */}
-          <button
-            onClick={() => setPreviewImage(null)}
-            className="absolute top-6 right-6 h-14 w-14 rounded-full bg-white dark:bg-zinc-900 border border-white/10 text-black dark:text-white flex items-center justify-center shadow-2xl transition-all duration-300 hover:scale-105"
-          >
-            <X className="h-7 w-7" />
-          </button>
-
-          {/* Image */}
-          <img
-            src={previewImage}
-            alt={t("subscriptionFlow.preview")}
-            className="max-w-[95vw] max-h-[92vh] object-contain rounded-3xl shadow-[0_20px_120px_rgba(0,0,0,0.5)] animate-in fade-in zoom-in duration-300"
-          />
-        </div>
-      )}
     </>
   );
 };

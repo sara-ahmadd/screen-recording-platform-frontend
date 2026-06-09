@@ -124,8 +124,8 @@ export const BLOG_POSTS: readonly BlogPostDefinition[] = [
   },
   {
     id: "recording-flow",
-    slug: "how-screen-recording-works",
-    primaryKeyword: "how screen recording works",
+    slug: "browser-screen-recording-for-remote-staff",
+    primaryKeyword: "browser screen recording for remote staff",
     calendarFeatured: false,
     sortOrder: 16,
   },

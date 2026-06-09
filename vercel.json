@@ -1,3 +1,28 @@
 {
-  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "rewrites": [
+    { "source": "/login", "destination": "/index.html" },
+    { "source": "/register", "destination": "/index.html" },
+    { "source": "/verify", "destination": "/index.html" },
+    { "source": "/forgot-password", "destination": "/index.html" },
+    { "source": "/dashboard/:path*", "destination": "/index.html" },
+    { "source": "/record/:path*", "destination": "/index.html" },
+    { "source": "/upload/:path*", "destination": "/index.html" },
+    { "source": "/recording/:path*", "destination": "/index.html" },
+    { "source": "/workspaces/:path*", "destination": "/index.html" },
+    { "source": "/billing/:path*", "destination": "/index.html" },
+    { "source": "/subscription/:path*", "destination": "/index.html" },
+    { "source": "/checkout/:path*", "destination": "/index.html" },
+    { "source": "/notifications/:path*", "destination": "/index.html" },
+    { "source": "/profile/:path*", "destination": "/index.html" },
+    { "source": "/feedback/:path*", "destination": "/index.html" },
+    { "source": "/select-workspace/:path*", "destination": "/index.html" },
+    { "source": "/accept-invite/:path*", "destination": "/index.html" },
+    { "source": "/workspace/:path*", "destination": "/index.html" },
+    { "source": "/super-admin/:path*", "destination": "/index.html" },
+    { "source": "/preview/:path*", "destination": "/index.html" },
+    { "source": "/share/:path*", "destination": "/index.html" },
+    { "source": "/payment/:path*", "destination": "/index.html" }
+  ]
 }

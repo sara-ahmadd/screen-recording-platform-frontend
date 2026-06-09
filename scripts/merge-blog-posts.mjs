@@ -47,7 +47,7 @@ const SLUGS = {
   "screen-camera": "screen-camera-vs-screen-only-recording",
   "video-onboarding-customers": "video-onboarding-customer-success-teams",
   "async-communication-etiquette": "async-communication-etiquette-distributed-teams",
-  "recording-flow": "how-screen-recording-works",
+  "recording-flow": "browser-screen-recording-for-remote-staff",
   lifecycle: "recording-status-video-lifecycle",
   "secure-sharing": "secure-video-sharing-teams",
   "upload-performance": "improve-video-upload-reliability",

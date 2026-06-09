@@ -7,6 +7,7 @@ const PARAGRAPH_KEYS = ["p1", "p2", "p3", "p4"] as const;
 const TAKEAWAY_KEYS = ["t1", "t2", "t3", "t4", "t5", "t6"] as const;
 
 const IMAGE_FLAG_PATTERN = /^\[INSERT[^\]]+\]$/i;
+const IMAGE_ASSET_PATTERN = /^\[IMAGE:([^|\]]+)\|([^\]]+)\]$/i;
 
 type BlogSubsection = {
   title: string;
@@ -64,6 +65,23 @@ export function RichText({ text }: { text: string }) {
   );
 }
 
+function BlogImage({ src, caption }: { src: string; caption: string }) {
+  return (
+    <figure className="my-8 overflow-hidden rounded-2xl border border-border/60 bg-muted/20 not-prose">
+      <img
+        src={src}
+        alt={caption}
+        loading="lazy"
+        decoding="async"
+        className="w-full h-auto object-cover"
+      />
+      <figcaption className="px-4 py-3 text-sm leading-relaxed text-muted-foreground border-t border-border/40 bg-muted/30">
+        {caption}
+      </figcaption>
+    </figure>
+  );
+}
+
 function ImagePlaceholder({ caption }: { caption: string }) {
   return (
     <figure className="my-8 rounded-2xl border border-dashed border-violet-500/40 bg-gradient-to-br from-violet-500/5 to-primary/5 p-8 text-center not-prose">
@@ -80,6 +98,10 @@ function ImagePlaceholder({ caption }: { caption: string }) {
 
 function ContentBlock({ text }: { text: string }) {
   const trimmed = text.trim();
+  const imageMatch = trimmed.match(IMAGE_ASSET_PATTERN);
+  if (imageMatch) {
+    return <BlogImage src={imageMatch[1].trim()} caption={imageMatch[2].trim()} />;
+  }
   if (IMAGE_FLAG_PATTERN.test(trimmed) || trimmed.startsWith("[INSERT")) {
     const caption = trimmed.replace(/^\[INSERT[^:]*:\s*/i, "").replace(/\]$/, "");
     return <ImagePlaceholder caption={caption} />;

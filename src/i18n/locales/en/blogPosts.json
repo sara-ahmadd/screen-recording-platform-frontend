@@ -29,7 +29,7 @@
         "Remote work did not invent communication problems. It amplified them. When your teammate sits three desks away, you can lean over and clarify a confusing message in thirty seconds. When they are in Lisbon and you are in Chicago, that same confusion can sit unresolved for a full business day.",
         "In our experience coaching distributed product, engineering, and customer-success teams, the teams that communicate well share one trait: they treat communication as a system, not a personality test. They decide where conversations live, how fast responses should happen, and what deserves a live call versus a thoughtful async update.",
         "The seven practices below are not theory. We have seen them reduce misalignment, shorten decision cycles, and—most importantly—give people their calendars back.",
-        "[INSERT CUSTOM SCREENSHOT: Remote team communication channel map showing Slack, docs, and async video workflows]"
+        "[IMAGE:/blog/remote-communication/channel-map.png|Remote team communication channel map showing Slack, docs, and async video workflows]"
       ],
       "sections": [
         {
@@ -73,7 +73,7 @@
             "Some information does not survive copy-paste. UI bugs, workflow demos, design reviews, and onboarding tours need visual context. A paragraph describing where to click is almost always slower than a ninety-second screen recording.",
             "When a support lead at a fintech startup started attaching short walkthrough videos to complex tickets, escalation rates dropped noticeably. Customers understood the fix. Internal teams stopped re-opening tickets because a screenshot missed the dropdown that only appeared on hover.",
             "You do not need Hollywood production value. Clear audio, a clean screen, and a stated goal in the first ten seconds beat a polished but rambling ten-minute video every time.",
-            "[INSERT CUSTOM SCREENSHOT: Example short screen recording attached to a bug ticket]"
+            "[IMAGE:/blog/remote-communication/bug-ticket-recording.png|Example short screen recording attached to a bug ticket]"
           ]
         },
         {
@@ -881,18 +881,20 @@
       "t6": "Review etiquette defaults every quarter"
     },
     "recording-flow": {
-      "category": "Product",
+      "category": "Guides",
       "readTime": "7 min read",
-      "title": "How Screen Recording Works on theRec.site",
-      "excerpt": "A clear walkthrough of capture, upload, processing, and sharing—so you know what happens behind the scenes and how to troubleshoot delays.",
-      "p1": "Every recording on theRec.site begins in the browser: you choose a screen, window, or tab, optionally enable camera and microphone, and capture your session without installing desktop software. That lowers friction for guests, contractors, and teammates who need to contribute quickly.",
-      "p2": "After capture, the file moves through secure upload. Large sessions are transferred in parts so unstable networks can recover without starting over. You will see status updates while chunks upload; leaving the tab open until upload completes helps avoid incomplete transfers.",
-      "p3": "Once upload finishes, processing begins. The platform generates playback-friendly formats, thumbnails, and streaming-ready output. Processing time depends on length, resolution, and current system load. Short walkthroughs are usually ready within minutes; longer sessions may take more time.",
-      "p4": "When processing completes, the recording is ready to view and share. You can keep it private inside a workspace, invite teammates, or generate a link for external viewers. Understanding this pipeline helps you plan support tickets, set expectations with stakeholders, and record with quality that survives compression.",
-      "t1": "Capture happens entirely in the browser",
-      "t2": "Multipart upload improves reliability on slow networks",
-      "t3": "Processing prepares playback, thumbnails, and streaming",
-      "t4": "Sharing options range from private workspace to public links"
+      "title": "How Browser-Based Screen Recording Works for Remote Staff",
+      "metaTitle": "Browser Screen Recording for Remote Staff: How It Works",
+      "metaDescription": "A plain-language guide to browser screen capture for distributed teams—permissions, audio setup, what gets recorded, and how staff can share walkthroughs safely.",
+      "excerpt": "A plain-language guide to browser screen capture for distributed teams—permissions, audio setup, what gets recorded, and how staff can share walkthroughs safely.",
+      "p1": "Browser-based screen recording lets remote staff capture their screen, a single window, or a browser tab without installing desktop software. When someone starts a recording, the browser asks which surface to share and whether to include system audio, a microphone, or a webcam. That permission step is deliberate: nothing is captured until the user explicitly chooses what to expose.",
+      "p2": "Once capture begins, the browser encodes video locally—often using WebM or similar formats—while the presenter narrates steps or demonstrates a workflow. Good audio matters more than perfect video for internal walkthroughs: a quiet room, muted notifications, and a consistent distance from the microphone help viewers follow along without replaying sections.",
+      "p3": "Most browser recorders support three common modes: full screen for broad demos, a single application window for focused tutorials, and a browser tab when the lesson stays inside one web app. Staff should pick the smallest surface that still shows the full context. Sharing an entire monitor when only one spreadsheet matters increases the risk of exposing unrelated tabs or notifications.",
+      "p4": "After recording, files are typically uploaded to cloud storage where teammates can watch asynchronously. Before sharing externally, review the footage for passwords, customer data, or private messages visible on screen. Teams that treat browser recording as a standard communication tool—planned, scoped, and reviewed—replace many live meetings without sacrificing clarity.",
+      "t1": "Capture starts only after explicit browser permission",
+      "t2": "Clear audio beats high resolution for walkthroughs",
+      "t3": "Choose the smallest screen surface that shows full context",
+      "t4": "Review recordings before sharing outside the team"
     },
     "lifecycle": {
       "category": "Product",

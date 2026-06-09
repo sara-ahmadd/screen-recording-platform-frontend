@@ -1,0 +1,9 @@
+# Static pre-rendered blog and marketing pages are served as .html files (cleanUrls).
+# SPA fallback only for authenticated / app routes.
+/blogs/:slug  /blogs/:slug.html  200
+/blogs        /blogs.html        200
+/about        /about.html        200
+/contact      /contact.html      200
+/demo         /demo.html         200
+/how-it-works /how-it-works.html 200
+/plans        /plans.html        200

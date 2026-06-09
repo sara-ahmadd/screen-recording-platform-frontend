@@ -95,16 +95,20 @@ const resources = {
   },
 };
 
-void i18n
-  .use(LanguageDetector)
-  .use(initReactI18next)
-  .init({
+const i18nChain = i18n.use(initReactI18next);
+if (typeof window !== "undefined") {
+  i18nChain.use(LanguageDetector);
+}
+
+void i18nChain.init({
     resources,
     ns: [...namespaces],
     defaultNS: "common",
     fallbackLng: FALLBACK_LANGUAGE,
     supportedLngs: ["en", "ar"],
     nonExplicitSupportedLngs: true,
+    // Force English during SSG/SSR so crawlers receive stable, indexable article text.
+    lng: typeof window === "undefined" ? DEFAULT_LANGUAGE : undefined,
     interpolation: { escapeValue: false },
     returnNull: false,
     returnEmptyString: false,
@@ -115,11 +119,14 @@ void i18n
       }
       return key;
     },
-    detection: {
-      order: ["localStorage", "navigator"],
-      lookupLocalStorage: LANGUAGE_STORAGE_KEY,
-      caches: ["localStorage"],
-    },
+    detection:
+      typeof window === "undefined"
+        ? undefined
+        : {
+            order: ["localStorage", "navigator"],
+            lookupLocalStorage: LANGUAGE_STORAGE_KEY,
+            caches: ["localStorage"],
+          },
     react: { useSuspense: false },
   });
 

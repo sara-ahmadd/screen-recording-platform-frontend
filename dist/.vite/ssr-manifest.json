@@ -18,7 +18,7 @@
     "/assets/logo-Bbe7nbNw.png"
   ],
   "\u0000/Users/saraahmad/Documents/my-apps/screen-recorder-frontend-lovable/node_modules/react-dom/client.js?commonjs-exports": [
-    "/assets/client-HJto5AFr.js"
+    "/assets/client-DaAxPgTw.js"
   ],
   "\u0000/Users/saraahmad/Documents/my-apps/screen-recorder-frontend-lovable/node_modules/react-dom/index.js?commonjs-module": [
     "/assets/logo-Bbe7nbNw.png"
@@ -1775,6 +1775,9 @@
   "node_modules/lucide-react/dist/esm/icons/heart-handshake.js": [
     "/assets/logo-Bbe7nbNw.png"
   ],
+  "node_modules/lucide-react/dist/esm/icons/image.js": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
   "node_modules/lucide-react/dist/esm/icons/info.js": [
     "/assets/logo-Bbe7nbNw.png"
   ],
@@ -1956,7 +1959,7 @@
     "/assets/logo-Bbe7nbNw.png"
   ],
   "node_modules/react-dom/client.js": [
-    "/assets/client-HJto5AFr.js"
+    "/assets/client-DaAxPgTw.js"
   ],
   "node_modules/react-dom/index.js": [
     "/assets/logo-Bbe7nbNw.png"
@@ -2552,6 +2555,12 @@
   "src/components/billing/SubscriptionBillingDialog.tsx": [
     "/assets/logo-Bbe7nbNw.png"
   ],
+  "src/components/blog/BlogArticleContent.tsx": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
+  "src/components/blog/BlogPostSeo.tsx": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
   "src/components/home/HomeBlogSection.tsx": [
     "/assets/logo-Bbe7nbNw.png"
   ],
@@ -2826,6 +2835,9 @@
     "/assets/logo-Bbe7nbNw.png"
   ],
   "src/pages/Billing.tsx": [
+    "/assets/logo-Bbe7nbNw.png"
+  ],
+  "src/pages/BlogPost.tsx": [
     "/assets/logo-Bbe7nbNw.png"
   ],
   "src/pages/Blogs.tsx": [
