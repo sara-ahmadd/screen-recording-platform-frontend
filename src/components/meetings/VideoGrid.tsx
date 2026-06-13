@@ -1,13 +1,14 @@
 import { useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
 import type { RemoteParticipant } from "@/hooks/useMeetingWebRTC";
-import { MicOff, VideoOff } from "lucide-react";
+import { MicOff, Monitor, VideoOff } from "lucide-react";
 
 type VideoTileProps = {
   stream?: MediaStream | null;
   displayName: string;
   audioEnabled?: boolean;
   videoEnabled?: boolean;
+  screenSharing?: boolean;
   isLocal?: boolean;
   className?: string;
 };
@@ -17,6 +18,7 @@ function VideoTile({
   displayName,
   audioEnabled = true,
   videoEnabled = true,
+  screenSharing = false,
   isLocal,
   className,
 }: VideoTileProps) {
@@ -38,6 +40,7 @@ function VideoTile({
     <div
       className={cn(
         "relative aspect-video overflow-hidden rounded-lg border bg-muted",
+        screenSharing && "aspect-auto min-h-[280px] md:min-h-[360px]",
         className,
       )}
     >
@@ -47,7 +50,10 @@ function VideoTile({
           autoPlay
           playsInline
           muted={isLocal}
-          className="h-full w-full object-cover"
+          className={cn(
+            "h-full w-full",
+            screenSharing ? "object-contain bg-black" : "object-cover",
+          )}
         />
       ) : (
         <div className="flex h-full w-full items-center justify-center bg-muted">
@@ -58,6 +64,7 @@ function VideoTile({
       )}
       <div className="absolute bottom-2 left-2 flex items-center gap-1.5 rounded-md bg-black/60 px-2 py-1 text-xs text-white">
         <span>{isLocal ? `${displayName} (You)` : displayName}</span>
+        {screenSharing && <Monitor className="h-3 w-3" />}
         {!audioEnabled && <MicOff className="h-3 w-3" />}
         {!videoEnabled && <VideoOff className="h-3 w-3" />}
       </div>
@@ -70,6 +77,7 @@ type VideoGridProps = {
   localName: string;
   audioEnabled: boolean;
   videoEnabled: boolean;
+  screenSharing: boolean;
   remoteParticipants: RemoteParticipant[];
 };
 
@@ -78,6 +86,7 @@ export default function VideoGrid({
   localName,
   audioEnabled,
   videoEnabled,
+  screenSharing,
   remoteParticipants,
 }: VideoGridProps) {
   const total = remoteParticipants.length + 1;
@@ -97,6 +106,7 @@ export default function VideoGrid({
         displayName={localName}
         audioEnabled={audioEnabled}
         videoEnabled={videoEnabled}
+        screenSharing={screenSharing}
         isLocal
       />
       {remoteParticipants.map((p) => (
@@ -106,6 +116,7 @@ export default function VideoGrid({
           displayName={p.displayName}
           audioEnabled={p.audioEnabled}
           videoEnabled={p.videoEnabled}
+          screenSharing={p.screenSharing}
         />
       ))}
     </div>

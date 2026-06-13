@@ -11,6 +11,7 @@ export type RemoteParticipant = {
   avatarUrl?: string;
   audioEnabled: boolean;
   videoEnabled: boolean;
+  screenSharing?: boolean;
   stream?: MediaStream;
 };
 
@@ -26,6 +27,16 @@ const ICE_SERVERS: RTCIceServer[] = [
   { urls: "stun:stun1.l.google.com:19302" },
 ];
 
+function buildOutboundStream(
+  videoTrack: MediaStreamTrack | null,
+  audioTracks: MediaStreamTrack[],
+) {
+  const stream = new MediaStream();
+  if (videoTrack) stream.addTrack(videoTrack);
+  audioTracks.forEach((t) => stream.addTrack(t));
+  return stream;
+}
+
 export function useMeetingWebRTC({
   meetingId,
   meetingToken,
@@ -38,33 +49,46 @@ export function useMeetingWebRTC({
   >(new Map());
   const [audioEnabled, setAudioEnabled] = useState(true);
   const [videoEnabled, setVideoEnabled] = useState(true);
+  const [screenSharing, setScreenSharing] = useState(false);
   const [connectionState, setConnectionState] = useState<
     "idle" | "connecting" | "connected" | "reconnecting" | "failed"
   >("idle");
   const [error, setError] = useState<string | null>(null);
 
   const peersRef = useRef<Map<number, RTCPeerConnection>>(new Map());
+  const cameraStreamRef = useRef<MediaStream | null>(null);
+  const screenStreamRef = useRef<MediaStream | null>(null);
   const localStreamRef = useRef<MediaStream | null>(null);
   const meetingTokenRef = useRef(meetingToken);
   const joinedRef = useRef(false);
+  const screenSharingRef = useRef(false);
 
   meetingTokenRef.current = meetingToken;
+  screenSharingRef.current = screenSharing;
 
-  const updateRemote = useCallback(
-    (participant: RemoteParticipant) => {
-      setRemoteParticipants((prev) => {
-        const next = new Map(prev);
-        const existing = next.get(participant.userId);
-        next.set(participant.userId, {
-          ...existing,
-          ...participant,
-          stream: participant.stream ?? existing?.stream,
-        });
-        return next;
-      });
+  const emitMediaState = useCallback(
+    (state: {
+      audioEnabled: boolean;
+      videoEnabled: boolean;
+      screenSharing: boolean;
+    }) => {
+      getMeetingsSocket().emit(MEETING_SOCKET_EVENTS.mediaState, state);
     },
     [],
   );
+
+  const updateRemote = useCallback((participant: RemoteParticipant) => {
+    setRemoteParticipants((prev) => {
+      const next = new Map(prev);
+      const existing = next.get(participant.userId);
+      next.set(participant.userId, {
+        ...existing,
+        ...participant,
+        stream: participant.stream ?? existing?.stream,
+      });
+      return next;
+    });
+  }, []);
 
   const removeRemote = useCallback((remoteUserId: number) => {
     const pc = peersRef.current.get(remoteUserId);
@@ -78,6 +102,45 @@ export function useMeetingWebRTC({
       return next;
     });
   }, []);
+
+  const renegotiateAllPeers = useCallback(async () => {
+    const socket = getMeetingsSocket();
+    for (const [remoteUserId, pc] of peersRef.current.entries()) {
+      if (
+        pc.signalingState !== "stable" &&
+        pc.signalingState !== "have-local-offer"
+      ) {
+        continue;
+      }
+      try {
+        const offer = await pc.createOffer();
+        await pc.setLocalDescription(offer);
+        socket.emit(MEETING_SOCKET_EVENTS.webrtcOffer, {
+          targetUserId: remoteUserId,
+          sdp: offer,
+        });
+      } catch {
+        // ignore renegotiation errors during transient states
+      }
+    }
+  }, []);
+
+  const replaceOutgoingVideoTrack = useCallback(
+    async (newVideoTrack: MediaStreamTrack | null) => {
+      for (const [, pc] of peersRef.current.entries()) {
+        const videoSender = pc
+          .getSenders()
+          .find((s) => s.track?.kind === "video");
+        if (videoSender) {
+          await videoSender.replaceTrack(newVideoTrack);
+        } else if (newVideoTrack && localStreamRef.current) {
+          pc.addTrack(newVideoTrack, localStreamRef.current);
+        }
+      }
+      await renegotiateAllPeers();
+    },
+    [renegotiateAllPeers],
+  );
 
   const createPeerConnection = useCallback(
     (remoteUserId: number) => {
@@ -143,16 +206,94 @@ export function useMeetingWebRTC({
     [createPeerConnection, userId],
   );
 
+  const stopScreenShareInternal = useCallback(async () => {
+    screenStreamRef.current?.getTracks().forEach((t) => t.stop());
+    screenStreamRef.current = null;
+    screenSharingRef.current = false;
+    setScreenSharing(false);
+
+    const camera = cameraStreamRef.current;
+    if (!camera) return;
+
+    const cameraVideo = camera.getVideoTracks()[0] ?? null;
+    const audioTracks = camera.getAudioTracks();
+    const outbound = buildOutboundStream(cameraVideo, audioTracks);
+    localStreamRef.current = outbound;
+    setLocalStream(outbound);
+
+    await replaceOutgoingVideoTrack(cameraVideo);
+    emitMediaState({
+      audioEnabled,
+      videoEnabled: cameraVideo?.enabled ?? videoEnabled,
+      screenSharing: false,
+    });
+  }, [audioEnabled, videoEnabled, emitMediaState, replaceOutgoingVideoTrack]);
+
+  const startScreenShare = useCallback(async () => {
+    if (screenSharingRef.current) return;
+    try {
+      const screenStream = await navigator.mediaDevices.getDisplayMedia({
+        video: true,
+        audio: false,
+      });
+      const screenTrack = screenStream.getVideoTracks()[0];
+      if (!screenTrack) {
+        screenStream.getTracks().forEach((t) => t.stop());
+        return;
+      }
+
+      screenStreamRef.current = screenStream;
+      screenSharingRef.current = true;
+      setScreenSharing(true);
+      setVideoEnabled(true);
+
+      screenTrack.onended = () => {
+        void stopScreenShareInternal();
+      };
+
+      const camera = cameraStreamRef.current;
+      const audioTracks = camera?.getAudioTracks() ?? [];
+      const outbound = buildOutboundStream(screenTrack, audioTracks);
+      localStreamRef.current = outbound;
+      setLocalStream(outbound);
+
+      await replaceOutgoingVideoTrack(screenTrack);
+      emitMediaState({
+        audioEnabled,
+        videoEnabled: true,
+        screenSharing: true,
+      });
+    } catch (err) {
+      if ((err as DOMException).name !== "NotAllowedError") {
+        setError("Could not share screen");
+      }
+    }
+  }, [
+    audioEnabled,
+    emitMediaState,
+    replaceOutgoingVideoTrack,
+    stopScreenShareInternal,
+  ]);
+
+  const toggleScreenShare = useCallback(async () => {
+    if (screenSharingRef.current) {
+      await stopScreenShareInternal();
+    } else {
+      await startScreenShare();
+    }
+  }, [startScreenShare, stopScreenShareInternal]);
+
   const joinMeetingRoom = useCallback(async () => {
     const socket = getMeetingsSocket();
     connectMeetingsSocket();
 
-    if (!localStreamRef.current) {
+    if (!cameraStreamRef.current) {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({
           audio: true,
           video: true,
         });
+        cameraStreamRef.current = stream;
         localStreamRef.current = stream;
         setLocalStream(stream);
       } catch (err) {
@@ -257,12 +398,14 @@ export function useMeetingWebRTC({
       userId: number;
       audioEnabled: boolean;
       videoEnabled: boolean;
+      screenSharing?: boolean;
     }) => {
       updateRemote({
         userId: payload.userId,
         displayName: `User ${payload.userId}`,
         audioEnabled: payload.audioEnabled,
         videoEnabled: payload.videoEnabled,
+        screenSharing: payload.screenSharing ?? false,
       });
     };
 
@@ -315,9 +458,13 @@ export function useMeetingWebRTC({
       socket.emit(MEETING_SOCKET_EVENTS.leave);
       peersRef.current.forEach((pc) => pc.close());
       peersRef.current.clear();
-      localStreamRef.current?.getTracks().forEach((t) => t.stop());
+      screenStreamRef.current?.getTracks().forEach((t) => t.stop());
+      screenStreamRef.current = null;
+      cameraStreamRef.current?.getTracks().forEach((t) => t.stop());
+      cameraStreamRef.current = null;
       localStreamRef.current = null;
       joinedRef.current = false;
+      screenSharingRef.current = false;
     };
   }, [
     enabled,
@@ -331,42 +478,53 @@ export function useMeetingWebRTC({
   ]);
 
   const toggleAudio = useCallback(() => {
-    const stream = localStreamRef.current;
-    if (!stream) return;
+    const camera = cameraStreamRef.current;
+    if (!camera) return;
     const next = !audioEnabled;
-    stream.getAudioTracks().forEach((t) => {
+    camera.getAudioTracks().forEach((t) => {
       t.enabled = next;
     });
     setAudioEnabled(next);
-    getMeetingsSocket().emit(MEETING_SOCKET_EVENTS.mediaState, {
+    emitMediaState({
       audioEnabled: next,
       videoEnabled,
+      screenSharing: screenSharingRef.current,
     });
-  }, [audioEnabled, videoEnabled]);
+  }, [audioEnabled, videoEnabled, emitMediaState]);
 
   const toggleVideo = useCallback(() => {
-    const stream = localStreamRef.current;
-    if (!stream) return;
     const next = !videoEnabled;
-    stream.getVideoTracks().forEach((t) => {
-      t.enabled = next;
-    });
+    if (screenSharingRef.current) {
+      screenStreamRef.current?.getVideoTracks().forEach((t) => {
+        t.enabled = next;
+      });
+    } else {
+      cameraStreamRef.current?.getVideoTracks().forEach((t) => {
+        t.enabled = next;
+      });
+    }
     setVideoEnabled(next);
-    getMeetingsSocket().emit(MEETING_SOCKET_EVENTS.mediaState, {
+    emitMediaState({
       audioEnabled,
       videoEnabled: next,
+      screenSharing: screenSharingRef.current,
     });
-  }, [audioEnabled, videoEnabled]);
+  }, [audioEnabled, videoEnabled, emitMediaState]);
 
   const leaveMeeting = useCallback(() => {
     getMeetingsSocket().emit(MEETING_SOCKET_EVENTS.leave);
     peersRef.current.forEach((pc) => pc.close());
     peersRef.current.clear();
-    localStreamRef.current?.getTracks().forEach((t) => t.stop());
+    screenStreamRef.current?.getTracks().forEach((t) => t.stop());
+    screenStreamRef.current = null;
+    cameraStreamRef.current?.getTracks().forEach((t) => t.stop());
+    cameraStreamRef.current = null;
     localStreamRef.current = null;
     setLocalStream(null);
     setRemoteParticipants(new Map());
     joinedRef.current = false;
+    screenSharingRef.current = false;
+    setScreenSharing(false);
     setConnectionState("idle");
   }, []);
 
@@ -375,10 +533,12 @@ export function useMeetingWebRTC({
     remoteParticipants: Array.from(remoteParticipants.values()),
     audioEnabled,
     videoEnabled,
+    screenSharing,
     connectionState,
     error,
     toggleAudio,
     toggleVideo,
+    toggleScreenShare,
     leaveMeeting,
   };
 }

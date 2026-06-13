@@ -23,6 +23,17 @@
       "connected": "Connected",
       "reconnecting": "Reconnecting…",
       "failed": "Connection failed"
+    },
+    "controls": {
+      "mute": "Mute",
+      "unmute": "Unmute",
+      "stopCamera": "Stop camera",
+      "startCamera": "Start camera",
+      "shareScreen": "Share screen",
+      "stopScreenShare": "Stop sharing screen",
+      "toggleChat": "Toggle chat",
+      "copyLink": "Copy invite link",
+      "leave": "Leave"
     }
   }
 }

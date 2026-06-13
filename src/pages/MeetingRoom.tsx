@@ -99,7 +99,7 @@ export default function MeetingRoom() {
   if (loading || !meetingToken) {
     return (
       <AppLayout>
-        <div className="flex min-h-[50vh] items-center justify-center">
+        <div className="flex min-h-[50vh] items-center justify-center p-6 md:p-8">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
       </AppLayout>
@@ -108,7 +108,7 @@ export default function MeetingRoom() {
 
   return (
     <AppLayout>
-      <div className="space-y-4">
+      <div className="mx-auto max-w-7xl space-y-4 p-6 md:p-8">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div>
             <h1 className="text-xl font-bold">{meetingTitle}</h1>
@@ -151,6 +151,7 @@ export default function MeetingRoom() {
             localName={displayName}
             audioEnabled={webrtc.audioEnabled}
             videoEnabled={webrtc.videoEnabled}
+            screenSharing={webrtc.screenSharing}
             remoteParticipants={webrtc.remoteParticipants}
           />
           {chatOpen && (
@@ -167,9 +168,11 @@ export default function MeetingRoom() {
         <MeetingControls
           audioEnabled={webrtc.audioEnabled}
           videoEnabled={webrtc.videoEnabled}
+          screenSharing={webrtc.screenSharing}
           chatOpen={chatOpen}
           onToggleAudio={webrtc.toggleAudio}
           onToggleVideo={webrtc.toggleVideo}
+          onToggleScreenShare={() => void webrtc.toggleScreenShare()}
           onToggleChat={() => setChatOpen((v) => !v)}
           onCopyLink={handleCopyLink}
           onLeave={() => void handleLeave()}

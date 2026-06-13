@@ -23,6 +23,17 @@
       "connected": "متصل",
       "reconnecting": "إعادة الاتصال…",
       "failed": "فشل الاتصال"
+    },
+    "controls": {
+      "mute": "كتم الصوت",
+      "unmute": "إلغاء كتم الصوت",
+      "stopCamera": "إيقاف الكاميرا",
+      "startCamera": "تشغيل الكاميرا",
+      "shareScreen": "مشاركة الشاشة",
+      "stopScreenShare": "إيقاف مشاركة الشاشة",
+      "toggleChat": "إظهار/إخفاء الدردشة",
+      "copyLink": "نسخ رابط الدعوة",
+      "leave": "مغادرة"
     }
   }
 }
